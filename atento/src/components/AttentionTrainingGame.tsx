@@ -288,69 +288,47 @@ export function AttentionTrainingGame() {
                 </div>
               </>
             ) : currentExercise.kind === "visual-search" ? (
-              <>
-                {!submitted ? (
-                  <VisualSearchHunt
-                    basePoints={currentExercise.points}
-                    startingLevel={currentExercise.startingLevel}
-                    maxLevelHint={currentExercise.maxLevelHint}
-                    onComplete={({ success, pointsEarned }) => {
-                      setScore((value) => value + pointsEarned);
-                      if (success) {
-                        setHits((value) => value + 1);
-                      }
-                      setSubmitted(true);
-                    }}
-                  />
-                ) : (
-                  <div className="space-y-3 rounded-lg border border-black/10 bg-zinc-50 p-4">
-                    <p className="text-sm text-zinc-700">
-                      Exercício concluído. Continue para o próximo desafio.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={nextExercise}
-                      className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
-                    >
-                      {currentIndex + 1 === selectedPlan.exercises.length
-                        ? "Ver resultado"
-                        : "Próximo exercício"}
-                    </button>
-                  </div>
-                )}
-              </>
+              <VisualSearchHunt
+                basePoints={currentExercise.points}
+                startingLevel={currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= selectedPlan.exercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage("instructions");
+                  }
+                }}
+              />
             ) : (
-              <>
-                {!submitted ? (
-                  <StroopInvertido
-                    basePoints={currentExercise.points}
-                    startingLevel={currentExercise.startingLevel}
-                    maxLevelHint={currentExercise.maxLevelHint}
-                    onComplete={({ success, pointsEarned }) => {
-                      setScore((value) => value + pointsEarned);
-                      if (success) {
-                        setHits((value) => value + 1);
-                      }
-                      setSubmitted(true);
-                    }}
-                  />
-                ) : (
-                  <div className="space-y-3 rounded-lg border border-black/10 bg-zinc-50 p-4">
-                    <p className="text-sm text-zinc-700">
-                      Exercício concluído. Continue para o próximo desafio.
-                    </p>
-                    <button
-                      type="button"
-                      onClick={nextExercise}
-                      className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
-                    >
-                      {currentIndex + 1 === selectedPlan.exercises.length
-                        ? "Ver resultado"
-                        : "Próximo exercício"}
-                    </button>
-                  </div>
-                )}
-              </>
+              <StroopInvertido
+                basePoints={currentExercise.points}
+                startingLevel={currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= selectedPlan.exercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage("instructions");
+                  }
+                }}
+              />
             )}
           </div>
         )}
