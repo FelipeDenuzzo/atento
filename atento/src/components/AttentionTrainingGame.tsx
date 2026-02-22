@@ -122,17 +122,24 @@ export function AttentionTrainingGame() {
 
             <div className="grid gap-2 text-sm text-zinc-700 sm:grid-cols-2">
               {(Object.keys(attentionTypeDescriptions) as AttentionType[]).map(
-                (type) => (
-                  <div
-                    key={type}
-                    className="rounded-lg border border-black/10 bg-zinc-50 p-3"
-                  >
-                    <p className="font-semibold text-zinc-900">
-                      {formatAttentionType(type)}
-                    </p>
-                    <p>{attentionTypeDescriptions[type]}</p>
-                  </div>
-                ),
+                (type) => {
+                  const isCurrentType = selectedPlan.exercises.length > 0 && selectedPlan.exercises[0].attentionType === type;
+                  return (
+                    <div
+                      key={type}
+                      className={`rounded-lg border p-3 ${
+                        isCurrentType
+                          ? "border-4 border-blue-500 bg-blue-50"
+                          : "border border-black/10 bg-zinc-50"
+                      }`}
+                    >
+                      <p className="font-semibold text-zinc-900">
+                        {formatAttentionType(type)}
+                      </p>
+                      <p>{attentionTypeDescriptions[type]}</p>
+                    </div>
+                  );
+                },
               )}
             </div>
 
@@ -206,9 +213,6 @@ export function AttentionTrainingGame() {
         {stage === "exercise" && currentExercise && (
           <div className="mt-4 space-y-6">
             <div className="space-y-1">
-              <p className="text-sm text-zinc-500">
-                Exercício {currentIndex + 1} de {selectedPlan.exercises.length}
-              </p>
               {currentExercise.kind === "quiz" ? (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   {currentExercise.question}

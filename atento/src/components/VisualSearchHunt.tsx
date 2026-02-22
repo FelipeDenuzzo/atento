@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 type Shape = "circle" | "square" | "triangle";
 type Color = "red" | "blue" | "green" | "yellow";
 type SearchMode = "feature" | "mixed" | "conjunction";
-type RoundStatus = "instructions" | "ready" | "playing" | "won" | "lost" | "completed";
+type RoundStatus = "preview" | "playing" | "won" | "lost" | "completed";
 
 type Tile = {
   id: string;
@@ -153,7 +153,7 @@ export function VisualSearchHunt({
   onComplete,
 }: Props) {
   const [level, setLevel] = useState(startingLevel);
-  const [status, setStatus] = useState<RoundStatus>("instructions");
+  const [status, setStatus] = useState<RoundStatus>("preview");
   const [targetShape, setTargetShape] = useState<Shape>("triangle");
   const [targetColor, setTargetColor] = useState<Color>("red");
   const [tiles, setTiles] = useState<Tile[]>([]);
@@ -288,7 +288,7 @@ export function VisualSearchHunt({
     return { tiles: shuffle([...targetTiles, ...distractors]), targetCount };
   };
 
-  const startRound = () => {
+  const generateRound = () => {
     const nextShape = randomItem(SHAPES);
     const nextColor = randomItem(COLORS);
     const generated = generateTiles(nextShape, nextColor);
@@ -303,6 +303,9 @@ export function VisualSearchHunt({
     reactionTimesRef.current = [];
     lastHitAtRef.current = 0;
     setLastMetrics(null);
+  };
+
+  const startRound = () => {
     setStatus("playing");
   };
 
@@ -414,7 +417,8 @@ export function VisualSearchHunt({
 
     const adjusted = Math.max(1, Math.min(maxLevelHint, level + suggestion.nextLevelDelta));
     setLevel(adjusted);
-    setStatus("ready");
+    generateRound();
+    setStatus("preview");
   };
 
   const summary = useMemo(() => {
@@ -439,22 +443,33 @@ export function VisualSearchHunt({
     };
   }, [lastMetrics, config.timeSeconds]);
 
+  useEffect(() => {
+    if (status === "preview") {
+      generateRound();
+    }
+  }, [status]);
+
   return (
     <div className="mt-4 space-y-4">
-      {status === "instructions" && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
-          <div>
-            <h3 className="text-xl font-semibold text-zinc-900">Caça ao Alvo</h3>
-            <p className="mt-2 text-sm text-zinc-700">
-              Encontre e clique em todos os alvos especificados antes que o tempo acabe.
-            </p>
+      {status === "preview" && (
+        <div className="space-y-6 rounded-lg border border-black/10 bg-zinc-50 p-6">
+          <div className="space-y-3 text-center">
+            <p className="text-sm text-zinc-600">Procure por:</p>
+            <div className="mx-auto flex w-fit flex-col items-center gap-4 rounded-2xl border-4 border-black bg-white p-8">
+              <span className={`inline-block h-20 w-20 ${getShapeClass(targetShape)} ${colorClass[targetColor]}`}
+                style={{ backgroundColor: colorClass[targetColor].includes("red") ? "#ef4444" : colorClass[targetColor].includes("blue") ? "#3b82f6" : colorClass[targetColor].includes("green") ? "#16a34a" : "#eab308" }}
+              />
+              <p className="text-xl font-semibold text-zinc-900">
+                {shapeLabel[targetShape]} {colorLabel[targetColor]}
+              </p>
+            </div>
           </div>
 
           <div className="space-y-2 text-sm text-zinc-700">
-            <p><strong>Como jogar:</strong></p>
+            <p><strong>Instruções:</strong></p>
             <ul className="ml-4 list-disc space-y-1">
               <li>Você verá uma grade com diferentes formas e cores</li>
-              <li>Clique em todos os objetos que correspondem ao alvo descrito</li>
+              <li>Clique em todos os objetos que correspondem ao alvo mostrado</li>
               <li>Cuidado: clicar em objetos errados reduz seu tempo</li>
               <li>Complete a busca antes que o tempo acabe</li>
             </ul>
@@ -462,54 +477,47 @@ export function VisualSearchHunt({
 
           <button
             type="button"
-            onClick={() => setStatus("ready")}
-            className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
+            onClick={startRound}
+            className="w-full rounded-lg bg-zinc-900 px-4 py-3 font-medium text-white hover:bg-zinc-700"
           >
-            Começar
+            Começar Fase
           </button>
         </div>
       )}
 
-      {status !== "instructions" && status !== "completed" && (
-        <div className="rounded-lg border border-black/10 bg-zinc-50 p-4">
-          <p className="mt-1 font-medium text-zinc-900">
-            Encontre todos os {shapeLabel[targetShape]} {colorLabel[targetColor]}
-          </p>
-        </div>
-      )}
+      {status === "playing" && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-center rounded-lg border border-black/10 bg-zinc-50 p-4">
+            <p className="text-center text-lg font-bold text-zinc-900">
+              Encontre: <span style={{ color: colorClass[targetColor].includes("red") ? "#ef4444" : colorClass[targetColor].includes("blue") ? "#3b82f6" : colorClass[targetColor].includes("green") ? "#16a34a" : "#eab308" }} className="font-black">{shapeLabel[targetShape]} {colorLabel[targetColor]}</span>
+            </p>
+          </div>
 
-      <div className="grid gap-3 text-sm sm:grid-cols-4">
-        <div className="rounded-lg border border-black/10 p-3">
-          <p className="text-zinc-500">Tempo</p>
-          <p className="font-semibold text-zinc-900">{remainingTime.toFixed(1)}s</p>
-        </div>
-        <div className="rounded-lg border border-black/10 p-3">
-          <p className="text-zinc-500">Alvos restantes</p>
-          <p className="font-semibold text-zinc-900">{targetsRemaining}</p>
-        </div>
-        <div className="rounded-lg border border-black/10 p-3">
-          <p className="text-zinc-500">Acertos</p>
-          <p className="font-semibold text-zinc-900">{hits}</p>
-        </div>
-        <div className="rounded-lg border border-black/10 p-3">
-          <p className="text-zinc-500">Erros</p>
-          <p className="font-semibold text-zinc-900">{errors}</p>
-        </div>
-      </div>
+          <div className="grid gap-3 text-sm sm:grid-cols-4">
+            <div className="rounded-lg border border-black/10 p-3">
+              <p className="text-zinc-500">Tempo</p>
+              <p className="font-semibold text-zinc-900">{remainingTime.toFixed(1)}s</p>
+            </div>
+            <div className="rounded-lg border border-black/10 p-3">
+              <p className="text-zinc-500">Alvos restantes</p>
+              <p className="font-semibold text-zinc-900">{targetsRemaining}</p>
+            </div>
+            <div className="rounded-lg border border-black/10 p-3">
+              <p className="text-zinc-500">Acertos</p>
+              <p className="font-semibold text-zinc-900">{hits}</p>
+            </div>
+            <div className="rounded-lg border border-black/10 p-3">
+              <p className="text-zinc-500">Erros</p>
+              <p className="font-semibold text-zinc-900">{errors}</p>
+            </div>
+          </div>
 
-      <div className="h-2 overflow-hidden rounded-full bg-zinc-200">
-        <div
-          className="h-full bg-zinc-900 transition-all"
-          style={{ width: `${Math.max(0, (remainingTime / config.timeSeconds) * 100)}%` }}
-        />
-      </div>
-
-      {status === "ready" && (
-        <div className="rounded-lg border border-dashed border-black/20 p-4 text-sm text-zinc-600">
-          <p>
-            Rodada pronta. Nas fases iniciais o alvo tende a saltar visualmente; em
-            níveis avançados, distratores compartilham cor ou forma com o alvo.
-          </p>
+          <div className="h-2 overflow-hidden rounded-full bg-zinc-200">
+            <div
+              className="h-full bg-zinc-900 transition-all"
+              style={{ width: `${Math.max(0, (remainingTime / config.timeSeconds) * 100)}%` }}
+            />
+          </div>
         </div>
       )}
 
@@ -541,15 +549,7 @@ export function VisualSearchHunt({
         ))}
       </div>
 
-      {status === "ready" && (
-        <button
-          type="button"
-          onClick={startRound}
-          className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
-        >
-          Iniciar rodada
-        </button>
-      )}
+
 
       {(status === "won" || status === "lost") && lastMetrics && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-4">
