@@ -1,0 +1,12 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^git add \\. && git commit -m \"feat: adicionar minijogo Stroop Invertido para atenção sustentada\" && git push$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^git add \\. && git commit -m \"feat: implementar sistema de progressão com 12 fases, telas de instruções e download de resultados\n\n- Caça ao Alvo: 12 fases progressivas com ajuste automático de dificuldade\n- Stroop Invertido: capitalização variada \\(maiúsculo/minúsculo/primeira letra\\) e posições de cores aleatórias\n- Telas de instruções no início de cada jogo focando em como jogar\n- Telas entre fases simplificadas \\(apenas botão Avançar\\)\n- Tela final com métricas detalhadas de todas as fases\n- Botão para baixar resultados em arquivo \\.txt\n- Clique direto para selecionar resposta no Stroop \\(sem botão confirmar\\)\" && git push$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

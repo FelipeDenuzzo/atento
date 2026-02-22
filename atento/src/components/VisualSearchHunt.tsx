@@ -482,6 +482,18 @@ export function VisualSearchHunt({
           >
             Começar Fase
           </button>
+
+          <div
+            className="grid gap-2 rounded-xl border border-black/10 p-2 bg-zinc-50"
+            style={{ gridTemplateColumns: gridColumns }}
+          >
+            {Array.from({ length: config.gridSize * config.gridSize }).map((_, index) => (
+              <div
+                key={index}
+                className="flex aspect-square items-center justify-center rounded-md border border-black/10 bg-white"
+              />
+            ))}
+          </div>
         </div>
       )}
 
@@ -521,33 +533,35 @@ export function VisualSearchHunt({
         </div>
       )}
 
-      <div
-        className={`grid gap-2 rounded-xl border p-2 ${
-          feedback === "success"
-            ? "border-emerald-300"
-            : feedback === "error"
-              ? "border-rose-300"
-              : "border-black/10"
-        }`}
-        style={{ gridTemplateColumns: gridColumns }}
-      >
-        {tiles.map((tile, index) => (
-          <button
-            key={tile.id}
-            type="button"
-            onClick={(event) => handleTileClick(tile, index, event.timeStamp)}
-            disabled={status !== "playing" || tile.found}
-            className="flex aspect-square items-center justify-center rounded-md border border-black/10 bg-white"
-          >
-            <span
-              className={`block h-[65%] w-[65%] ${getShapeClass(tile.shape)} ${
-                tile.found ? "bg-zinc-300" : colorClass[tile.color]
-              }`}
-              aria-hidden="true"
-            />
-          </button>
-        ))}
-      </div>
+      {status === "playing" && (
+        <div
+          className={`grid gap-2 rounded-xl border p-2 ${
+            feedback === "success"
+              ? "border-emerald-300"
+              : feedback === "error"
+                ? "border-rose-300"
+                : "border-black/10"
+          }`}
+          style={{ gridTemplateColumns: gridColumns }}
+        >
+          {tiles.map((tile, index) => (
+            <button
+              key={tile.id}
+              type="button"
+              onClick={(event) => handleTileClick(tile, index, event.timeStamp)}
+              disabled={status !== "playing" || tile.found}
+              className="flex aspect-square items-center justify-center rounded-md border border-black/10 bg-white"
+            >
+              <span
+                className={`block h-[65%] w-[65%] ${getShapeClass(tile.shape)} ${
+                  tile.found ? "bg-zinc-300" : colorClass[tile.color]
+                }`}
+                aria-hidden="true"
+              />
+            </button>
+          ))}
+        </div>
+      )}
 
 
 

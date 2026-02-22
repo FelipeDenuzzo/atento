@@ -189,15 +189,6 @@ export function AttentionTrainingGame() {
               {currentExercise.title}
             </h2>
             <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 text-zinc-700">
-              <p className="font-medium text-zinc-900">
-                {formatAttentionType(currentExercise.attentionType)}
-              </p>
-              <p className="mt-1">
-                {getTransitionText(
-                  currentExercise.attentionType,
-                  previousExercise?.attentionType ?? null,
-                )}
-              </p>
               <p className="mt-3">{currentExercise.instructions}</p>
             </div>
             <button
