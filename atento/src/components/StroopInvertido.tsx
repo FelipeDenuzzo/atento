@@ -339,11 +339,8 @@ export function StroopInvertido({
       return;
     }
 
-    if (metrics.correctCount / metrics.totalTrials >= 0.7) {
-      setLevel((prev) => Math.min(maxLevelHint, prev + 1));
-    } else if (metrics.correctCount / metrics.totalTrials < 0.4) {
-      setLevel((prev) => Math.max(1, prev - 1));
-    }
+    // Avança automaticamente para o próximo nível
+    setLevel((prev) => Math.min(maxLevelHint, prev + 1));
     setStatus("ready");
     setScore(0);
   };
