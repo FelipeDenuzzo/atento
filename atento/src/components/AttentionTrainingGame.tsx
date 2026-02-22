@@ -148,28 +148,41 @@ export function AttentionTrainingGame() {
                 Escolha o formato do treino:
               </p>
               <div className="grid gap-3">
-                {trainingPlans.map((plan) => (
-                  <label
-                    key={plan.id}
-                    className="flex cursor-pointer items-start gap-3 rounded-lg border border-black/10 p-3"
-                  >
-                    <input
-                      type="radio"
-                      name="plan"
-                      checked={selectedPlanId === plan.id}
-                      onChange={() => setSelectedPlanId(plan.id)}
-                      className="mt-1"
-                    />
-                    <span>
-                      <span className="block font-semibold text-zinc-900">
-                        {plan.name}
+                {trainingPlans.map((plan) => {
+                  const isDisabled = plan.id === "misto";
+                  return (
+                    <label
+                      key={plan.id}
+                      className={`flex items-start gap-3 rounded-lg border p-3 ${
+                        isDisabled
+                          ? "cursor-not-allowed border-black/10 bg-zinc-100 opacity-50"
+                          : "cursor-pointer border-black/10"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="plan"
+                        checked={selectedPlanId === plan.id}
+                        onChange={() => !isDisabled && setSelectedPlanId(plan.id)}
+                        disabled={isDisabled}
+                        className="mt-1"
+                      />
+                      <span>
+                        <span className="block font-semibold text-zinc-900">
+                          {plan.name}
+                        </span>
+                        <span className="block text-sm text-zinc-600">
+                          {plan.description}
+                        </span>
+                        {isDisabled && (
+                          <span className="mt-2 block text-xs text-zinc-500">
+                            Disponível quando mais tipos de atenção forem implementados
+                          </span>
+                        )}
                       </span>
-                      <span className="block text-sm text-zinc-600">
-                        {plan.description}
-                      </span>
-                    </span>
-                  </label>
-                ))}
+                    </label>
+                  );
+                })}
               </div>
             </div>
 
