@@ -468,6 +468,10 @@ export function StroopInvertido({
 
       {status === "playing" && currentTrial && (
         <div className="space-y-5">
+          <div className="rounded-lg border border-black/10 bg-blue-50 p-3">
+            <p className="text-sm font-semibold text-blue-900">Nível {level} de {maxLevelHint}</p>
+          </div>
+
           <div className="h-2 overflow-hidden rounded-full bg-zinc-200">
             <div
               className="h-full bg-zinc-900 transition-all"

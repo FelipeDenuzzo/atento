@@ -487,7 +487,8 @@ export function VisualSearchHunt({
 
       {status === "playing" && (
         <div className="space-y-4">
-          <div className="flex items-center justify-center rounded-lg border border-black/10 bg-zinc-50 p-4">
+          <div className="flex items-center justify-between rounded-lg border border-black/10 bg-blue-50 p-4">
+            <p className="text-sm font-semibold text-blue-900">Fase {level} de {maxLevelHint}</p>
             <p className="text-center text-lg font-bold text-zinc-900">
               Encontre: <span style={{ color: colorClass[targetColor].includes("red") ? "#ef4444" : colorClass[targetColor].includes("blue") ? "#3b82f6" : colorClass[targetColor].includes("green") ? "#16a34a" : "#eab308" }} className="font-black">{shapeLabel[targetShape]} {colorLabel[targetColor]}</span>
             </p>
