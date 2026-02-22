@@ -38,6 +38,8 @@ export function AttentionTrainingGame() {
   const [hits, setHits] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [quizResults, setQuizResults] = useState<Array<{ correct: boolean }>>([]);
+  const [showingQuizResults, setShowingQuizResults] = useState(false);
 
   const selectedPlan: TrainingPlan = useMemo(
     () =>
@@ -59,6 +61,8 @@ export function AttentionTrainingGame() {
     setHits(0);
     setSelectedOption(null);
     setSubmitted(false);
+    setQuizResults([]);
+    setShowingQuizResults(false);
     setStage("instructions");
   };
 
@@ -76,6 +80,7 @@ export function AttentionTrainingGame() {
       setScore((value) => value + currentExercise.points);
       setHits((value) => value + 1);
     }
+    setQuizResults((prev) => [...prev, { correct: isCorrect }]);
     setSubmitted(true);
   };
 
@@ -85,7 +90,12 @@ export function AttentionTrainingGame() {
     setSubmitted(false);
 
     if (nextIndex >= selectedPlan.exercises.length) {
-      setStage("result");
+      // Check if current exercise was a quiz
+      if (currentExercise?.kind === "quiz") {
+        setShowingQuizResults(true);
+      } else {
+        setStage("result");
+      }
       return;
     }
 
@@ -100,6 +110,42 @@ export function AttentionTrainingGame() {
     setHits(0);
     setSelectedOption(null);
     setSubmitted(false);
+    setQuizResults([]);
+    setShowingQuizResults(false);
+  };
+
+  const downloadQuizResults = () => {
+    const lines: string[] = [];
+    lines.push("=" + "=".repeat(60));
+    lines.push("RESULTADO - DESTAQUE O ALVO (Atenção Seletiva - Quiz)");
+    lines.push("=" + "=".repeat(60));
+    lines.push("");
+
+    quizResults.forEach((result, idx) => {
+      lines.push(`Fase ${idx + 1}: ${result.correct ? "✓ Acertou" : "✗ Errou"}`);
+    });
+
+    lines.push("");
+    lines.push("=".repeat(62));
+    lines.push(`Acertos: ${quizResults.filter((r) => r.correct).length}/${quizResults.length}`);
+    lines.push(`Pontuação: ${score}/${totalPossible}`);
+    lines.push("=".repeat(62));
+    lines.push("");
+    lines.push(`Data: ${new Date().toLocaleString("pt-BR")}`);
+
+    const text = lines.join("\n");
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `destaque-o-alvo-resultado-${Date.now()}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const continueAfterQuizResults = () => {
+    setShowingQuizResults(false);
+    setStage("result");
   };
 
   return (
@@ -330,6 +376,52 @@ export function AttentionTrainingGame() {
                 }}
               />
             )}
+          </div>
+        )}
+
+        {showingQuizResults && (
+          <div className="mt-4 space-y-5">
+            <h2 className="text-xl font-semibold text-zinc-900">
+              Destaque o Alvo - Concluído!
+            </h2>
+
+            <div className="space-y-3">
+              {quizResults.map((result, idx) => (
+                <div key={idx} className="rounded-lg border border-black/10 bg-white p-3">
+                  <p className="text-sm font-medium text-zinc-900">Fase {idx + 1}</p>
+                  <p className={`text-sm ${result.correct ? "text-emerald-600" : "text-rose-600"}`}>
+                    {result.correct ? "✓ Acertou" : "✗ Errou"}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="rounded-lg border-2 border-zinc-900 bg-white p-4">
+              <p className="font-semibold text-zinc-900">Resumo Total</p>
+              <div className="mt-2 grid gap-2 text-sm">
+                <p>Fases concluídas: {quizResults.length}/12</p>
+                <p>Acertos: {quizResults.filter((r) => r.correct).length}</p>
+                <p>Erros: {quizResults.filter((r) => !r.correct).length}</p>
+                <p>Pontuação: {score}/{totalPossible}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={downloadQuizResults}
+                className="flex-1 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
+              >
+                Baixar Resultados
+              </button>
+              <button
+                type="button"
+                onClick={continueAfterQuizResults}
+                className="flex-1 rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
+              >
+                Continuar
+              </button>
+            </div>
           </div>
         )}
 
