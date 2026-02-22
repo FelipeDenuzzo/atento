@@ -4,7 +4,7 @@ export type AttentionType =
   | "dividida"
   | "alternada";
 
-export type ExerciseKind = "quiz" | "visual-search";
+export type ExerciseKind = "quiz" | "visual-search" | "stroop";
 
 type BaseExercise = {
   id: string;
@@ -28,7 +28,13 @@ export type VisualSearchExercise = BaseExercise & {
   maxLevelHint: number;
 };
 
-export type AttentionExercise = QuizExercise | VisualSearchExercise;
+export type StroopExercise = BaseExercise & {
+  kind: "stroop";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
+export type AttentionExercise = QuizExercise | VisualSearchExercise | StroopExercise;
 
 export type TrainingPlan = {
   id: string;

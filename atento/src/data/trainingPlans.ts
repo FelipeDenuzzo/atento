@@ -35,15 +35,14 @@ export const trainingPlans: TrainingPlan[] = [
       },
       {
         id: "mix-2",
-        title: "Foco contínuo",
+        title: "Stroop Invertido",
         attentionType: "sustentada",
-        kind: "quiz",
+        kind: "stroop",
         instructions:
-          "Mantenha a mesma regra até o fim da questão e evite responder por impulso.",
-        question: "Selecione o único número ímpar.",
-        options: ["12", "18", "21", "30"],
-        correctOptionIndex: 2,
-        points: 25,
+          "Clique na cor da tinta, não na palavra escrita. Mantenha o foco e evite respostas automáticas.",
+        startingLevel: 1,
+        maxLevelHint: 8,
+        points: 30,
       },
       {
         id: "mix-3",
