@@ -4,12 +4,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type ColorName = "vermelho" | "azul" | "verde" | "amarelo" | "roxo" | "laranja";
 type TrialType = "congruent" | "incongruent";
-type GameStatus = "ready" | "playing" | "finished";
+type GameStatus = "instructions" | "ready" | "playing" | "finished" | "completed";
+type TextCase = "uppercase" | "lowercase" | "capitalize";
 
 type Trial = {
   id: number;
   wordText: ColorName;
   inkColor: ColorName;
+  textCase: TextCase;
   type: TrialType;
   correctAnswer: ColorName;
   playerAnswer: ColorName | null;
@@ -23,6 +25,17 @@ type LevelConfig = {
   timePerTrialSeconds: number;
   incongruentRatio: number;
   trialsPerLevel: number;
+};
+
+type LevelMetrics = {
+  level: number;
+  totalTrials: number;
+  correctCount: number;
+  errorCount: number;
+  averageReactionMs: number;
+  congruentAccuracy: number;
+  incongruentAccuracy: number;
+  score: number;
 };
 
 type SessionMetrics = {
@@ -93,6 +106,22 @@ function randomItem<T>(items: T[]): T {
   return items[Math.floor(Math.random() * items.length)];
 }
 
+function shuffle<T>(array: T[]): T[] {
+  const clone = [...array];
+  for (let i = clone.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [clone[i], clone[j]] = [clone[j], clone[i]];
+  }
+  return clone;
+}
+
+function formatText(word: ColorName, textCase: TextCase): string {
+  const text = word.toUpperCase();
+  if (textCase === "uppercase") return text;
+  if (textCase === "lowercase") return text.toLowerCase();
+  return text.charAt(0) + text.slice(1).toLowerCase();
+}
+
 function generateTrial(
   id: number,
   colors: ColorName[],
@@ -103,11 +132,13 @@ function generateTrial(
   const wordText = isIncongruent
     ? randomItem(colors.filter((color) => color !== inkColor))
     : inkColor;
+  const textCase = randomItem<TextCase>(["uppercase", "lowercase", "capitalize"]);
 
   return {
     id,
     wordText,
     inkColor,
+    textCase,
     type: isIncongruent ? "incongruent" : "congruent",
     correctAnswer: inkColor,
     playerAnswer: null,
@@ -157,12 +188,14 @@ export function StroopInvertido({
   onComplete,
 }: Props) {
   const [level, setLevel] = useState(startingLevel);
-  const [status, setStatus] = useState<GameStatus>("ready");
+  const [status, setStatus] = useState<GameStatus>("instructions");
   const [currentTrialIndex, setCurrentTrialIndex] = useState(0);
   const [trials, setTrials] = useState<Trial[]>([]);
   const [score, setScore] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null);
+  const [allLevelMetrics, setAllLevelMetrics] = useState<LevelMetrics[]>([]);
+  const [colorOrder, setColorOrder] = useState<ColorName[]>([]);
 
   const trialStartTimeRef = useRef<number>(0);
   const config = useMemo(() => getLevelConfig(level), [level]);
@@ -177,6 +210,7 @@ export function StroopInvertido({
     setTrials(generatedTrials);
     setCurrentTrialIndex(0);
     setTimeRemaining(config.timePerTrialSeconds);
+    setColorOrder(shuffle(config.colors));
     trialStartTimeRef.current = performance.now();
     setStatus("playing");
   }, [config]);
@@ -224,6 +258,7 @@ export function StroopInvertido({
 
         setCurrentTrialIndex(nextIndex);
         setTimeRemaining(config.timePerTrialSeconds);
+        setColorOrder(shuffle(config.colors));
         trialStartTimeRef.current = performance.now();
       }, 400);
     },
@@ -284,9 +319,29 @@ export function StroopInvertido({
   }, [status, trials]);
 
   const progressToNextLevel = () => {
-    if (metrics && metrics.correctCount / metrics.totalTrials >= 0.7) {
+    if (!metrics) return;
+
+    const levelMetrics: LevelMetrics = {
+      level,
+      totalTrials: metrics.totalTrials,
+      correctCount: metrics.correctCount,
+      errorCount: metrics.errorCount,
+      averageReactionMs: metrics.averageReactionMs,
+      congruentAccuracy: metrics.congruentAccuracy,
+      incongruentAccuracy: metrics.incongruentAccuracy,
+      score,
+    };
+
+    setAllLevelMetrics(prev => [...prev, levelMetrics]);
+
+    if (level >= maxLevelHint) {
+      setStatus("completed");
+      return;
+    }
+
+    if (metrics.correctCount / metrics.totalTrials >= 0.7) {
       setLevel((prev) => Math.min(maxLevelHint, prev + 1));
-    } else if (metrics && metrics.correctCount / metrics.totalTrials < 0.4) {
+    } else if (metrics.correctCount / metrics.totalTrials < 0.4) {
       setLevel((prev) => Math.max(1, prev - 1));
     }
     setStatus("ready");
@@ -294,42 +349,117 @@ export function StroopInvertido({
   };
 
   const finishExercise = () => {
-    const success = metrics ? metrics.correctCount / metrics.totalTrials >= 0.6 : false;
+    const allMetrics = metrics ? [...allLevelMetrics, {
+      level,
+      totalTrials: metrics.totalTrials,
+      correctCount: metrics.correctCount,
+      errorCount: metrics.errorCount,
+      averageReactionMs: metrics.averageReactionMs,
+      congruentAccuracy: metrics.congruentAccuracy,
+      incongruentAccuracy: metrics.incongruentAccuracy,
+      score,
+    }] : allLevelMetrics;
+    const totalCorrect = allMetrics.reduce((sum, m) => sum + m.correctCount, 0);
+    const totalTrials = allMetrics.reduce((sum, m) => sum + m.totalTrials, 0);
+    const success = totalTrials > 0 ? totalCorrect / totalTrials >= 0.6 : false;
     const pointsEarned = success ? basePoints : Math.round(basePoints * 0.4);
     onComplete({ success, pointsEarned });
   };
 
+  const downloadResults = () => {
+    const allMetrics = metrics ? [...allLevelMetrics, {
+      level,
+      totalTrials: metrics.totalTrials,
+      correctCount: metrics.correctCount,
+      errorCount: metrics.errorCount,
+      averageReactionMs: metrics.averageReactionMs,
+      congruentAccuracy: metrics.congruentAccuracy,
+      incongruentAccuracy: metrics.incongruentAccuracy,
+      score,
+    }] : allLevelMetrics;
+
+    const lines: string[] = [];
+    lines.push("=" + "=".repeat(60));
+    lines.push("RESULTADO - STROOP INVERTIDO (Atenção Sustentada)");
+    lines.push("=" + "=".repeat(60));
+    lines.push("");
+    
+    allMetrics.forEach((m, idx) => {
+      lines.push(`Nível ${idx + 1}:`);
+      lines.push(`  Tentativas: ${m.totalTrials}`);
+      lines.push(`  Acertos: ${m.correctCount}`);
+      lines.push(`  Erros: ${m.errorCount}`);
+      lines.push(`  Pontuação: ${m.score}`);
+      lines.push(`  Tempo médio: ${m.averageReactionMs}ms`);
+      lines.push(`  Acurácia congruentes: ${Math.round(m.congruentAccuracy * 100)}%`);
+      lines.push(`  Acurácia incongruentes: ${Math.round(m.incongruentAccuracy * 100)}%`);
+      const overall = m.totalTrials > 0 ? Math.round((m.correctCount / m.totalTrials) * 100) : 0;
+      lines.push(`  Acurácia geral: ${overall}%`);
+      lines.push("");
+    });
+
+    const totalCorrect = allMetrics.reduce((sum, m) => sum + m.correctCount, 0);
+    const totalErrors = allMetrics.reduce((sum, m) => sum + m.errorCount, 0);
+    const totalTrials = allMetrics.reduce((sum, m) => sum + m.totalTrials, 0);
+    const totalScore = allMetrics.reduce((sum, m) => sum + m.score, 0);
+    const overallAccuracy = totalTrials > 0 ? Math.round((totalCorrect / totalTrials) * 100) : 0;
+
+    lines.push("=" + "=".repeat(60));
+    lines.push("RESUMO TOTAL:");
+    lines.push(`Níveis completados: ${allMetrics.length}`);
+    lines.push(`Tentativas totais: ${totalTrials}`);
+    lines.push(`Acertos totais: ${totalCorrect}`);
+    lines.push(`Erros totais: ${totalErrors}`);
+    lines.push(`Pontuação total: ${totalScore}`);
+    lines.push(`Acurácia geral: ${overallAccuracy}%`);
+    lines.push("=" + "=".repeat(60));
+
+    const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `atento_stroop_invertido_${new Date().toISOString().split("T")[0]}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="mt-4 space-y-4">
-      {status === "ready" && (
+      {status === "instructions" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
           <div>
-            <p className="text-sm text-zinc-500">Nível {level}</p>
-            <h3 className="mt-1 text-xl font-semibold text-zinc-900">
-              Stroop Invertido
-            </h3>
+            <h3 className="text-xl font-semibold text-zinc-900">Stroop Invertido</h3>
             <p className="mt-2 text-sm text-zinc-700">
-              Você verá palavras com nomes de cores. Clique no botão que corresponde à{" "}
-              <strong>cor da tinta</strong>, não ao texto da palavra.
+              Identifique a cor da tinta usada para escrever a palavra, ignorando o que a palavra diz.
             </p>
           </div>
 
-          <div className="grid gap-2 text-sm">
-            <p>
-              <strong>Cores disponíveis:</strong> {config.colors.length}
-            </p>
-            <p>
-              <strong>Tempo por tentativa:</strong> {config.timePerTrialSeconds}s
-            </p>
-            <p>
-              <strong>Tentativas no nível:</strong> {config.trialsPerLevel}
-            </p>
+          <div className="space-y-2 text-sm text-zinc-700">
+            <p><strong>Como jogar:</strong></p>
+            <ul className="ml-4 list-disc space-y-1">
+              <li>Uma palavra com o nome de uma cor aparecerá na tela</li>
+              <li>Clique no botão que corresponde à <strong>cor da tinta</strong>, não ao texto</li>
+              <li>Exemplo: se aparecer "VERDE" escrito em azul, clique em Azul</li>
+              <li>Seja rápido! Você tem tempo limitado por tentativa</li>
+            </ul>
           </div>
 
           <button
             type="button"
-            onClick={startLevel}
+            onClick={() => setStatus("ready")}
             className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
+          >
+            Começar
+          </button>
+        </div>
+      )}
+
+      {status === "ready" && (
+        <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
+          <button
+            type="button"
+            onClick={startLevel}
+            className="w-full rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
           >
             Iniciar nível
           </button>
@@ -338,27 +468,6 @@ export function StroopInvertido({
 
       {status === "playing" && currentTrial && (
         <div className="space-y-5">
-          <div className="grid gap-3 text-sm sm:grid-cols-4">
-            <div className="rounded-lg border border-black/10 p-3">
-              <p className="text-zinc-500">Tentativa</p>
-              <p className="font-semibold text-zinc-900">
-                {currentTrialIndex + 1}/{trials.length}
-              </p>
-            </div>
-            <div className="rounded-lg border border-black/10 p-3">
-              <p className="text-zinc-500">Pontuação</p>
-              <p className="font-semibold text-zinc-900">{score}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 p-3">
-              <p className="text-zinc-500">Tempo</p>
-              <p className="font-semibold text-zinc-900">{timeRemaining.toFixed(1)}s</p>
-            </div>
-            <div className="rounded-lg border border-black/10 p-3">
-              <p className="text-zinc-500">Nível</p>
-              <p className="font-semibold text-zinc-900">{level}</p>
-            </div>
-          </div>
-
           <div className="h-2 overflow-hidden rounded-full bg-zinc-200">
             <div
               className="h-full bg-zinc-900 transition-all"
@@ -378,15 +487,15 @@ export function StroopInvertido({
             }`}
           >
             <p
-              className="select-none text-center text-6xl font-bold uppercase tracking-wider sm:text-8xl"
+              className="select-none text-center text-6xl font-bold tracking-wider sm:text-8xl"
               style={{ color: COLOR_MAP[currentTrial.inkColor] }}
             >
-              {currentTrial.wordText}
+              {formatText(currentTrial.wordText, currentTrial.textCase)}
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {config.colors.map((color) => (
+            {colorOrder.map((color) => (
               <button
                 key={color}
                 type="button"
@@ -406,66 +515,64 @@ export function StroopInvertido({
       )}
 
       {status === "finished" && metrics && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
-          <h3 className="text-xl font-semibold text-zinc-900">Nível concluído</h3>
+        <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-4">
+          <p className="text-center font-semibold text-zinc-900">Nível concluído!</p>
 
-          <div className="grid gap-3 text-sm sm:grid-cols-2">
-            <div className="rounded-lg border border-black/10 bg-white p-3">
-              <p className="text-zinc-500">Tentativas</p>
-              <p className="font-semibold text-zinc-900">{metrics.totalTrials}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-white p-3">
-              <p className="text-zinc-500">Pontuação final</p>
-              <p className="font-semibold text-zinc-900">{score}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-white p-3">
-              <p className="text-zinc-500">Acertos</p>
-              <p className="font-semibold text-emerald-600">{metrics.correctCount}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-white p-3">
-              <p className="text-zinc-500">Erros</p>
-              <p className="font-semibold text-rose-600">{metrics.errorCount}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-white p-3">
-              <p className="text-zinc-500">Tempo médio</p>
-              <p className="font-semibold text-zinc-900">
-                {metrics.averageReactionMs}ms
-              </p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-white p-3">
-              <p className="text-zinc-500">Acurácia geral</p>
-              <p className="font-semibold text-zinc-900">
-                {Math.round((metrics.correctCount / metrics.totalTrials) * 100)}%
-              </p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-white p-3">
-              <p className="text-zinc-500">Congruentes</p>
-              <p className="font-semibold text-zinc-900">
-                {Math.round(metrics.congruentAccuracy * 100)}%
-              </p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-white p-3">
-              <p className="text-zinc-500">Incongruentes</p>
-              <p className="font-semibold text-zinc-900">
-                {Math.round(metrics.incongruentAccuracy * 100)}%
-              </p>
+          <button
+            type="button"
+            onClick={progressToNextLevel}
+            className="w-full rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
+          >
+            Avançar
+          </button>
+        </div>
+      )}
+
+      {status === "completed" && (
+        <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
+          <h3 className="text-xl font-semibold text-zinc-900">Jogo concluído!</h3>
+
+          <div className="space-y-3">
+            {allLevelMetrics.map((m, idx) => {
+              const accuracy = m.totalTrials > 0 ? Math.round((m.correctCount / m.totalTrials) * 100) : 0;
+              return (
+                <div key={idx} className="rounded-lg border border-black/10 bg-white p-3">
+                  <p className="text-sm font-medium text-zinc-900">Nível {idx + 1}</p>
+                  <div className="mt-1 grid grid-cols-2 gap-2 text-xs text-zinc-600">
+                    <p>Pontuação: {m.score}</p>
+                    <p>Acurácia: {accuracy}%</p>
+                    <p>Acertos: {m.correctCount}</p>
+                    <p>Erros: {m.errorCount}</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="rounded-lg border-2 border-zinc-900 bg-white p-4">
+            <p className="font-semibold text-zinc-900">Resumo Total</p>
+            <div className="mt-2 grid gap-2 text-sm">
+              <p>Níveis completados: {allLevelMetrics.length}</p>
+              <p>Pontuação total: {allLevelMetrics.reduce((sum, m) => sum + m.score, 0)}</p>
+              <p>Acertos totais: {allLevelMetrics.reduce((sum, m) => sum + m.correctCount, 0)}</p>
+              <p>Erros totais: {allLevelMetrics.reduce((sum, m) => sum + m.errorCount, 0)}</p>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-3">
             <button
               type="button"
-              onClick={progressToNextLevel}
-              className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
+              onClick={downloadResults}
+              className="flex-1 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
             >
-              Próximo nível
+              Baixar Resultados
             </button>
             <button
               type="button"
               onClick={finishExercise}
-              className="rounded-lg border border-black/20 px-4 py-2 font-medium text-zinc-800 hover:bg-zinc-100"
+              className="flex-1 rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
             >
-              Finalizar exercício
+              Continuar
             </button>
           </div>
         </div>

@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 type Shape = "circle" | "square" | "triangle";
 type Color = "red" | "blue" | "green" | "yellow";
 type SearchMode = "feature" | "mixed" | "conjunction";
-type RoundStatus = "ready" | "playing" | "won" | "lost";
+type RoundStatus = "instructions" | "ready" | "playing" | "won" | "lost" | "completed";
 
 type Tile = {
   id: string;
@@ -153,7 +153,7 @@ export function VisualSearchHunt({
   onComplete,
 }: Props) {
   const [level, setLevel] = useState(startingLevel);
-  const [status, setStatus] = useState<RoundStatus>("ready");
+  const [status, setStatus] = useState<RoundStatus>("instructions");
   const [targetShape, setTargetShape] = useState<Shape>("triangle");
   const [targetColor, setTargetColor] = useState<Color>("red");
   const [tiles, setTiles] = useState<Tile[]>([]);
@@ -163,6 +163,7 @@ export function VisualSearchHunt({
   const [targetsRemaining, setTargetsRemaining] = useState(0);
   const [feedback, setFeedback] = useState<"success" | "error" | null>(null);
   const [lastMetrics, setLastMetrics] = useState<RoundMetrics | null>(null);
+  const [allLevelMetrics, setAllLevelMetrics] = useState<RoundMetrics[]>([]);
 
   const reactionTimesRef = useRef<number[]>([]);
   const lastHitAtRef = useRef<number>(0);
@@ -341,20 +342,69 @@ export function VisualSearchHunt({
   };
 
   const completeExercise = () => {
-    const success = (lastMetrics?.status ?? "lost") === "won";
+    const allMetrics = lastMetrics ? [...allLevelMetrics, lastMetrics] : allLevelMetrics;
+    const wonLevels = allMetrics.filter(m => m.status === "won").length;
+    const success = wonLevels >= maxLevelHint * 0.6;
     const pointsEarned = success ? basePoints : Math.round(basePoints * 0.35);
     onComplete({ success, pointsEarned });
   };
 
-  const applyDifficultyAdjustment = () => {
-    if (!lastMetrics) {
+  const downloadResults = () => {
+    const allMetrics = lastMetrics ? [...allLevelMetrics, lastMetrics] : allLevelMetrics;
+    const lines: string[] = [];
+    lines.push("=" + "=".repeat(60));
+    lines.push("RESULTADO - CAÇA AO ALVO (Atenção Seletiva)");
+    lines.push("=" + "=".repeat(60));
+    lines.push("");
+    
+    allMetrics.forEach((m, idx) => {
+      lines.push(`Fase ${idx + 1} (Nível ${m.level}):`);
+      lines.push(`  Status: ${m.status === "won" ? "Completada" : "Tempo esgotado"}`);
+      lines.push(`  Acertos: ${m.hits}`);
+      lines.push(`  Erros: ${m.errors}`);
+      lines.push(`  Tempo restante: ${m.timeRemaining}s`);
+      lines.push(`  Tempo médio de reação: ${m.averageReactionMs > 0 ? m.averageReactionMs + "ms" : "-"}`);
+      const totalClicks = m.hits + m.errors;
+      const accuracy = totalClicks > 0 ? Math.round((m.hits / totalClicks) * 100) : 0;
+      lines.push(`  Acurácia: ${accuracy}%`);
+      lines.push("");
+    });
+
+    const wonCount = allMetrics.filter(m => m.status === "won").length;
+    const totalHits = allMetrics.reduce((sum, m) => sum + m.hits, 0);
+    const totalErrors = allMetrics.reduce((sum, m) => sum + m.errors, 0);
+    const totalAccuracy = totalHits + totalErrors > 0 ? Math.round((totalHits / (totalHits + totalErrors)) * 100) : 0;
+
+    lines.push("=" + "=".repeat(60));
+    lines.push("RESUMO TOTAL:");
+    lines.push(`Fases completadas: ${wonCount}/${allMetrics.length}`);
+    lines.push(`Acertos totais: ${totalHits}`);
+    lines.push(`Erros totais: ${totalErrors}`);
+    lines.push(`Acurácia geral: ${totalAccuracy}%`);
+    lines.push("=" + "=".repeat(60));
+
+    const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `atento_caca_ao_alvo_${new Date().toISOString().split("T")[0]}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const advanceToNextLevel = () => {
+    if (!lastMetrics) return;
+
+    setAllLevelMetrics(prev => [...prev, lastMetrics]);
+
+    if (level >= maxLevelHint) {
+      setStatus("completed");
       return;
     }
 
     const totalClicks = lastMetrics.hits + lastMetrics.errors;
     const accuracy = totalClicks > 0 ? lastMetrics.hits / totalClicks : 0;
-    const timeRatio =
-      config.timeSeconds > 0 ? lastMetrics.timeRemaining / config.timeSeconds : 0;
+    const timeRatio = config.timeSeconds > 0 ? lastMetrics.timeRemaining / config.timeSeconds : 0;
 
     const suggestion = getSuggestion({
       status: lastMetrics.status,
@@ -362,10 +412,7 @@ export function VisualSearchHunt({
       timeRatio,
     });
 
-    const adjusted = Math.max(
-      1,
-      Math.min(maxLevelHint, level + suggestion.nextLevelDelta),
-    );
+    const adjusted = Math.max(1, Math.min(maxLevelHint, level + suggestion.nextLevelDelta));
     setLevel(adjusted);
     setStatus("ready");
   };
@@ -394,12 +441,42 @@ export function VisualSearchHunt({
 
   return (
     <div className="mt-4 space-y-4">
-      <div className="rounded-lg border border-black/10 bg-zinc-50 p-4">
-        <p className="text-sm text-zinc-500">Nível atual: {level}</p>
-        <p className="mt-1 font-medium text-zinc-900">
-          Encontre todos os {shapeLabel[targetShape]} {colorLabel[targetColor]}
-        </p>
-      </div>
+      {status === "instructions" && (
+        <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
+          <div>
+            <h3 className="text-xl font-semibold text-zinc-900">Caça ao Alvo</h3>
+            <p className="mt-2 text-sm text-zinc-700">
+              Encontre e clique em todos os alvos especificados antes que o tempo acabe.
+            </p>
+          </div>
+
+          <div className="space-y-2 text-sm text-zinc-700">
+            <p><strong>Como jogar:</strong></p>
+            <ul className="ml-4 list-disc space-y-1">
+              <li>Você verá uma grade com diferentes formas e cores</li>
+              <li>Clique em todos os objetos que correspondem ao alvo descrito</li>
+              <li>Cuidado: clicar em objetos errados reduz seu tempo</li>
+              <li>Complete a busca antes que o tempo acabe</li>
+            </ul>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setStatus("ready")}
+            className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
+          >
+            Começar
+          </button>
+        </div>
+      )}
+
+      {status !== "instructions" && status !== "completed" && (
+        <div className="rounded-lg border border-black/10 bg-zinc-50 p-4">
+          <p className="mt-1 font-medium text-zinc-900">
+            Encontre todos os {shapeLabel[targetShape]} {colorLabel[targetColor]}
+          </p>
+        </div>
+      )}
 
       <div className="grid gap-3 text-sm sm:grid-cols-4">
         <div className="rounded-lg border border-black/10 p-3">
@@ -474,36 +551,67 @@ export function VisualSearchHunt({
         </button>
       )}
 
-      {(status === "won" || status === "lost") && lastMetrics && summary && (
+      {(status === "won" || status === "lost") && lastMetrics && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-4">
-          <p className="font-semibold text-zinc-900">
-            {status === "won" ? "Vitória" : "Tempo esgotado"}
+          <p className="text-center font-semibold text-zinc-900">
+            {status === "won" ? "Fase concluída!" : "Tempo esgotado"}
           </p>
-          <div className="grid gap-2 text-sm sm:grid-cols-2">
-            <p>Tempo restante: {lastMetrics.timeRemaining}s</p>
-            <p>Alvos encontrados: {lastMetrics.hits}</p>
-            <p>Cliques errados: {lastMetrics.errors}</p>
-            <p>
-              Tempo médio de reação: {lastMetrics.averageReactionMs > 0 ? `${lastMetrics.averageReactionMs}ms` : "-"}
-            </p>
-            <p>Acurácia: {summary.accuracyPercent}%</p>
+
+          <button
+            type="button"
+            onClick={advanceToNextLevel}
+            className="w-full rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
+          >
+            Avançar
+          </button>
+        </div>
+      )}
+
+      {status === "completed" && (
+        <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
+          <h3 className="text-xl font-semibold text-zinc-900">Jogo concluído!</h3>
+
+          <div className="space-y-3">
+            {allLevelMetrics.map((m, idx) => {
+              const totalClicks = m.hits + m.errors;
+              const accuracy = totalClicks > 0 ? Math.round((m.hits / totalClicks) * 100) : 0;
+              return (
+                <div key={idx} className="rounded-lg border border-black/10 bg-white p-3">
+                  <p className="text-sm font-medium text-zinc-900">Fase {idx + 1}</p>
+                  <div className="mt-1 grid grid-cols-2 gap-2 text-xs text-zinc-600">
+                    <p>Status: {m.status === "won" ? "✓ Completada" : "✗ Tempo esgotado"}</p>
+                    <p>Acurácia: {accuracy}%</p>
+                    <p>Acertos: {m.hits}</p>
+                    <p>Erros: {m.errors}</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <p className="text-sm text-zinc-700">{summary.suggestion.text}</p>
+
+          <div className="rounded-lg border-2 border-zinc-900 bg-white p-4">
+            <p className="font-semibold text-zinc-900">Resumo Total</p>
+            <div className="mt-2 grid gap-2 text-sm">
+              <p>Fases completadas: {allLevelMetrics.filter(m => m.status === "won").length}/{allLevelMetrics.length}</p>
+              <p>Acertos totais: {allLevelMetrics.reduce((sum, m) => sum + m.hits, 0)}</p>
+              <p>Erros totais: {allLevelMetrics.reduce((sum, m) => sum + m.errors, 0)}</p>
+            </div>
+          </div>
 
           <div className="flex flex-wrap gap-3">
             <button
               type="button"
-              onClick={applyDifficultyAdjustment}
-              className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
+              onClick={downloadResults}
+              className="flex-1 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
             >
-              Próxima rodada
+              Baixar Resultados
             </button>
             <button
               type="button"
               onClick={completeExercise}
-              className="rounded-lg border border-black/20 px-4 py-2 font-medium text-zinc-800 hover:bg-zinc-100"
+              className="flex-1 rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
             >
-              Finalizar exercício
+              Continuar
             </button>
           </div>
         </div>
