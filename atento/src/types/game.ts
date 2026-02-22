@@ -11,7 +11,7 @@ type BaseExercise = {
   title: string;
   attentionType: AttentionType;
   kind: ExerciseKind;
-  instructions: string;
+  instructions?: string;
   points: number;
 };
 

@@ -198,12 +198,14 @@ export function AttentionTrainingGame() {
 
         {stage === "instructions" && currentExercise && (
           <div className="mt-4 space-y-5">
-            <h2 className="text-2xl font-semibold text-zinc-900">
+            <h2 className="text-xl font-semibold text-zinc-900">
               {currentExercise.title}
             </h2>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 text-zinc-700">
-              <p className="mt-3">{currentExercise.instructions}</p>
-            </div>
+            {currentExercise.instructions && (
+              <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
+                <p>{currentExercise.instructions}</p>
+              </div>
+            )}
             <button
               type="button"
               onClick={() => setStage("exercise")}
@@ -355,7 +357,7 @@ export function AttentionTrainingGame() {
 
         {stage === "result" && (
           <div className="mt-4 space-y-5">
-            <h2 className="text-2xl font-semibold text-zinc-900">
+            <h2 className="text-xl font-semibold text-zinc-900">
               Treino concluído
             </h2>
 

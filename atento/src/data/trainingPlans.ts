@@ -82,8 +82,6 @@ export const trainingPlans: TrainingPlan[] = [
         title: "Destaque o alvo - Fase 1",
         attentionType: "seletiva",
         kind: "quiz",
-        instructions:
-          "Ignore palavras parecidas e escolha apenas o item que corresponde exatamente ao alvo.",
         question: "Qual opção corresponde exatamente ao alvo 'AZUL'?",
         options: ["AZUL", "AZUI", "A Z U L", "AZUL!"],
         correctOptionIndex: 0,
@@ -94,8 +92,6 @@ export const trainingPlans: TrainingPlan[] = [
         title: "Destaque o alvo - Fase 2",
         attentionType: "seletiva",
         kind: "quiz",
-        instructions:
-          "Ignore palavras parecidas e escolha apenas o item que corresponde exatamente ao alvo.",
         question: "Qual opção é idêntica a 'B7K2'?",
         options: ["B7K2", "B7KZ", "87K2", "B7K-2"],
         correctOptionIndex: 0,
@@ -106,8 +102,6 @@ export const trainingPlans: TrainingPlan[] = [
         title: "Destaque o alvo - Fase 3",
         attentionType: "seletiva",
         kind: "quiz",
-        instructions:
-          "Ignore palavras parecidas e escolha apenas o item que corresponde exatamente ao alvo.",
         question: "Qual item aparece apenas uma vez?",
         options: ["XXQ", "XXQ", "XQX", "XXQ"],
         correctOptionIndex: 2,
@@ -118,8 +112,6 @@ export const trainingPlans: TrainingPlan[] = [
         title: "Destaque o alvo - Fase 4",
         attentionType: "seletiva",
         kind: "quiz",
-        instructions:
-          "Ignore palavras parecidas e escolha apenas o item que corresponde exatamente ao alvo.",
         question: "Qual palavra está correta?",
         options: ["ATENSAO", "ATENÇÃO", "ATENCAO", "ATENÇAO"],
         correctOptionIndex: 1,
@@ -130,8 +122,6 @@ export const trainingPlans: TrainingPlan[] = [
         title: "Destaque o alvo - Fase 5",
         attentionType: "seletiva",
         kind: "quiz",
-        instructions:
-          "Ignore palavras parecidas e escolha apenas o item que corresponde exatamente ao alvo.",
         question: "Qual sequência contém apenas números pares?",
         options: ["2486", "2469", "2245", "8427"],
         correctOptionIndex: 0,
@@ -142,8 +132,6 @@ export const trainingPlans: TrainingPlan[] = [
         title: "Destaque o alvo - Fase 6",
         attentionType: "seletiva",
         kind: "quiz",
-        instructions:
-          "Ignore palavras parecidas e escolha apenas o item que corresponde exatamente ao alvo.",
         question: "Qual código tem todas as letras maiúsculas?",
         options: ["abc123", "ABC123", "Abc123", "aBc123"],
         correctOptionIndex: 1,
@@ -154,8 +142,6 @@ export const trainingPlans: TrainingPlan[] = [
         title: "Destaque o alvo - Fase 7",
         attentionType: "seletiva",
         kind: "quiz",
-        instructions:
-          "Ignore palavras parecidas e escolha apenas o item que corresponde exatamente ao alvo.",
         question: "Qual email está escrito corretamente?",
         options: ["usuario@email.com", "usuario.@email.com", "usuario@email,com", "usuario@@email.com"],
         correctOptionIndex: 0,
@@ -166,8 +152,6 @@ export const trainingPlans: TrainingPlan[] = [
         title: "Destaque o alvo - Fase 8",
         attentionType: "seletiva",
         kind: "quiz",
-        instructions:
-          "Ignore palavras parecidas e escolha apenas o item que corresponde exatamente ao alvo.",
         question: "Qual imagem não repete nenhuma outra?",
         options: ["●◐◑", "●◐◑", "●◐◐", "●◐◑"],
         correctOptionIndex: 2,
@@ -178,8 +162,6 @@ export const trainingPlans: TrainingPlan[] = [
         title: "Destaque o alvo - Fase 9",
         attentionType: "seletiva",
         kind: "quiz",
-        instructions:
-          "Ignore palavras parecidas e escolha apenas o item que corresponde exatamente ao alvo.",
         question: "Qual número começa com 5 e termina com 8?",
         options: ["5678", "5348", "5388", "5008"],
         correctOptionIndex: 2,
@@ -190,8 +172,6 @@ export const trainingPlans: TrainingPlan[] = [
         title: "Destaque o alvo - Fase 10",
         attentionType: "seletiva",
         kind: "quiz",
-        instructions:
-          "Ignore palavras parecidas e escolha apenas o item que corresponde exatamente ao alvo.",
         question: "Qual letra aparece 3 vezes?",
         options: ["AABCAADA", "AABBAADA", "AABBAABA", "AABBBAAA"],
         correctOptionIndex: 2,
@@ -202,8 +182,6 @@ export const trainingPlans: TrainingPlan[] = [
         title: "Destaque o alvo - Fase 11",
         attentionType: "seletiva",
         kind: "quiz",
-        instructions:
-          "Ignore palavras parecidas e escolha apenas o item que corresponde exatamente ao alvo.",
         question: "Qual padrão é único?",
         options: ["■□■", "■□■", "■□□", "■□■"],
         correctOptionIndex: 2,
@@ -214,8 +192,6 @@ export const trainingPlans: TrainingPlan[] = [
         title: "Destaque o alvo - Fase 12",
         attentionType: "seletiva",
         kind: "quiz",
-        instructions:
-          "Ignore palavras parecidas e escolha apenas o item que corresponde exatamente ao alvo.",
         question: "Qual símbolo diferente dos outros?",
         options: ["@ @ ©", "@ @ @", "@ © @", "@ @ @"],
         correctOptionIndex: 1,
