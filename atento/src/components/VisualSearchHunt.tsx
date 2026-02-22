@@ -482,18 +482,6 @@ export function VisualSearchHunt({
           >
             Começar Fase
           </button>
-
-          <div
-            className="grid gap-2 rounded-xl border border-black/10 p-2 bg-zinc-50"
-            style={{ gridTemplateColumns: gridColumns }}
-          >
-            {Array.from({ length: config.gridSize * config.gridSize }).map((_, index) => (
-              <div
-                key={index}
-                className="flex aspect-square items-center justify-center rounded-md border border-black/10 bg-white"
-              />
-            ))}
-          </div>
         </div>
       )}
 
