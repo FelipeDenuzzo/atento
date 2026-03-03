@@ -1,4 +1,5 @@
 import { AttentionType, TrainingPlan } from "@/types/game";
+import { ENABLE_COLOR_FILTER_WITH_SOUND } from "@/config/features";
 
 const typeLabel: Record<AttentionType, string> = {
   seletiva: "Atenção seletiva",
@@ -208,6 +209,76 @@ export const trainingPlans: TrainingPlan[] = [
         maxLevelHint: 12,
         points: 30,
       },
+      {
+        id: "sel-14",
+        title: "Flanker — Seta Central",
+        attentionType: "seletiva",
+        kind: "flanker",
+        instructions:
+          "Indique a direcao da seta central ignorando as laterais.",
+        startingLevel: 1,
+        maxLevelHint: 6,
+        points: 30,
+      },
+      {
+        id: "sel-15",
+        title: "Stroop Invertido",
+        attentionType: "seletiva",
+        kind: "stroop",
+        instructions:
+          "Clique na cor da tinta, nao na palavra escrita.",
+        startingLevel: 1,
+        maxLevelHint: 8,
+        points: 30,
+      },
+      {
+        id: "sel-16",
+        title: "Escuta Seletiva (Cocktail Party)",
+        attentionType: "seletiva",
+        kind: "cocktail-party",
+        instructions:
+          "Identifique o nome alvo em meio a falas simultaneas.",
+        startingLevel: 1,
+        maxLevelHint: 12,
+        points: 30,
+      },
+      {
+        id: "sel-17",
+        title: "Go / No-Go — Clique Rapido",
+        attentionType: "seletiva",
+        kind: "go-no-go",
+        instructions:
+          "Clique rapidamente nas frutas e nao clique nos distratores.",
+        startingLevel: 1,
+        maxLevelHint: 4,
+        points: 30,
+      },
+      {
+        id: "sel-18",
+        title: "Go / No-Go",
+        attentionType: "seletiva",
+        kind: "go-no-go-expandido",
+        instructions:
+          "Clique ou pressione ESPAÇO apenas quando aparecer o tipo de item indicado. Não faça nada quando aparecer outro tipo.",
+        startingLevel: 1,
+        maxLevelHint: 3,
+        points: 30,
+      },
+      ...(ENABLE_COLOR_FILTER_WITH_SOUND
+        ? [
+            {
+              id: "sel-19",
+              title: "Filtro de Cores com Som",
+              attentionType: "seletiva" as const,
+              kind: "filtro-cores-com-som" as const,
+              instructions:
+                "Clique apenas nas formas da cor anunciada. Ignore as outras cores.",
+              startingLevel: 1,
+              maxLevelHint: 4,
+              points: 30,
+            },
+          ]
+        : []),
     ],
   },
 ];

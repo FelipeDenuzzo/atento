@@ -1,0 +1,837 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+type Direction = "left" | "right";
+type TrialType = "congruent" | "incongruent";
+type Phase = 1 | 2 | 3;
+type GameStatus = "instructions" | "ready" | "playing" | "finished" | "transition" | "completed";
+type TransitionContext = "initial" | "next-phase";
+
+type Trial = {
+  id: number;
+  level: number;
+  phase: Phase;
+  arrowCount: number;
+  targetIndex: number;
+  targetDirection: Direction;
+  flankerDirection: Direction;
+  type: TrialType;
+  stimulus: Direction[];
+  playerDirection: Direction | null;
+  correct: boolean | null;
+  reactionTimeMs: number | null;
+  timedOut: boolean;
+};
+
+type LevelConfig = {
+  level: number;
+  phase: Phase;
+  arrowCount: number;
+  timePerTrialSeconds: number;
+  incongruentRatio: number;
+  trialsPerLevel: number;
+  targetMode: "fixed" | "variable";
+};
+
+type LevelMetrics = {
+  level: number;
+  phase: Phase;
+  totalTrials: number;
+  correctCount: number;
+  errorCount: number;
+  accuracy: number;
+  score: number;
+  averageReactionMs: number;
+  congruentAccuracy: number;
+  incongruentAccuracy: number;
+  congruentAverageReactionMs: number;
+  incongruentAverageReactionMs: number;
+};
+
+type Props = {
+  basePoints: number;
+  startingLevel: number;
+  maxLevelHint: number;
+  onComplete: (result: { success: boolean; pointsEarned: number }) => void;
+};
+
+const ARROW_SYMBOL: Record<Direction, string> = {
+  left: "←",
+  right: "→",
+};
+
+const PHASE_1_ARROW_COUNT = 5;
+const PHASE_2_ARROW_COUNT = 7;
+const PHASE_3_ARROW_COUNT = 9;
+
+const PHASE_1_TIME_SECONDS = 2.8;
+const PHASE_2_TIME_SECONDS = 2;
+const PHASE_3_TIME_SECONDS = 1.3;
+
+const PHASE_1_INCONGRUENT_RATIO = 0.5;
+const PHASE_2_INCONGRUENT_RATIO = 0.72;
+const PHASE_3_INCONGRUENT_RATIO = 0.84;
+
+const MIN_ACCURACY_TO_ADVANCE = 0.6;
+
+function randomItem<T>(items: T[]): T {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function oppositeDirection(direction: Direction): Direction {
+  return direction === "left" ? "right" : "left";
+}
+
+function getLevelConfig(level: number): LevelConfig {
+  // Fase 1: base do treino (5 setas, alvo central, tempo mais generoso)
+  if (level <= 4) {
+    return {
+      level,
+      phase: 1,
+      arrowCount: PHASE_1_ARROW_COUNT,
+      timePerTrialSeconds: PHASE_1_TIME_SECONDS,
+      incongruentRatio: PHASE_1_INCONGRUENT_RATIO,
+      trialsPerLevel: 8,
+      targetMode: "fixed",
+    };
+  }
+
+  // Fase 2: mais setas e maior conflito, mantendo alvo central
+  if (level <= 8) {
+    return {
+      level,
+      phase: 2,
+      arrowCount: PHASE_2_ARROW_COUNT,
+      timePerTrialSeconds: PHASE_2_TIME_SECONDS,
+      incongruentRatio: PHASE_2_INCONGRUENT_RATIO,
+      trialsPerLevel: 10,
+      targetMode: "fixed",
+    };
+  }
+
+  // Fase 3: alvo em posição variável e tempo curto
+  return {
+    level,
+    phase: 3,
+    arrowCount: PHASE_3_ARROW_COUNT,
+    timePerTrialSeconds: PHASE_3_TIME_SECONDS,
+    incongruentRatio: PHASE_3_INCONGRUENT_RATIO,
+    trialsPerLevel: 12,
+    targetMode: "variable",
+  };
+}
+
+function generateTrial(id: number, config: LevelConfig): Trial {
+  const targetDirection = randomItem<Direction>(["left", "right"]);
+  const isIncongruent = Math.random() < config.incongruentRatio;
+  const flankerDirection = isIncongruent
+    ? oppositeDirection(targetDirection)
+    : targetDirection;
+
+  // Na fase 3 (targetMode variable), o alvo é sorteado em qualquer posição da fileira.
+  const targetIndex =
+    config.targetMode === "fixed"
+      ? Math.floor(config.arrowCount / 2)
+      : Math.floor(Math.random() * config.arrowCount);
+
+  const stimulus = Array.from({ length: config.arrowCount }, () => flankerDirection);
+  stimulus[targetIndex] = targetDirection;
+
+  return {
+    id,
+    level: config.level,
+    phase: config.phase,
+    arrowCount: config.arrowCount,
+    targetIndex,
+    targetDirection,
+    flankerDirection,
+    type: isIncongruent ? "incongruent" : "congruent",
+    stimulus,
+    playerDirection: null,
+    correct: null,
+    reactionTimeMs: null,
+    timedOut: false,
+  };
+}
+
+function playFeedbackSound(correct: boolean) {
+  const audioContext = new (window.AudioContext ||
+    (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext)();
+  if (!audioContext) return;
+
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+
+  if (correct) {
+    oscillator.frequency.value = 860;
+    oscillator.type = "sine";
+    gainNode.gain.setValueAtTime(0.28, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.14);
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.14);
+  } else {
+    oscillator.frequency.value = 180;
+    oscillator.type = "sawtooth";
+    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.23);
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.23);
+  }
+}
+
+function buildLevelMetrics(trials: Trial[], level: number, phase: Phase, score: number): LevelMetrics {
+  const completedTrials = trials.filter((trial) => trial.correct !== null);
+  const correctTrials = completedTrials.filter((trial) => trial.correct);
+  const congruentTrials = completedTrials.filter((trial) => trial.type === "congruent");
+  const incongruentTrials = completedTrials.filter((trial) => trial.type === "incongruent");
+
+  const congruentCorrect = congruentTrials.filter((trial) => trial.correct).length;
+  const incongruentCorrect = incongruentTrials.filter((trial) => trial.correct).length;
+
+  const allReactionTimes = completedTrials
+    .map((trial) => trial.reactionTimeMs)
+    .filter((time): time is number => time !== null);
+
+  const congruentReactionTimes = congruentTrials
+    .map((trial) => trial.reactionTimeMs)
+    .filter((time): time is number => time !== null);
+
+  const incongruentReactionTimes = incongruentTrials
+    .map((trial) => trial.reactionTimeMs)
+    .filter((time): time is number => time !== null);
+
+  const average = (values: number[]) =>
+    values.length > 0
+      ? Math.round(values.reduce((sum, value) => sum + value, 0) / values.length)
+      : 0;
+
+  const accuracy =
+    completedTrials.length > 0 ? correctTrials.length / completedTrials.length : 0;
+
+  return {
+    level,
+    phase,
+    totalTrials: completedTrials.length,
+    correctCount: correctTrials.length,
+    errorCount: completedTrials.length - correctTrials.length,
+    accuracy,
+    score,
+    averageReactionMs: average(allReactionTimes),
+    congruentAccuracy:
+      congruentTrials.length > 0 ? congruentCorrect / congruentTrials.length : 0,
+    incongruentAccuracy:
+      incongruentTrials.length > 0 ? incongruentCorrect / incongruentTrials.length : 0,
+    congruentAverageReactionMs: average(congruentReactionTimes),
+    incongruentAverageReactionMs: average(incongruentReactionTimes),
+  };
+}
+
+export function FlankerSetas({
+  basePoints,
+  startingLevel,
+  maxLevelHint,
+  onComplete,
+}: Props) {
+  const [level, setLevel] = useState(startingLevel);
+  const [status, setStatus] = useState<GameStatus>("instructions");
+  const [trials, setTrials] = useState<Trial[]>([]);
+  const [currentTrialIndex, setCurrentTrialIndex] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState(0);
+  const [score, setScore] = useState(0);
+  const [hits, setHits] = useState(0);
+  const [errors, setErrors] = useState(0);
+  const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null);
+  const [allLevelMetrics, setAllLevelMetrics] = useState<LevelMetrics[]>([]);
+  const [trialHistory, setTrialHistory] = useState<Trial[]>([]);
+  const [transitionCountdown, setTransitionCountdown] = useState(3);
+  const [nextLevel, setNextLevel] = useState<number | null>(null);
+  const [transitionContext, setTransitionContext] = useState<TransitionContext>("next-phase");
+
+  const trialStartTimeRef = useRef<number>(0);
+  const trialResolvedRef = useRef(false);
+
+  const config = useMemo(() => getLevelConfig(level), [level]);
+  const currentTrial = trials[currentTrialIndex];
+
+  const startLevel = useCallback(
+    (levelToStart: number = level) => {
+      const configToStart = getLevelConfig(levelToStart);
+      const generatedTrials = Array.from(
+        { length: configToStart.trialsPerLevel },
+        (_, index) => generateTrial(index, configToStart),
+      );
+
+      setLevel(levelToStart);
+      setTrials(generatedTrials);
+      setCurrentTrialIndex(0);
+      setTimeRemaining(configToStart.timePerTrialSeconds);
+      setScore(0);
+      setHits(0);
+      setErrors(0);
+      setFeedback(null);
+      trialResolvedRef.current = false;
+      trialStartTimeRef.current = performance.now();
+      setStatus("playing");
+    },
+    [level],
+  );
+
+  const moveToNextTrial = useCallback(() => {
+    const nextIndex = currentTrialIndex + 1;
+    setFeedback(null);
+
+    if (nextIndex >= trials.length) {
+      setStatus("finished");
+      return;
+    }
+
+    setCurrentTrialIndex(nextIndex);
+    setTimeRemaining(config.timePerTrialSeconds);
+    trialResolvedRef.current = false;
+    trialStartTimeRef.current = performance.now();
+  }, [config.timePerTrialSeconds, currentTrialIndex, trials.length]);
+
+  const resolveTrial = useCallback(
+    (playerDirection: Direction | null, timedOut: boolean) => {
+      if (status !== "playing" || !currentTrial || trialResolvedRef.current) return;
+
+      trialResolvedRef.current = true;
+
+      const reactionTime = timedOut
+        ? null
+        : Math.max(0, performance.now() - trialStartTimeRef.current);
+      const isCorrect = playerDirection === currentTrial.targetDirection;
+
+      playFeedbackSound(isCorrect);
+      setFeedback(isCorrect ? "correct" : "incorrect");
+
+      setTrials((prev) =>
+        prev.map((trial, index) =>
+          index === currentTrialIndex
+            ? {
+                ...trial,
+                playerDirection,
+                correct: isCorrect,
+                reactionTimeMs: reactionTime,
+                timedOut,
+              }
+            : trial,
+        ),
+      );
+
+      if (isCorrect) {
+        setHits((value) => value + 1);
+        setScore((value) => value + (reactionTime !== null && reactionTime <= 1000 ? 12 : 8));
+      } else {
+        setErrors((value) => value + 1);
+        setScore((value) => Math.max(0, value - 4));
+      }
+
+      window.setTimeout(() => {
+        moveToNextTrial();
+      }, 300);
+    },
+    [currentTrial, currentTrialIndex, moveToNextTrial, status],
+  );
+
+  const handleAnswer = useCallback(
+    (direction: Direction) => {
+      resolveTrial(direction, false);
+    },
+    [resolveTrial],
+  );
+
+  useEffect(() => {
+    if (status !== "playing" || !currentTrial) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setTimeRemaining((value) => {
+        const next = Number((value - 0.1).toFixed(1));
+        if (next <= 0) {
+          window.clearInterval(timer);
+          resolveTrial(null, true);
+          return 0;
+        }
+        return next;
+      });
+    }, 100);
+
+    return () => window.clearInterval(timer);
+  }, [currentTrial, resolveTrial, status]);
+
+  useEffect(() => {
+    if (status !== "playing") {
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
+        return;
+      }
+
+      event.preventDefault();
+      if (event.key === "ArrowLeft") {
+        handleAnswer("left");
+      } else {
+        handleAnswer("right");
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [handleAnswer, status]);
+
+  const levelMetrics = useMemo(() => {
+    if (status !== "finished") return null;
+    return buildLevelMetrics(trials, level, config.phase, score);
+  }, [config.phase, level, score, status, trials]);
+
+  const progressToNextLevel = () => {
+    if (!levelMetrics) return;
+
+    const completedTrials = trials.filter(
+      (trial): trial is Trial & { correct: boolean } => trial.correct !== null,
+    );
+
+    setAllLevelMetrics((prev) => [...prev, levelMetrics]);
+    setTrialHistory((prev) => [...prev, ...completedTrials]);
+
+    if (level >= maxLevelHint) {
+      setStatus("completed");
+      return;
+    }
+
+    const upcomingLevel = Math.min(maxLevelHint, level + 1);
+    setTransitionContext("next-phase");
+    setNextLevel(upcomingLevel);
+    setTransitionCountdown(3);
+    setStatus("transition");
+  };
+
+  useEffect(() => {
+    if (status !== "transition" || nextLevel === null) {
+      return;
+    }
+
+    if (transitionCountdown <= 0) {
+      const levelToStart = nextLevel;
+      setNextLevel(null);
+      startLevel(levelToStart);
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setTransitionCountdown((value) => value - 1);
+    }, 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [nextLevel, startLevel, status, transitionCountdown]);
+
+  const downloadResults = () => {
+    const lines: string[] = [];
+    lines.push("=" + "=".repeat(60));
+    lines.push("RESULTADO - FLANKER DE SETAS (Atenção Seletiva)");
+    lines.push("=" + "=".repeat(60));
+    lines.push("");
+
+    allLevelMetrics.forEach((metric, index) => {
+      lines.push(`Nível ${index + 1} (Fase ${metric.phase}):`);
+      lines.push(`  Tentativas: ${metric.totalTrials}`);
+      lines.push(`  Acertos: ${metric.correctCount}`);
+      lines.push(`  Erros: ${metric.errorCount}`);
+      lines.push(`  Pontuação: ${metric.score}`);
+      lines.push(`  Acurácia geral: ${Math.round(metric.accuracy * 100)}%`);
+      lines.push(`  Acurácia congruentes: ${Math.round(metric.congruentAccuracy * 100)}%`);
+      lines.push(`  Acurácia incongruentes: ${Math.round(metric.incongruentAccuracy * 100)}%`);
+      lines.push(`  TR médio geral: ${metric.averageReactionMs}ms`);
+      lines.push(`  TR médio congruentes: ${metric.congruentAverageReactionMs}ms`);
+      lines.push(`  TR médio incongruentes: ${metric.incongruentAverageReactionMs}ms`);
+      lines.push("");
+    });
+
+    const totalTrials = allLevelMetrics.reduce((sum, metric) => sum + metric.totalTrials, 0);
+    const totalCorrect = allLevelMetrics.reduce((sum, metric) => sum + metric.correctCount, 0);
+    const totalErrors = allLevelMetrics.reduce((sum, metric) => sum + metric.errorCount, 0);
+    const totalScore = allLevelMetrics.reduce((sum, metric) => sum + metric.score, 0);
+    const totalAccuracy = totalTrials > 0 ? Math.round((totalCorrect / totalTrials) * 100) : 0;
+
+    const phaseSummary = ([1, 2, 3] as const).map((phase) => {
+      const phaseTrials = trialHistory.filter((trial) => trial.phase === phase);
+      const phaseCorrect = phaseTrials.filter((trial) => trial.correct).length;
+      const phaseErrors = phaseTrials.length - phaseCorrect;
+      const reactionTimes = phaseTrials
+        .map((trial) => trial.reactionTimeMs)
+        .filter((time): time is number => time !== null);
+      const averageReactionMs =
+        reactionTimes.length > 0
+          ? Math.round(reactionTimes.reduce((sum, time) => sum + time, 0) / reactionTimes.length)
+          : 0;
+
+      return {
+        phase,
+        trials: phaseTrials.length,
+        correct: phaseCorrect,
+        errors: phaseErrors,
+        averageReactionMs,
+      };
+    });
+
+    lines.push("=" + "=".repeat(60));
+    lines.push("RESUMO TOTAL:");
+    lines.push(`Níveis completados: ${allLevelMetrics.length}`);
+    lines.push(`Tentativas totais: ${totalTrials}`);
+    lines.push(`Acertos totais: ${totalCorrect}`);
+    lines.push(`Erros totais: ${totalErrors}`);
+    lines.push(`Pontuação total: ${totalScore}`);
+    lines.push(`Acurácia geral: ${totalAccuracy}%`);
+    lines.push("");
+    lines.push("Totais por fase:");
+    phaseSummary.forEach((phaseData) => {
+      lines.push(
+        `Fase ${phaseData.phase}: tentativas ${phaseData.trials}, acertos ${phaseData.correct}, erros ${phaseData.errors}, TR médio ${phaseData.averageReactionMs}ms`,
+      );
+    });
+    lines.push("");
+    lines.push("Detalhe por tentativa:");
+    trialHistory.forEach((trial, index) => {
+      lines.push(
+        `#${index + 1} | fase ${trial.phase} | tipo ${trial.type} | correta ${trial.targetDirection} | resposta ${trial.playerDirection ?? "sem resposta"} | acerto ${trial.correct ? "sim" : "não"} | TR ${trial.reactionTimeMs ?? 0}ms`,
+      );
+    });
+    lines.push("=" + "=".repeat(60));
+
+    const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `atento_flanker_setas_${new Date().toISOString().split("T")[0]}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const finishExercise = () => {
+    const totalTrials = allLevelMetrics.reduce((sum, metric) => sum + metric.totalTrials, 0);
+    const totalCorrect = allLevelMetrics.reduce((sum, metric) => sum + metric.correctCount, 0);
+    const accuracy = totalTrials > 0 ? totalCorrect / totalTrials : 0;
+
+    const success = accuracy >= MIN_ACCURACY_TO_ADVANCE;
+    const pointsEarned = success ? basePoints : Math.round(basePoints * 0.4);
+    onComplete({ success, pointsEarned });
+  };
+
+  const sessionSummary = useMemo(() => {
+    const totalTrials = allLevelMetrics.reduce((sum, metric) => sum + metric.totalTrials, 0);
+    const totalCorrect = allLevelMetrics.reduce((sum, metric) => sum + metric.correctCount, 0);
+    const totalErrors = allLevelMetrics.reduce((sum, metric) => sum + metric.errorCount, 0);
+    const totalScore = allLevelMetrics.reduce((sum, metric) => sum + metric.score, 0);
+
+    const congruentTrialsWeight = allLevelMetrics.reduce(
+      (sum, metric) => sum + metric.totalTrials,
+      0,
+    );
+
+    const averageCongruentAccuracy =
+      allLevelMetrics.length > 0
+        ? Math.round(
+            (allLevelMetrics.reduce((sum, metric) => sum + metric.congruentAccuracy, 0) /
+              allLevelMetrics.length) *
+              100,
+          )
+        : 0;
+
+    const averageIncongruentAccuracy =
+      allLevelMetrics.length > 0
+        ? Math.round(
+            (allLevelMetrics.reduce((sum, metric) => sum + metric.incongruentAccuracy, 0) /
+              allLevelMetrics.length) *
+              100,
+          )
+        : 0;
+
+    const avgReaction =
+      allLevelMetrics.length > 0
+        ? Math.round(
+            allLevelMetrics.reduce((sum, metric) => sum + metric.averageReactionMs, 0) /
+              allLevelMetrics.length,
+          )
+        : 0;
+
+    const byPhase = ([1, 2, 3] as const).map((phase) => {
+      const phaseTrials = trialHistory.filter((trial) => trial.phase === phase);
+      const correct = phaseTrials.filter((trial) => trial.correct).length;
+      const errors = phaseTrials.length - correct;
+      const reactionTimes = phaseTrials
+        .map((trial) => trial.reactionTimeMs)
+        .filter((time): time is number => time !== null);
+      const averageReactionMs =
+        reactionTimes.length > 0
+          ? Math.round(reactionTimes.reduce((sum, time) => sum + time, 0) / reactionTimes.length)
+          : 0;
+
+      return {
+        phase,
+        trials: phaseTrials.length,
+        correct,
+        errors,
+        averageReactionMs,
+      };
+    });
+
+    return {
+      totalTrials,
+      totalCorrect,
+      totalErrors,
+      totalScore,
+      overallAccuracy: totalTrials > 0 ? Math.round((totalCorrect / totalTrials) * 100) : 0,
+      averageCongruentAccuracy,
+      averageIncongruentAccuracy,
+      avgReaction,
+      hasTrials: congruentTrialsWeight > 0,
+      byPhase,
+    };
+  }, [allLevelMetrics, trialHistory]);
+
+  return (
+    <div className="mt-4 space-y-4">
+      {status === "instructions" && (
+        <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
+          <div>
+            <h3 className="text-xl font-semibold text-zinc-900">Flanker de Setas</h3>
+            <p className="mt-2 text-sm text-zinc-700">
+              Você deve responder somente a direção da <strong>seta alvo</strong>,
+              ignorando as setas laterais. O treino mede foco seletivo diante de
+              informações conflitantes.
+            </p>
+          </div>
+
+          <div className="space-y-3 text-sm text-zinc-700">
+            <p><strong>Como jogar (passo a passo):</strong></p>
+            <ul className="ml-4 list-disc space-y-1">
+              <li>Observe a fileira e identifique a seta com destaque (alvo).</li>
+              <li>Se o alvo apontar para a esquerda, pressione a tecla ←.</li>
+              <li>Se o alvo apontar para a direita, pressione a tecla →.</li>
+              <li>Ignore as setas ao redor, mesmo quando apontarem para o lado oposto.</li>
+              <li>Responda rápido antes do tempo acabar.</li>
+            </ul>
+
+            <div className="rounded-lg border border-black/10 bg-white p-3 text-xs text-zinc-700">
+              <p><strong>Exemplo:</strong> em <span className="font-semibold">← ← → ← ←</span>, o alvo é a seta do meio (<span className="font-semibold">→</span>), então a resposta correta é <span className="font-semibold">→</span>.</p>
+              <p className="mt-1">Quando o alvo muda de posição nas fases avançadas, ele continua marcado com destaque visual.</p>
+            </div>
+
+            <div className="rounded-lg border border-black/10 bg-white p-3 text-xs text-zinc-700">
+              <p><strong>Progressão:</strong></p>
+              <ul className="ml-4 list-disc space-y-1">
+                <li>Fase 1: 5 setas, alvo central, tempo mais alto.</li>
+                <li>Fase 2: mais setas e mais trials incongruentes.</li>
+                <li>Fase 3: alvo pode variar de posição e tempo mais curto.</li>
+              </ul>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setTransitionContext("initial");
+              setNextLevel(level);
+              setTransitionCountdown(3);
+              setStatus("transition");
+            }}
+            className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
+          >
+            Começar
+          </button>
+        </div>
+      )}
+
+      {status === "playing" && currentTrial && (
+        <div className="space-y-5">
+          <div className="rounded-lg border border-black/10 bg-blue-50 p-3">
+            <p className="text-sm font-semibold text-blue-900">
+              Nível {level} de {maxLevelHint}
+            </p>
+          </div>
+
+          <div className="grid gap-3 text-sm sm:grid-cols-5">
+            <div className="rounded-lg border border-black/10 p-3">
+              <p className="text-zinc-500">Tentativa</p>
+              <p className="font-semibold text-zinc-900">{currentTrialIndex + 1}/{trials.length}</p>
+            </div>
+            <div className="rounded-lg border border-black/10 p-3">
+              <p className="text-zinc-500">Tempo</p>
+              <p className="font-semibold text-zinc-900">{timeRemaining.toFixed(1)}s</p>
+            </div>
+            <div className="rounded-lg border border-black/10 p-3">
+              <p className="text-zinc-500">Acertos</p>
+              <p className="font-semibold text-zinc-900">{hits}</p>
+            </div>
+            <div className="rounded-lg border border-black/10 p-3">
+              <p className="text-zinc-500">Erros</p>
+              <p className="font-semibold text-zinc-900">{errors}</p>
+            </div>
+            <div className="rounded-lg border border-black/10 p-3">
+              <p className="text-zinc-500">Pontuação</p>
+              <p className="font-semibold text-zinc-900">{score}</p>
+            </div>
+          </div>
+
+          <div className="h-2 overflow-hidden rounded-full bg-zinc-200">
+            <div
+              className="h-full bg-zinc-900 transition-all"
+              style={{
+                width: `${Math.max(0, (timeRemaining / config.timePerTrialSeconds) * 100)}%`,
+              }}
+            />
+          </div>
+
+          <div
+            className={`rounded-2xl border-4 p-8 transition-colors ${
+              feedback === "correct"
+                ? "border-emerald-400 bg-emerald-50"
+                : feedback === "incorrect"
+                  ? "border-rose-400 bg-rose-50"
+                  : "border-black/10 bg-white"
+            }`}
+          >
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              {currentTrial.stimulus.map((direction, index) => {
+                const isTarget = index === currentTrial.targetIndex;
+                return (
+                  <span
+                    key={`${currentTrial.id}-${index}`}
+                    className={`inline-flex h-16 w-16 select-none items-center justify-center rounded-xl text-5xl font-semibold sm:h-20 sm:w-20 sm:text-6xl ${
+                      isTarget
+                        ? "border-2 border-zinc-900 bg-zinc-100 text-zinc-900"
+                        : "border border-black/10 bg-white text-zinc-700"
+                    }`}
+                    aria-label={isTarget ? "Seta alvo" : "Seta flanqueadora"}
+                  >
+                    {ARROW_SYMBOL[direction]}
+                  </span>
+                );
+              })}
+            </div>
+            <p className="mt-4 text-center text-xs text-zinc-500">
+              {config.targetMode === "variable"
+                ? "Alvo destacado por borda escura (posição variável)."
+                : "Alvo no centro (destacado por borda escura)."}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => handleAnswer("left")}
+              className="rounded-lg border border-black/20 p-3 font-medium text-zinc-900 hover:bg-zinc-100"
+            >
+              ← Esquerda
+            </button>
+            <button
+              type="button"
+              onClick={() => handleAnswer("right")}
+              className="rounded-lg border border-black/20 p-3 font-medium text-zinc-900 hover:bg-zinc-100"
+            >
+              Direita →
+            </button>
+          </div>
+        </div>
+      )}
+
+      {status === "finished" && levelMetrics && (
+        <div className="rounded-lg border border-black/10 bg-zinc-50 p-6">
+          <p className="mb-4 text-center font-semibold text-zinc-900">
+            Fase concluída!
+          </p>
+
+          <button
+            type="button"
+            onClick={progressToNextLevel}
+            className="h-11 w-full rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
+          >
+            Avançar para a próxima
+          </button>
+        </div>
+      )}
+
+      {status === "transition" && (
+        <div className="rounded-lg border border-black/10 bg-zinc-50 p-6">
+          <p className="mb-2 text-center text-xl font-semibold text-zinc-900">
+            {transitionContext === "initial" ? "Flanker de Setas" : "Fase concluída!"}
+          </p>
+          <p className="text-center text-sm text-zinc-700">
+            {transitionContext === "initial"
+              ? "Iniciando em"
+              : "Próxima fase começa em"}
+          </p>
+          <p className="mt-2 text-center text-4xl font-semibold text-zinc-900">
+            {transitionCountdown}
+          </p>
+        </div>
+      )}
+
+      {status === "completed" && (
+        <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
+          <h3 className="text-xl font-semibold text-zinc-900">Jogo concluído!</h3>
+
+          <div className="space-y-3">
+            {allLevelMetrics.map((metric, index) => (
+              <div key={index} className="rounded-lg border border-black/10 bg-white p-3">
+                <p className="text-sm font-medium text-zinc-900">
+                  Nível {index + 1} • Fase {metric.phase}
+                </p>
+                <div className="mt-1 grid grid-cols-2 gap-2 text-xs text-zinc-600">
+                  <p>Pontuação: {metric.score}</p>
+                  <p>Acurácia: {Math.round(metric.accuracy * 100)}%</p>
+                  <p>Congruentes: {Math.round(metric.congruentAccuracy * 100)}%</p>
+                  <p>Incongruentes: {Math.round(metric.incongruentAccuracy * 100)}%</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="rounded-lg border-2 border-zinc-900 bg-white p-4">
+            <p className="font-semibold text-zinc-900">Resumo Total</p>
+            <div className="mt-2 grid gap-2 text-sm">
+              <p>Tentativas totais: {sessionSummary.totalTrials}</p>
+              <p>Acurácia geral: {sessionSummary.overallAccuracy}%</p>
+              <p>Acertos: {sessionSummary.totalCorrect}</p>
+              <p>Erros: {sessionSummary.totalErrors}</p>
+              <p>Acurácia em congruentes: {sessionSummary.averageCongruentAccuracy}%</p>
+              <p>Acurácia em incongruentes: {sessionSummary.averageIncongruentAccuracy}%</p>
+              <p>Tempo médio de reação: {sessionSummary.avgReaction}ms</p>
+              <p>Pontuação total: {sessionSummary.totalScore}</p>
+              {sessionSummary.byPhase.map((phaseData) => (
+                <p key={`phase-summary-${phaseData.phase}`}>
+                  Fase {phaseData.phase}: {phaseData.correct} acertos, {phaseData.errors} erros, TR médio {phaseData.averageReactionMs}ms
+                </p>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={downloadResults}
+              className="flex-1 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
+            >
+              Baixar Resultados
+            </button>
+            <button
+              type="button"
+              onClick={finishExercise}
+              className="flex-1 rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
+            >
+              Continuar
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

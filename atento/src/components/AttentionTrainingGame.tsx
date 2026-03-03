@@ -9,8 +9,14 @@ import {
 import { AttentionType, TrainingPlan } from "@/types/game";
 import { VisualSearchHunt } from "@/components/VisualSearchHunt";
 import { StroopInvertido } from "@/components/StroopInvertido";
+import { FlankerSetas } from "@/components/FlankerSetas";
+import { EscutaSeletivaCocktailParty } from "@/components/EscutaSeletivaCocktailParty";
+import { GoNoGoQuickClick } from "@/components/GoNoGoQuickClick";
+import { GoNoGoExpandidoGame } from "@/games/go-no-go-expandido/GoNoGoExpandidoGame";
+import { FiltroCoresComSomGame } from "@/games/filtro-cores-com-som/FiltroCoresComSomGame";
 
 type GameStage = "intro" | "instructions" | "exercise" | "result";
+type TrainingMode = "sequence" | "single" | null;
 
 const stageTitle: Record<GameStage, string> = {
   intro: "Treino de Atenção",
@@ -19,21 +25,19 @@ const stageTitle: Record<GameStage, string> = {
   result: "Resultado final",
 };
 
-function getTransitionText(
-  currentType: AttentionType,
-  previousType: AttentionType | null,
-): string {
-  if (!previousType || previousType === currentType) {
-    return `Você seguirá no tipo ${formatAttentionType(currentType).toLowerCase()}.`;
-  }
-
-  return `Mudança de foco: de ${formatAttentionType(previousType).toLowerCase()} para ${formatAttentionType(currentType).toLowerCase()}.`;
-}
-
 export function AttentionTrainingGame() {
+  const defaultPlanId =
+    trainingPlans.find((plan) => plan.id === "foco-seletiva")?.id ??
+    trainingPlans[0].id;
   const [stage, setStage] = useState<GameStage>("intro");
-  const [selectedPlanId, setSelectedPlanId] = useState<string>(trainingPlans[0].id);
+  const [selectedPlanId] = useState<string>(defaultPlanId);
+  const [trainingMode, setTrainingMode] = useState<TrainingMode>(null);
+  const [selectedSingleTitle, setSelectedSingleTitle] = useState<string | null>(null);
+  const [introSelection, setIntroSelection] = useState<"initial" | "choose-exercise">(
+    "initial",
+  );
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [cocktailStartLevelOverride, setCocktailStartLevelOverride] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [hits, setHits] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -48,15 +52,24 @@ export function AttentionTrainingGame() {
   );
 
   const currentExercise = selectedPlan.exercises[currentIndex];
-  const previousExercise =
-    currentIndex > 0 ? selectedPlan.exercises[currentIndex - 1] : null;
+  const quizExercises = selectedPlan.exercises.filter(
+    (exercise) => exercise.kind === "quiz",
+  );
   const totalPossible = selectedPlan.exercises.reduce(
     (sum, exercise) => sum + exercise.points,
     0,
   );
+  const quizTotalPossible = quizExercises.reduce(
+    (sum, exercise) => sum + exercise.points,
+    0,
+  );
+
 
   const startPlan = () => {
+    setTrainingMode("sequence");
+    setSelectedSingleTitle(null);
     setCurrentIndex(0);
+    setCocktailStartLevelOverride(null);
     setScore(0);
     setHits(0);
     setSelectedOption(null);
@@ -64,6 +77,24 @@ export function AttentionTrainingGame() {
     setQuizResults([]);
     setShowingQuizResults(false);
     setStage("instructions");
+  };
+
+  const startFromExercise = (
+    exerciseIndex: number,
+    options?: { cocktailStartLevel?: number },
+    startStage: GameStage = "exercise",
+  ) => {
+    setTrainingMode("single");
+    setSelectedSingleTitle(selectedPlan.exercises[exerciseIndex]?.title ?? null);
+    setCurrentIndex(exerciseIndex);
+    setCocktailStartLevelOverride(options?.cocktailStartLevel ?? null);
+    setScore(0);
+    setHits(0);
+    setSelectedOption(null);
+    setSubmitted(false);
+    setQuizResults([]);
+    setShowingQuizResults(false);
+    setStage(startStage);
   };
 
   const submitAnswer = () => {
@@ -89,13 +120,19 @@ export function AttentionTrainingGame() {
     setSelectedOption(null);
     setSubmitted(false);
 
+    const nextExerciseItem = selectedPlan.exercises[nextIndex];
+    const isTransitionFromQuizToNonQuiz =
+      currentExercise?.kind === "quiz" && nextExerciseItem?.kind !== "quiz";
+
+    if (isTransitionFromQuizToNonQuiz) {
+      setCurrentIndex(nextIndex);
+      setShowingQuizResults(true);
+      setStage("instructions");
+      return;
+    }
+
     if (nextIndex >= selectedPlan.exercises.length) {
-      // Check if current exercise was a quiz
-      if (currentExercise?.kind === "quiz") {
-        setShowingQuizResults(true);
-      } else {
-        setStage("result");
-      }
+      setStage("result");
       return;
     }
 
@@ -104,14 +141,30 @@ export function AttentionTrainingGame() {
   };
 
   const restart = () => {
+    setTrainingMode(null);
+    setSelectedSingleTitle(null);
+    setIntroSelection("initial");
     setStage("intro");
     setCurrentIndex(0);
+    setCocktailStartLevelOverride(null);
     setScore(0);
     setHits(0);
     setSelectedOption(null);
     setSubmitted(false);
     setQuizResults([]);
     setShowingQuizResults(false);
+  };
+
+  const confirmReturnToMenu = () => {
+    if (typeof window === "undefined") return false;
+    return window.confirm(
+      "Voltar ao menu inicial? O progresso atual sera perdido.",
+    );
+  };
+
+  const handleReturnToMenu = () => {
+    if (!confirmReturnToMenu()) return;
+    restart();
   };
 
   const downloadQuizResults = () => {
@@ -121,6 +174,14 @@ export function AttentionTrainingGame() {
     lines.push("=" + "=".repeat(60));
     lines.push("");
 
+    if (trainingMode === "sequence") {
+      lines.push("Modo: Trilha percorrida");
+      lines.push("");
+    } else if (trainingMode === "single") {
+      lines.push(`Modo: Jogo individual (${selectedSingleTitle ?? ""})`);
+      lines.push("");
+    }
+
     quizResults.forEach((result, idx) => {
       lines.push(`Fase ${idx + 1}: ${result.correct ? "✓ Acertou" : "✗ Errou"}`);
     });
@@ -128,7 +189,7 @@ export function AttentionTrainingGame() {
     lines.push("");
     lines.push("=".repeat(62));
     lines.push(`Acertos: ${quizResults.filter((r) => r.correct).length}/${quizResults.length}`);
-    lines.push(`Pontuação: ${score}/${totalPossible}`);
+    lines.push(`Pontuação: ${score}/${quizTotalPossible}`);
     lines.push("=".repeat(62));
     lines.push("");
     lines.push(`Data: ${new Date().toLocaleString("pt-BR")}`);
@@ -145,100 +206,113 @@ export function AttentionTrainingGame() {
 
   const continueAfterQuizResults = () => {
     setShowingQuizResults(false);
-    setStage("result");
+    if (currentIndex >= selectedPlan.exercises.length) {
+      setStage("result");
+      return;
+    }
+    setStage("instructions");
   };
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl items-center px-6 py-10">
       <section className="w-full rounded-2xl border border-black/10 bg-white p-6 shadow-sm sm:p-8">
-        <p className="text-sm font-medium text-zinc-500">{stageTitle[stage]}</p>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm font-medium text-zinc-500">{stageTitle[stage]}</p>
+          <button
+            type="button"
+            onClick={handleReturnToMenu}
+            className="rounded-lg border border-zinc-200 px-3 py-1 text-xs font-semibold text-zinc-700 hover:bg-zinc-50"
+          >
+            Voltar ao menu
+          </button>
+        </div>
 
         {stage === "intro" && (
           <div className="mt-4 space-y-6">
             <div className="space-y-2">
               <h1 className="text-3xl font-semibold text-zinc-900">
-                Jogo de Treino de Atenção
+                Treino de Atenção Seletiva
               </h1>
               <p className="text-zinc-600">
-                Treine atenção seletiva, sustentada, dividida e alternada com
-                exercícios curtos, orientações antes de cada etapa e pontuação
-                total ao final.
+                Selecione o tipo de atencao e escolha seguir a sequencia de
+                exercicios ou treinar um exercicio especifico.
               </p>
             </div>
 
             <div className="grid gap-2 text-sm text-zinc-700 sm:grid-cols-2">
               {(Object.keys(attentionTypeDescriptions) as AttentionType[]).map(
                 (type) => {
-                  const isCurrentType = selectedPlan.exercises.length > 0 && selectedPlan.exercises[0].attentionType === type;
+                  const isCurrentType = type === "seletiva";
+                  const isDisabled = type !== "seletiva";
                   return (
                     <div
                       key={type}
                       className={`rounded-lg border p-3 ${
                         isCurrentType
                           ? "border-4 border-blue-500 bg-blue-50"
-                          : "border border-black/10 bg-zinc-50"
+                          : "border border-black/10 bg-zinc-50 opacity-50"
                       }`}
                     >
                       <p className="font-semibold text-zinc-900">
                         {formatAttentionType(type)}
                       </p>
                       <p>{attentionTypeDescriptions[type]}</p>
+                      {isDisabled && (
+                        <p className="mt-2 text-xs text-zinc-500">
+                          Indisponivel no momento
+                        </p>
+                      )}
                     </div>
                   );
                 },
               )}
             </div>
 
-            <div className="space-y-3">
-              <p className="text-sm font-medium text-zinc-700">
-                Escolha o formato do treino:
-              </p>
+            {introSelection === "initial" && (
               <div className="grid gap-3">
-                {trainingPlans.map((plan) => {
-                  const isDisabled = plan.id === "misto";
-                  return (
-                    <label
-                      key={plan.id}
-                      className={`flex items-start gap-3 rounded-lg border p-3 ${
-                        isDisabled
-                          ? "cursor-not-allowed border-black/10 bg-zinc-100 opacity-50"
-                          : "cursor-pointer border-black/10"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="plan"
-                        checked={selectedPlanId === plan.id}
-                        onChange={() => !isDisabled && setSelectedPlanId(plan.id)}
-                        disabled={isDisabled}
-                        className="mt-1"
-                      />
-                      <span>
-                        <span className="block font-semibold text-zinc-900">
-                          {plan.name}
-                        </span>
-                        <span className="block text-sm text-zinc-600">
-                          {plan.description}
-                        </span>
-                        {isDisabled && (
-                          <span className="mt-2 block text-xs text-zinc-500">
-                            Disponível quando mais tipos de atenção forem implementados
-                          </span>
-                        )}
-                      </span>
-                    </label>
-                  );
-                })}
+                <button
+                  type="button"
+                  onClick={startPlan}
+                  className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
+                >
+                  Seguir sequencia de exercicios
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIntroSelection("choose-exercise")}
+                  className="rounded-lg border border-zinc-200 px-4 py-2 font-medium text-zinc-800 hover:bg-zinc-50"
+                >
+                  Escolher exercicio
+                </button>
               </div>
-            </div>
+            )}
 
-            <button
-              type="button"
-              onClick={startPlan}
-              className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
-            >
-              Iniciar treino
-            </button>
+            {introSelection === "choose-exercise" && (
+              <div className="space-y-4">
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {selectedPlan.exercises
+                    .map((exercise, index) => ({ exercise, index }))
+                    .filter(({ exercise }) => exercise.kind !== "quiz")
+                    .map(({ exercise, index }) => (
+                    <button
+                      key={`choose-exercise-${exercise.id}`}
+                      type="button"
+                      onClick={() => startFromExercise(index, undefined, "instructions")}
+                      className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-left text-sm font-medium text-zinc-800 hover:bg-zinc-50"
+                    >
+                      {exercise.title}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIntroSelection("initial")}
+                  className="w-full rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                >
+                  Voltar
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -272,6 +346,26 @@ export function AttentionTrainingGame() {
               ) : currentExercise.kind === "visual-search" ? (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Caça ao Alvo (Visual Search)
+                </h2>
+              ) : currentExercise.kind === "flanker" ? (
+                <h2 className="text-xl font-semibold text-zinc-900">
+                  Flanker de Setas
+                </h2>
+              ) : currentExercise.kind === "cocktail-party" ? (
+                <h2 className="text-xl font-semibold text-zinc-900">
+                  Escuta Seletiva (Cocktail Party)
+                </h2>
+              ) : currentExercise.kind === "filtro-cores-com-som" ? (
+                <h2 className="text-xl font-semibold text-zinc-900">
+                  Filtro de Cores com Som
+                </h2>
+              ) : currentExercise.kind === "go-no-go" ? (
+                <h2 className="text-xl font-semibold text-zinc-900">
+                  Go / No-Go — Clique Rapido
+                </h2>
+              ) : currentExercise.kind === "go-no-go-expandido" ? (
+                <h2 className="text-xl font-semibold text-zinc-900">
+                  Go / No-Go
                 </h2>
               ) : (
                 <h2 className="text-xl font-semibold text-zinc-900">
@@ -354,6 +448,93 @@ export function AttentionTrainingGame() {
                   }
                 }}
               />
+            ) : currentExercise.kind === "flanker" ? (
+              <FlankerSetas
+                basePoints={currentExercise.points}
+                startingLevel={currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= selectedPlan.exercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage("instructions");
+                  }
+                }}
+              />
+            ) : currentExercise.kind === "cocktail-party" ? (
+              <EscutaSeletivaCocktailParty
+                basePoints={currentExercise.points}
+                startingLevel={cocktailStartLevelOverride ?? currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  setCocktailStartLevelOverride(null);
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= selectedPlan.exercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage("instructions");
+                  }
+                }}
+              />
+            ) : currentExercise.kind === "filtro-cores-com-som" ? (
+              <FiltroCoresComSomGame
+                basePoints={currentExercise.points}
+                startingLevel={currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= selectedPlan.exercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage("instructions");
+                  }
+                }}
+              />
+            ) : currentExercise.kind === "go-no-go" ? (
+              <GoNoGoQuickClick />
+            ) : currentExercise.kind === "go-no-go-expandido" ? (
+              <GoNoGoExpandidoGame
+                basePoints={currentExercise.points}
+                startingLevel={currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= selectedPlan.exercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage("instructions");
+                  }
+                }}
+              />
             ) : (
               <StroopInvertido
                 basePoints={currentExercise.points}
@@ -399,10 +580,10 @@ export function AttentionTrainingGame() {
             <div className="rounded-lg border-2 border-zinc-900 bg-white p-4">
               <p className="font-semibold text-zinc-900">Resumo Total</p>
               <div className="mt-2 grid gap-2 text-sm">
-                <p>Fases concluídas: {quizResults.length}/12</p>
+                <p>Fases concluídas: {quizResults.length}/{quizExercises.length}</p>
                 <p>Acertos: {quizResults.filter((r) => r.correct).length}</p>
                 <p>Erros: {quizResults.filter((r) => !r.correct).length}</p>
-                <p>Pontuação: {score}/{totalPossible}</p>
+                <p>Pontuação: {score}/{quizTotalPossible}</p>
               </div>
             </div>
 
@@ -433,8 +614,14 @@ export function AttentionTrainingGame() {
 
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="rounded-lg border border-black/10 bg-zinc-50 p-4">
-                <p className="text-sm text-zinc-500">Plano</p>
-                <p className="font-semibold text-zinc-900">{selectedPlan.name}</p>
+                <p className="text-sm text-zinc-500">Modo</p>
+                <p className="font-semibold text-zinc-900">
+                  {trainingMode === "sequence"
+                    ? "Trilha percorrida"
+                    : trainingMode === "single"
+                      ? `Jogo individual${selectedSingleTitle ? `: ${selectedSingleTitle}` : ""}`
+                      : "-"}
+                </p>
               </div>
               <div className="rounded-lg border border-black/10 bg-zinc-50 p-4">
                 <p className="text-sm text-zinc-500">Acertos</p>

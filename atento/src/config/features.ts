@@ -1,0 +1,5 @@
+export const ENABLE_GONOGO_EXPANDIDO =
+  process.env.NEXT_PUBLIC_ENABLE_GONOGO_EXPANDIDO === "true";
+
+export const ENABLE_COLOR_FILTER_WITH_SOUND =
+  process.env.NEXT_PUBLIC_ENABLE_COLOR_FILTER_WITH_SOUND === "true";

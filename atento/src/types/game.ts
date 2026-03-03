@@ -4,7 +4,15 @@ export type AttentionType =
   | "dividida"
   | "alternada";
 
-export type ExerciseKind = "quiz" | "visual-search" | "stroop";
+export type ExerciseKind =
+  | "quiz"
+  | "visual-search"
+  | "stroop"
+  | "flanker"
+  | "cocktail-party"
+  | "go-no-go"
+  | "go-no-go-expandido"
+  | "filtro-cores-com-som";
 
 type BaseExercise = {
   id: string;
@@ -34,7 +42,45 @@ export type StroopExercise = BaseExercise & {
   maxLevelHint: number;
 };
 
-export type AttentionExercise = QuizExercise | VisualSearchExercise | StroopExercise;
+export type FlankerExercise = BaseExercise & {
+  kind: "flanker";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
+export type CocktailPartyExercise = BaseExercise & {
+  kind: "cocktail-party";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
+export type GoNoGoExpandidoExercise = BaseExercise & {
+  kind: "go-no-go-expandido";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
+export type GoNoGoExercise = BaseExercise & {
+  kind: "go-no-go";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
+export type FiltroCoresComSomExercise = BaseExercise & {
+  kind: "filtro-cores-com-som";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
+export type AttentionExercise =
+  | QuizExercise
+  | VisualSearchExercise
+  | StroopExercise
+  | FlankerExercise
+  | CocktailPartyExercise
+  | GoNoGoExercise
+  | GoNoGoExpandidoExercise
+  | FiltroCoresComSomExercise;
 
 export type TrainingPlan = {
   id: string;
