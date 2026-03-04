@@ -14,7 +14,9 @@ export type ExerciseKind =
   | "go-no-go-expandido"
   | "filtro-cores-com-som"
   | "counting-flow-task"
-  | "long-mazes";
+  | "long-mazes"
+  | "symbol-map"
+  | "symbol-matrix-search";
 
 type BaseExercise = {
   id: string;
@@ -86,6 +88,18 @@ export type LongMazesExercise = BaseExercise & {
   maxLevelHint: number;
 };
 
+export type SymbolMapExercise = BaseExercise & {
+  kind: "symbol-map";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
+export type SymbolMatrixSearchExercise = BaseExercise & {
+  kind: "symbol-matrix-search";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
 export type AttentionExercise =
   | QuizExercise
   | VisualSearchExercise
@@ -96,7 +110,9 @@ export type AttentionExercise =
   | GoNoGoExpandidoExercise
   | FiltroCoresComSomExercise
   | CountingFlowTaskExercise
-  | LongMazesExercise;
+  | LongMazesExercise
+  | SymbolMapExercise
+  | SymbolMatrixSearchExercise;
 
 export type TrainingPlan = {
   id: string;

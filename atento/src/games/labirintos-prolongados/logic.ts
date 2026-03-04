@@ -241,10 +241,21 @@ export function registerVisit(visitedKeys: Set<string>, point: Point): boolean {
   return false;
 }
 
-export function buildSessionLog(result: MazeSessionResult): MazeSessionLog {
+export function buildSessionLog(
+  result: MazeSessionResult,
+  context?: { mode: "single" | "sequence"; scopeLabel: string },
+): MazeSessionLog {
   return {
     ...result,
     dateIso: new Date().toISOString(),
+    ...(context
+      ? {
+          session: {
+            mode: context.mode,
+            scopeLabel: context.scopeLabel,
+          },
+        }
+      : {}),
   };
 }
 

@@ -16,10 +16,17 @@ import { GoNoGoExpandidoGame } from "@/games/go-no-go-expandido/GoNoGoExpandidoG
 import { FiltroCoresComSomGame } from "@/games/filtro-cores-com-som/FiltroCoresComSomGame";
 import { ContagemEstimulosFluxoGame } from "@/games/contagem-estimulos-fluxo/ContagemEstimulosFluxoGame";
 import { LabirintosProlongadosGame } from "@/games/labirintos-prolongados/LabirintosProlongadosGame";
-import { ENABLE_COUNTING_FLOW_TASK, ENABLE_LONG_MAZES } from "@/config/features";
+import { MapaDeSimbolosGame } from "@/games/mapa-de-simbolos/MapaDeSimbolosGame";
+import { BuscaSimbolosMatrizGame } from "@/games/busca-simbolos-matriz/BuscaSimbolosMatrizGame";
 
 type GameStage = "intro" | "instructions" | "exercise" | "result";
 type TrainingMode = "sequence" | "single" | null;
+type SessionMode = "sequence" | "single";
+
+export type ReportContext = {
+  mode: SessionMode;
+  scopeLabel: string;
+};
 
 const stageTitle: Record<GameStage, string> = {
   intro: "Treino de Atenção",
@@ -29,11 +36,26 @@ const stageTitle: Record<GameStage, string> = {
 };
 
 export function AttentionTrainingGame() {
+  const getFocusedPlanByAttentionType = (
+    type: AttentionType,
+  ): TrainingPlan | undefined =>
+    trainingPlans.find((plan) => plan.id === `foco-${type}`);
+
   const getPlanIdByAttentionType = (type: AttentionType): string => {
-    const focusedPlanId = `foco-${type}`;
-    return (
-      trainingPlans.find((plan) => plan.id === focusedPlanId)?.id ??
-      trainingPlans[0].id
+    const focusedPlan = getFocusedPlanByAttentionType(type);
+    if (focusedPlan) return focusedPlan.id;
+    if (type === "seletiva") {
+      return trainingPlans.find((plan) => plan.id === "foco-seletiva")?.id ?? "";
+    }
+    return "";
+  };
+
+  const hasExercisesByAttentionType = (type: AttentionType): boolean => {
+    const focusedPlan = getFocusedPlanByAttentionType(type);
+    return Boolean(
+      focusedPlan?.exercises.some(
+        (exercise) => exercise.attentionType === type && exercise.kind !== "quiz",
+      ),
     );
   };
 
@@ -57,23 +79,37 @@ export function AttentionTrainingGame() {
   const [quizResults, setQuizResults] = useState<Array<{ correct: boolean }>>([]);
   const [showingQuizResults, setShowingQuizResults] = useState(false);
 
+  const fallbackPlanId = getPlanIdByAttentionType("seletiva");
   const selectedPlan: TrainingPlan = useMemo(
     () =>
-      trainingPlans.find((plan) => plan.id === selectedPlanId) ?? trainingPlans[0],
-    [selectedPlanId],
+      trainingPlans.find((plan) => plan.id === selectedPlanId) ??
+      trainingPlans.find((plan) => plan.id === fallbackPlanId) ??
+      trainingPlans[0],
+    [selectedPlanId, fallbackPlanId],
   );
 
-  const currentExercise = selectedPlan.exercises[currentIndex];
+  const sequenceExercises = useMemo(
+    () =>
+      selectedPlan.exercises.filter(
+        (exercise) => exercise.attentionType === selectedAttentionType,
+      ),
+    [selectedPlan.exercises, selectedAttentionType],
+  );
+  const activeExercises = trainingMode === "sequence" ? sequenceExercises : selectedPlan.exercises;
+  const currentExercise = activeExercises[currentIndex];
   const countingFlowExerciseIndex = selectedPlan.exercises.findIndex(
-    (exercise) => exercise.kind === "counting-flow-task",
+    (exercise) =>
+      exercise.kind === "counting-flow-task" &&
+      exercise.attentionType === selectedAttentionType,
   );
   const longMazesExerciseIndex = selectedPlan.exercises.findIndex(
-    (exercise) => exercise.kind === "long-mazes",
+    (exercise) =>
+      exercise.kind === "long-mazes" && exercise.attentionType === selectedAttentionType,
   );
-  const quizExercises = selectedPlan.exercises.filter(
+  const quizExercises = activeExercises.filter(
     (exercise) => exercise.kind === "quiz",
   );
-  const totalPossible = selectedPlan.exercises.reduce(
+  const totalPossible = activeExercises.reduce(
     (sum, exercise) => sum + exercise.points,
     0,
   );
@@ -82,8 +118,30 @@ export function AttentionTrainingGame() {
     0,
   );
 
+  const resolvedSessionMode: SessionMode = trainingMode === "single" ? "single" : "sequence";
+  const reportContext: ReportContext = {
+    mode: resolvedSessionMode,
+    scopeLabel:
+      resolvedSessionMode === "single"
+        ? selectedSingleTitle ?? currentExercise?.title ?? "Jogo individual"
+        : selectedPlan.name,
+  };
+
+  const finalHitsTotal = resolvedSessionMode === "single" ? 1 : activeExercises.length;
+  const finalScoreTotal =
+    resolvedSessionMode === "single"
+      ? (currentExercise?.points ?? 0)
+      : totalPossible;
+
+  const getStageForExercise = (
+    exercise: TrainingPlan["exercises"][number] | undefined,
+  ): GameStage => (exercise?.kind === "symbol-matrix-search" ? "exercise" : "instructions");
+
 
   const startPlan = () => {
+    const focusedPlanId = getPlanIdByAttentionType(selectedAttentionType);
+    if (!focusedPlanId) return;
+    setSelectedPlanId(focusedPlanId);
     setTrainingMode("sequence");
     setSelectedSingleTitle(null);
     setCurrentIndex(0);
@@ -94,7 +152,7 @@ export function AttentionTrainingGame() {
     setSubmitted(false);
     setQuizResults([]);
     setShowingQuizResults(false);
-    setStage("instructions");
+    setStage(getStageForExercise(activeExercises[0]));
   };
 
   const startFromExercise = (
@@ -102,8 +160,17 @@ export function AttentionTrainingGame() {
     options?: { cocktailStartLevel?: number },
     startStage: GameStage = "exercise",
   ) => {
+    const selectedExercise = selectedPlan.exercises[exerciseIndex];
+    if (
+      !selectedExercise ||
+      selectedExercise.kind === "quiz" ||
+      selectedExercise.attentionType !== selectedAttentionType
+    ) {
+      return;
+    }
+
     setTrainingMode("single");
-    setSelectedSingleTitle(selectedPlan.exercises[exerciseIndex]?.title ?? null);
+    setSelectedSingleTitle(selectedExercise.title);
     setCurrentIndex(exerciseIndex);
     setCocktailStartLevelOverride(options?.cocktailStartLevel ?? null);
     setScore(0);
@@ -112,7 +179,9 @@ export function AttentionTrainingGame() {
     setSubmitted(false);
     setQuizResults([]);
     setShowingQuizResults(false);
-    setStage(startStage);
+    setStage(
+      selectedExercise.kind === "symbol-matrix-search" ? "exercise" : startStage,
+    );
   };
 
   const submitAnswer = () => {
@@ -138,24 +207,24 @@ export function AttentionTrainingGame() {
     setSelectedOption(null);
     setSubmitted(false);
 
-    const nextExerciseItem = selectedPlan.exercises[nextIndex];
+    const nextExerciseItem = activeExercises[nextIndex];
     const isTransitionFromQuizToNonQuiz =
       currentExercise?.kind === "quiz" && nextExerciseItem?.kind !== "quiz";
 
     if (isTransitionFromQuizToNonQuiz) {
       setCurrentIndex(nextIndex);
       setShowingQuizResults(true);
-      setStage("instructions");
+      setStage(getStageForExercise(nextExerciseItem));
       return;
     }
 
-    if (nextIndex >= selectedPlan.exercises.length) {
+    if (nextIndex >= activeExercises.length) {
       setStage("result");
       return;
     }
 
     setCurrentIndex(nextIndex);
-    setStage("instructions");
+    setStage(getStageForExercise(nextExerciseItem));
   };
 
   const restart = () => {
@@ -192,6 +261,13 @@ export function AttentionTrainingGame() {
     lines.push("=" + "=".repeat(60));
     lines.push("");
 
+    lines.push(`Escopo: ${
+      reportContext.mode === "sequence"
+        ? `Trilha completa (${reportContext.scopeLabel})`
+        : `Jogo individual (${reportContext.scopeLabel})`
+    }`);
+    lines.push("");
+
     if (trainingMode === "sequence") {
       lines.push("Modo: Trilha percorrida");
       lines.push("");
@@ -224,11 +300,11 @@ export function AttentionTrainingGame() {
 
   const continueAfterQuizResults = () => {
     setShowingQuizResults(false);
-    if (currentIndex >= selectedPlan.exercises.length) {
+    if (currentIndex >= activeExercises.length) {
       setStage("result");
       return;
     }
-    setStage("instructions");
+    setStage(getStageForExercise(activeExercises[currentIndex]));
   };
 
   return (
@@ -261,10 +337,7 @@ export function AttentionTrainingGame() {
               {(Object.keys(attentionTypeDescriptions) as AttentionType[]).map(
                 (type) => {
                   const isCurrentType = type === selectedAttentionType;
-                  const isSustentadaAvailable =
-                    type === "sustentada" &&
-                    (ENABLE_COUNTING_FLOW_TASK || ENABLE_LONG_MAZES);
-                  const isDisabled = type !== "seletiva" && !isSustentadaAvailable;
+                  const isDisabled = type !== "seletiva" && !hasExercisesByAttentionType(type);
                   return (
                     <button
                       key={type}
@@ -272,7 +345,10 @@ export function AttentionTrainingGame() {
                       onClick={() => {
                         if (isDisabled) return;
                         setSelectedAttentionType(type);
-                        setSelectedPlanId(getPlanIdByAttentionType(type));
+                        const planId = getPlanIdByAttentionType(type);
+                        if (planId) {
+                          setSelectedPlanId(planId);
+                        }
                         setIntroSelection("initial");
                       }}
                       disabled={isDisabled}
@@ -345,7 +421,11 @@ export function AttentionTrainingGame() {
                 <div className="grid gap-2 sm:grid-cols-2">
                   {selectedPlan.exercises
                     .map((exercise, index) => ({ exercise, index }))
-                    .filter(({ exercise }) => exercise.kind !== "quiz")
+                    .filter(
+                      ({ exercise }) =>
+                        exercise.kind !== "quiz" &&
+                        exercise.attentionType === selectedAttentionType,
+                    )
                     .map(({ exercise, index }) => (
                     <button
                       key={`choose-exercise-${exercise.id}`}
@@ -420,6 +500,14 @@ export function AttentionTrainingGame() {
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Labirintos Prolongados
                 </h2>
+              ) : currentExercise.kind === "symbol-map" ? (
+                <h2 className="text-xl font-semibold text-zinc-900">
+                  Mapa de Símbolos (Symbol Matching)
+                </h2>
+              ) : currentExercise.kind === "symbol-matrix-search" ? (
+                <h2 className="text-xl font-semibold text-zinc-900">
+                  Busca de Símbolos em Matriz
+                </h2>
               ) : currentExercise.kind === "go-no-go" ? (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Go / No-Go — Clique Rapido
@@ -481,7 +569,7 @@ export function AttentionTrainingGame() {
                       onClick={nextExercise}
                       className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
                     >
-                      {currentIndex + 1 === selectedPlan.exercises.length
+                      {currentIndex + 1 === activeExercises.length
                         ? "Ver resultado"
                         : "Próximo exercício"}
                     </button>
@@ -493,19 +581,20 @@ export function AttentionTrainingGame() {
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);
                   if (success) {
                     setHits((value) => value + 1);
                   }
                   const nextIndex = currentIndex + 1;
-                  if (nextIndex >= selectedPlan.exercises.length) {
+                  if (nextIndex >= activeExercises.length) {
                     setStage("result");
                   } else {
                     setCurrentIndex(nextIndex);
                     setSelectedOption(null);
                     setSubmitted(false);
-                    setStage("instructions");
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
                   }
                 }}
               />
@@ -514,19 +603,20 @@ export function AttentionTrainingGame() {
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);
                   if (success) {
                     setHits((value) => value + 1);
                   }
                   const nextIndex = currentIndex + 1;
-                  if (nextIndex >= selectedPlan.exercises.length) {
+                  if (nextIndex >= activeExercises.length) {
                     setStage("result");
                   } else {
                     setCurrentIndex(nextIndex);
                     setSelectedOption(null);
                     setSubmitted(false);
-                    setStage("instructions");
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
                   }
                 }}
               />
@@ -535,6 +625,7 @@ export function AttentionTrainingGame() {
                 basePoints={currentExercise.points}
                 startingLevel={cocktailStartLevelOverride ?? currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);
                   if (success) {
@@ -542,13 +633,13 @@ export function AttentionTrainingGame() {
                   }
                   setCocktailStartLevelOverride(null);
                   const nextIndex = currentIndex + 1;
-                  if (nextIndex >= selectedPlan.exercises.length) {
+                  if (nextIndex >= activeExercises.length) {
                     setStage("result");
                   } else {
                     setCurrentIndex(nextIndex);
                     setSelectedOption(null);
                     setSubmitted(false);
-                    setStage("instructions");
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
                   }
                 }}
               />
@@ -557,19 +648,20 @@ export function AttentionTrainingGame() {
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);
                   if (success) {
                     setHits((value) => value + 1);
                   }
                   const nextIndex = currentIndex + 1;
-                  if (nextIndex >= selectedPlan.exercises.length) {
+                  if (nextIndex >= activeExercises.length) {
                     setStage("result");
                   } else {
                     setCurrentIndex(nextIndex);
                     setSelectedOption(null);
                     setSubmitted(false);
-                    setStage("instructions");
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
                   }
                 }}
               />
@@ -578,19 +670,20 @@ export function AttentionTrainingGame() {
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);
                   if (success) {
                     setHits((value) => value + 1);
                   }
                   const nextIndex = currentIndex + 1;
-                  if (nextIndex >= selectedPlan.exercises.length) {
+                  if (nextIndex >= activeExercises.length) {
                     setStage("result");
                   } else {
                     setCurrentIndex(nextIndex);
                     setSelectedOption(null);
                     setSubmitted(false);
-                    setStage("instructions");
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
                   }
                 }}
               />
@@ -599,19 +692,64 @@ export function AttentionTrainingGame() {
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);
                   if (success) {
                     setHits((value) => value + 1);
                   }
                   const nextIndex = currentIndex + 1;
-                  if (nextIndex >= selectedPlan.exercises.length) {
+                  if (nextIndex >= activeExercises.length) {
                     setStage("result");
                   } else {
                     setCurrentIndex(nextIndex);
                     setSelectedOption(null);
                     setSubmitted(false);
-                    setStage("instructions");
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
+                  }
+                }}
+              />
+            ) : currentExercise.kind === "symbol-map" ? (
+              <MapaDeSimbolosGame
+                basePoints={currentExercise.points}
+                startingLevel={currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= activeExercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
+                  }
+                }}
+              />
+            ) : currentExercise.kind === "symbol-matrix-search" ? (
+              <BuscaSimbolosMatrizGame
+                basePoints={currentExercise.points}
+                startingLevel={currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= activeExercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
                   }
                 }}
               />
@@ -622,19 +760,20 @@ export function AttentionTrainingGame() {
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);
                   if (success) {
                     setHits((value) => value + 1);
                   }
                   const nextIndex = currentIndex + 1;
-                  if (nextIndex >= selectedPlan.exercises.length) {
+                  if (nextIndex >= activeExercises.length) {
                     setStage("result");
                   } else {
                     setCurrentIndex(nextIndex);
                     setSelectedOption(null);
                     setSubmitted(false);
-                    setStage("instructions");
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
                   }
                 }}
               />
@@ -643,19 +782,20 @@ export function AttentionTrainingGame() {
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);
                   if (success) {
                     setHits((value) => value + 1);
                   }
                   const nextIndex = currentIndex + 1;
-                  if (nextIndex >= selectedPlan.exercises.length) {
+                  if (nextIndex >= activeExercises.length) {
                     setStage("result");
                   } else {
                     setCurrentIndex(nextIndex);
                     setSelectedOption(null);
                     setSubmitted(false);
-                    setStage("instructions");
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
                   }
                 }}
               />
@@ -729,13 +869,13 @@ export function AttentionTrainingGame() {
               <div className="rounded-lg border border-black/10 bg-zinc-50 p-4">
                 <p className="text-sm text-zinc-500">Acertos</p>
                 <p className="font-semibold text-zinc-900">
-                  {hits}/{selectedPlan.exercises.length}
+                  {hits}/{finalHitsTotal}
                 </p>
               </div>
               <div className="rounded-lg border border-black/10 bg-zinc-50 p-4">
                 <p className="text-sm text-zinc-500">Pontuação total</p>
                 <p className="font-semibold text-zinc-900">
-                  {score}/{totalPossible}
+                  {score}/{finalScoreTotal}
                 </p>
               </div>
             </div>

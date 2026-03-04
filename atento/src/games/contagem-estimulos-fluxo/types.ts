@@ -35,6 +35,10 @@ export type CountingFlowResult = {
 
 export type CountingFlowSessionLog = {
   dateIso: string;
+  session?: {
+    mode: "single" | "sequence";
+    scopeLabel: string;
+  };
   levelId: number;
   levelName: string;
   config: {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { ReportContext } from "@/components/AttentionTrainingGame";
 
 type Direction = "left" | "right";
 type TrialType = "congruent" | "incongruent";
@@ -53,6 +54,7 @@ type Props = {
   basePoints: number;
   startingLevel: number;
   maxLevelHint: number;
+  reportContext?: ReportContext;
   onComplete: (result: { success: boolean; pointsEarned: number }) => void;
 };
 
@@ -234,6 +236,7 @@ export function FlankerSetas({
   basePoints,
   startingLevel,
   maxLevelHint,
+  reportContext,
   onComplete,
 }: Props) {
   const [level, setLevel] = useState(startingLevel);
@@ -439,6 +442,16 @@ export function FlankerSetas({
     lines.push("RESULTADO - FLANKER DE SETAS (Atenção Seletiva)");
     lines.push("=" + "=".repeat(60));
     lines.push("");
+    if (reportContext) {
+      lines.push(
+        `Escopo: ${
+          reportContext.mode === "sequence"
+            ? `Trilha completa (${reportContext.scopeLabel})`
+            : `Jogo individual (${reportContext.scopeLabel})`
+        }`,
+      );
+      lines.push("");
+    }
 
     allLevelMetrics.forEach((metric, index) => {
       lines.push(`Nível ${index + 1} (Fase ${metric.phase}):`);

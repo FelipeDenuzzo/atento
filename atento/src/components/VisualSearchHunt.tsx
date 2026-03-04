@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { ReportContext } from "@/components/AttentionTrainingGame";
 
 type Shape = "circle" | "square" | "triangle";
 type Color = "red" | "blue" | "green" | "yellow";
@@ -28,6 +29,7 @@ type Props = {
   basePoints: number;
   startingLevel: number;
   maxLevelHint: number;
+  reportContext?: ReportContext;
   onComplete: (result: { success: boolean; pointsEarned: number }) => void;
 };
 
@@ -150,6 +152,7 @@ export function VisualSearchHunt({
   basePoints,
   startingLevel,
   maxLevelHint,
+  reportContext,
   onComplete,
 }: Props) {
   const [level, setLevel] = useState(startingLevel);
@@ -359,6 +362,16 @@ export function VisualSearchHunt({
     lines.push("RESULTADO - CAÇA AO ALVO (Atenção Seletiva)");
     lines.push("=" + "=".repeat(60));
     lines.push("");
+    if (reportContext) {
+      lines.push(
+        `Escopo: ${
+          reportContext.mode === "sequence"
+            ? `Trilha completa (${reportContext.scopeLabel})`
+            : `Jogo individual (${reportContext.scopeLabel})`
+        }`,
+      );
+      lines.push("");
+    }
     
     allMetrics.forEach((m, idx) => {
       lines.push(`Fase ${idx + 1} (Nível ${m.level}):`);

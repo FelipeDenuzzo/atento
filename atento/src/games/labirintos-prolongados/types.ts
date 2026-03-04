@@ -37,4 +37,8 @@ export type MazeSessionResult = {
 
 export type MazeSessionLog = MazeSessionResult & {
   dateIso: string;
+  session?: {
+    mode: "single" | "sequence";
+    scopeLabel: string;
+  };
 };

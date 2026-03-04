@@ -251,9 +251,18 @@ export function saveBlockLog(log: BlockLog): void {
 export function buildBlockLog(
   level: GoNoGoExpandidoLevelConfig,
   summary: BlockSummary,
+  context?: { mode: "single" | "sequence"; scopeLabel: string },
 ): BlockLog {
   return {
     dateIso: new Date().toISOString(),
+    ...(context
+      ? {
+          session: {
+            mode: context.mode,
+            scopeLabel: context.scopeLabel,
+          },
+        }
+      : {}),
     levelId: level.id,
     levelName: level.name,
     config: {

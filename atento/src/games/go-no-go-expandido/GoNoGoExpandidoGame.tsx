@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { ReportContext } from "@/components/AttentionTrainingGame";
 import {
   buildBlockLog,
   createEmptyMetrics,
@@ -17,6 +18,7 @@ type Props = {
   basePoints: number;
   startingLevel: number;
   maxLevelHint: number;
+  reportContext?: ReportContext;
   onComplete: (result: { success: boolean; pointsEarned: number }) => void;
 };
 
@@ -40,6 +42,7 @@ export function GoNoGoExpandidoGame({
   basePoints,
   startingLevel,
   maxLevelHint,
+  reportContext,
   onComplete,
 }: Props) {
   const levels = useMemo(() => defaultExpandidoLevels(), []);
@@ -198,7 +201,7 @@ export function GoNoGoExpandidoGame({
       if (nextTrialIndex >= trials.length) {
         const summary = summarizeBlock(blockMetrics);
         setLevelSummaries((previous) => [...previous, summary]);
-        saveBlockLog(buildBlockLog(level, summary));
+        saveBlockLog(buildBlockLog(level, summary, reportContext));
         setPhase("level-summary");
         return;
       }
@@ -211,7 +214,7 @@ export function GoNoGoExpandidoGame({
     }, level.itiMs);
 
     return () => window.clearTimeout(timeoutId);
-  }, [phase, trialIndex, trials.length, level, blockMetrics]);
+  }, [phase, trialIndex, trials.length, level, blockMetrics, reportContext]);
 
   function continueAfterLevelSummary() {
     if (canAdvanceLevel) {

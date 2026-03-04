@@ -44,6 +44,10 @@ export type SessionSummary = {
 
 export type SessionLog = {
   dateIso: string;
+  session?: {
+    mode: "single" | "sequence";
+    scopeLabel: string;
+  };
   levelSummaries: LevelSummary[];
   summary: SessionSummary;
 };

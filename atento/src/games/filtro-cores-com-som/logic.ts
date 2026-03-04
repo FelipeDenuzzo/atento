@@ -85,12 +85,23 @@ export function buildSessionSummary(levels: LevelSummary[]): SessionSummary {
   };
 }
 
-export function saveSessionLog(levelSummaries: LevelSummary[]): SessionLog | null {
+export function saveSessionLog(
+  levelSummaries: LevelSummary[],
+  context?: { mode: "single" | "sequence"; scopeLabel: string },
+): SessionLog | null {
   if (typeof window === "undefined") return null;
 
   const summary = buildSessionSummary(levelSummaries);
   const log: SessionLog = {
     dateIso: new Date().toISOString(),
+    ...(context
+      ? {
+          session: {
+            mode: context.mode,
+            scopeLabel: context.scopeLabel,
+          },
+        }
+      : {}),
     levelSummaries,
     summary,
   };

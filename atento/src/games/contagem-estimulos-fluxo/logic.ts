@@ -87,9 +87,18 @@ export function getPerformanceBand(absoluteError: number): string {
 export function buildSessionLog(
   level: CountingFlowLevelConfig,
   result: CountingFlowResult,
+  context?: { mode: "single" | "sequence"; scopeLabel: string },
 ): CountingFlowSessionLog {
   return {
     dateIso: new Date().toISOString(),
+    ...(context
+      ? {
+          session: {
+            mode: context.mode,
+            scopeLabel: context.scopeLabel,
+          },
+        }
+      : {}),
     levelId: level.id,
     levelName: level.name,
     config: {

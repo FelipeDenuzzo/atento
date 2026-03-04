@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { ReportContext } from "@/components/AttentionTrainingGame";
 import { COLOR_HEX, COLOR_LABEL, LEVELS } from "./levels";
 import {
   average,
@@ -17,6 +18,7 @@ type Props = {
   basePoints: number;
   startingLevel: number;
   maxLevelHint: number;
+  reportContext?: ReportContext;
   onComplete: (result: { success: boolean; pointsEarned: number }) => void;
 };
 
@@ -70,6 +72,7 @@ export function FiltroCoresComSomGame({
   basePoints,
   startingLevel,
   maxLevelHint,
+  reportContext,
   onComplete,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -313,7 +316,7 @@ export function FiltroCoresComSomGame({
       setPhase("intro");
       return;
     }
-    saveSessionLog(levelSummaries);
+    saveSessionLog(levelSummaries, reportContext);
     setPhase("session-summary");
   }
 

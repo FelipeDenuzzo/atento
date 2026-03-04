@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { ReportContext } from "@/components/AttentionTrainingGame";
 import { defaultLongMazesLevels } from "./levels";
 import {
   buildResult,
@@ -18,6 +19,7 @@ type Props = {
   basePoints: number;
   startingLevel: number;
   maxLevelHint: number;
+  reportContext?: ReportContext;
   onComplete: (result: { success: boolean; pointsEarned: number }) => void;
 };
 
@@ -41,6 +43,7 @@ export function LabirintosProlongadosGame({
   basePoints,
   startingLevel,
   maxLevelHint,
+  reportContext,
   onComplete,
 }: Props) {
   const levels = useMemo(() => defaultLongMazesLevels(), []);
@@ -83,10 +86,10 @@ export function LabirintosProlongadosGame({
 
       setLevelResult(result);
       setHistory((prev) => [...prev, result]);
-      saveSessionLog(buildSessionLog(result));
+      saveSessionLog(buildSessionLog(result, reportContext));
       setPhase("result");
     },
-    [level, mazeData, revisits, steps],
+    [level, mazeData, reportContext, revisits, steps],
   );
 
   const startLevel = () => {

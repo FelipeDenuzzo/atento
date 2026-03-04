@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { ReportContext } from "@/components/AttentionTrainingGame";
 
 type ColorName = "vermelho" | "azul" | "verde" | "amarelo" | "roxo" | "laranja";
 type TrialType = "congruent" | "incongruent";
@@ -51,6 +52,7 @@ type Props = {
   basePoints: number;
   startingLevel: number;
   maxLevelHint: number;
+  reportContext?: ReportContext;
   onComplete: (result: { success: boolean; pointsEarned: number }) => void;
 };
 
@@ -185,6 +187,7 @@ export function StroopInvertido({
   basePoints,
   startingLevel,
   maxLevelHint,
+  reportContext,
   onComplete,
 }: Props) {
   const [level, setLevel] = useState(startingLevel);
@@ -380,6 +383,16 @@ export function StroopInvertido({
     lines.push("RESULTADO - STROOP INVERTIDO (Atenção Sustentada)");
     lines.push("=" + "=".repeat(60));
     lines.push("");
+    if (reportContext) {
+      lines.push(
+        `Escopo: ${
+          reportContext.mode === "sequence"
+            ? `Trilha completa (${reportContext.scopeLabel})`
+            : `Jogo individual (${reportContext.scopeLabel})`
+        }`,
+      );
+      lines.push("");
+    }
     
     allMetrics.forEach((m, idx) => {
       lines.push(`Nível ${idx + 1}:`);

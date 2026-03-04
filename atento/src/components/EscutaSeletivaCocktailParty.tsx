@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { ReportContext } from "@/components/AttentionTrainingGame";
 
 type Side = "left" | "right";
 type Phase = 1 | 2 | 3;
@@ -68,6 +69,7 @@ type Props = {
   basePoints: number;
   startingLevel: number;
   maxLevelHint: number;
+  reportContext?: ReportContext;
   onComplete: (result: { success: boolean; pointsEarned: number }) => void;
 };
 
@@ -369,6 +371,7 @@ export function EscutaSeletivaCocktailParty({
   basePoints,
   startingLevel,
   maxLevelHint,
+  reportContext,
   onComplete,
 }: Props) {
   const [level, setLevel] = useState(startingLevel);
@@ -681,6 +684,16 @@ export function EscutaSeletivaCocktailParty({
     lines.push("RESULTADO - ESCUTA SELETIVA (COCKTAIL PARTY)");
     lines.push("=" + "=".repeat(60));
     lines.push("");
+    if (reportContext) {
+      lines.push(
+        `Escopo: ${
+          reportContext.mode === "sequence"
+            ? `Trilha completa (${reportContext.scopeLabel})`
+            : `Jogo individual (${reportContext.scopeLabel})`
+        }`,
+      );
+      lines.push("");
+    }
 
     allLevelMetrics.forEach((metric, index) => {
       lines.push(`Nível ${index + 1} (Fase ${metric.phase}):`);

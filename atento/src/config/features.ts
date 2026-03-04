@@ -9,3 +9,9 @@ export const ENABLE_COUNTING_FLOW_TASK =
 
 export const ENABLE_LONG_MAZES =
   process.env.NEXT_PUBLIC_ENABLE_LONG_MAZES === "true";
+
+export const ENABLE_SYMBOL_MAP =
+  process.env.NEXT_PUBLIC_ENABLE_SYMBOL_MAP === "true";
+
+export const ENABLE_MATRIX_SYMBOL_SEARCH =
+  process.env.NEXT_PUBLIC_ENABLE_MATRIX_SYMBOL_SEARCH === "true";

@@ -2,7 +2,9 @@ import { AttentionType, TrainingPlan } from "@/types/game";
 import {
   ENABLE_COLOR_FILTER_WITH_SOUND,
   ENABLE_COUNTING_FLOW_TASK,
+  ENABLE_MATRIX_SYMBOL_SEARCH,
   ENABLE_LONG_MAZES,
+  ENABLE_SYMBOL_MAP,
 } from "@/config/features";
 
 const typeLabel: Record<AttentionType, string> = {
@@ -74,6 +76,21 @@ export const trainingPlans: TrainingPlan[] = [
         correctOptionIndex: 1,
         points: 25,
       },
+      ...(ENABLE_SYMBOL_MAP
+        ? [
+            {
+              id: "mix-5",
+              title: "Mapa de Símbolos (Symbol Matching)",
+              attentionType: "seletiva" as const,
+              kind: "symbol-map" as const,
+              instructions:
+                "Encontre e marque todos os símbolos-alvo na grade o mais rápido possível.",
+              startingLevel: 1,
+              maxLevelHint: 4,
+              points: 30,
+            },
+          ]
+        : []),
     ],
   },
   {
@@ -272,9 +289,24 @@ export const trainingPlans: TrainingPlan[] = [
             },
           ]
         : []),
+      ...(ENABLE_SYMBOL_MAP
+        ? [
+            {
+              id: "sel-20",
+              title: "Mapa de Símbolos (Symbol Matching)",
+              attentionType: "seletiva" as const,
+              kind: "symbol-map" as const,
+              instructions:
+                "Mantenha o símbolo-alvo em mente e marque todas as ocorrências na grade.",
+              startingLevel: 1,
+              maxLevelHint: 4,
+              points: 30,
+            },
+          ]
+        : []),
     ],
   },
-  ...(ENABLE_COUNTING_FLOW_TASK || ENABLE_LONG_MAZES
+  ...(ENABLE_COUNTING_FLOW_TASK || ENABLE_LONG_MAZES || ENABLE_MATRIX_SYMBOL_SEARCH
     ? [
         {
           id: "foco-sustentada",
@@ -304,6 +336,21 @@ export const trainingPlans: TrainingPlan[] = [
                       "Navegue do início ao fim sem perder o foco no percurso, mantendo atenção contínua por tempo prolongado.",
                     startingLevel: 1,
                     maxLevelHint: 4,
+                    points: 30,
+                  },
+                ]
+              : []),
+            ...(ENABLE_MATRIX_SYMBOL_SEARCH
+              ? [
+                  {
+                    id: "sust-3",
+                    title: "Busca de Símbolos em Matriz",
+                    attentionType: "sustentada" as const,
+                    kind: "symbol-matrix-search" as const,
+                    instructions:
+                      "Marque todos os alvos na matriz por varredura sistemática, mantendo atenção contínua durante toda a tarefa.",
+                    startingLevel: 1,
+                    maxLevelHint: 1,
                     points: 30,
                   },
                 ]

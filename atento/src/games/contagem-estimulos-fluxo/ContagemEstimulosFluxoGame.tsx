@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { ReportContext } from "@/components/AttentionTrainingGame";
 import { defaultCountingFlowLevels } from "./levels";
 import {
   buildSessionLog,
@@ -16,6 +17,7 @@ type Props = {
   basePoints: number;
   startingLevel: number;
   maxLevelHint: number;
+  reportContext?: ReportContext;
   onComplete: (result: { success: boolean; pointsEarned: number }) => void;
 };
 
@@ -49,6 +51,7 @@ export function ContagemEstimulosFluxoGame({
   basePoints,
   startingLevel,
   maxLevelHint,
+  reportContext,
   onComplete,
 }: Props) {
   const levels = useMemo(() => defaultCountingFlowLevels(), []);
@@ -126,7 +129,7 @@ export function ContagemEstimulosFluxoGame({
     setLevelResult(result);
     setHistory((prev) => [...prev, result]);
 
-    const log = buildSessionLog(level, result);
+    const log = buildSessionLog(level, result, reportContext);
     saveSessionLog(log);
 
     setPhase("result");
