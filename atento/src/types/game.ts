@@ -12,7 +12,9 @@ export type ExerciseKind =
   | "cocktail-party"
   | "go-no-go"
   | "go-no-go-expandido"
-  | "filtro-cores-com-som";
+  | "filtro-cores-com-som"
+  | "counting-flow-task"
+  | "long-mazes";
 
 type BaseExercise = {
   id: string;
@@ -72,6 +74,18 @@ export type FiltroCoresComSomExercise = BaseExercise & {
   maxLevelHint: number;
 };
 
+export type CountingFlowTaskExercise = BaseExercise & {
+  kind: "counting-flow-task";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
+export type LongMazesExercise = BaseExercise & {
+  kind: "long-mazes";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
 export type AttentionExercise =
   | QuizExercise
   | VisualSearchExercise
@@ -80,7 +94,9 @@ export type AttentionExercise =
   | CocktailPartyExercise
   | GoNoGoExercise
   | GoNoGoExpandidoExercise
-  | FiltroCoresComSomExercise;
+  | FiltroCoresComSomExercise
+  | CountingFlowTaskExercise
+  | LongMazesExercise;
 
 export type TrainingPlan = {
   id: string;

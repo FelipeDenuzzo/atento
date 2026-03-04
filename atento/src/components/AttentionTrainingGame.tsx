@@ -14,6 +14,9 @@ import { EscutaSeletivaCocktailParty } from "@/components/EscutaSeletivaCocktail
 import { GoNoGoQuickClick } from "@/components/GoNoGoQuickClick";
 import { GoNoGoExpandidoGame } from "@/games/go-no-go-expandido/GoNoGoExpandidoGame";
 import { FiltroCoresComSomGame } from "@/games/filtro-cores-com-som/FiltroCoresComSomGame";
+import { ContagemEstimulosFluxoGame } from "@/games/contagem-estimulos-fluxo/ContagemEstimulosFluxoGame";
+import { LabirintosProlongadosGame } from "@/games/labirintos-prolongados/LabirintosProlongadosGame";
+import { ENABLE_COUNTING_FLOW_TASK, ENABLE_LONG_MAZES } from "@/config/features";
 
 type GameStage = "intro" | "instructions" | "exercise" | "result";
 type TrainingMode = "sequence" | "single" | null;
@@ -26,11 +29,20 @@ const stageTitle: Record<GameStage, string> = {
 };
 
 export function AttentionTrainingGame() {
-  const defaultPlanId =
-    trainingPlans.find((plan) => plan.id === "foco-seletiva")?.id ??
-    trainingPlans[0].id;
+  const getPlanIdByAttentionType = (type: AttentionType): string => {
+    const focusedPlanId = `foco-${type}`;
+    return (
+      trainingPlans.find((plan) => plan.id === focusedPlanId)?.id ??
+      trainingPlans[0].id
+    );
+  };
+
+  const [selectedAttentionType, setSelectedAttentionType] = useState<AttentionType>(
+    "seletiva",
+  );
+  const defaultPlanId = getPlanIdByAttentionType("seletiva");
   const [stage, setStage] = useState<GameStage>("intro");
-  const [selectedPlanId] = useState<string>(defaultPlanId);
+  const [selectedPlanId, setSelectedPlanId] = useState<string>(defaultPlanId);
   const [trainingMode, setTrainingMode] = useState<TrainingMode>(null);
   const [selectedSingleTitle, setSelectedSingleTitle] = useState<string | null>(null);
   const [introSelection, setIntroSelection] = useState<"initial" | "choose-exercise">(
@@ -52,6 +64,12 @@ export function AttentionTrainingGame() {
   );
 
   const currentExercise = selectedPlan.exercises[currentIndex];
+  const countingFlowExerciseIndex = selectedPlan.exercises.findIndex(
+    (exercise) => exercise.kind === "counting-flow-task",
+  );
+  const longMazesExerciseIndex = selectedPlan.exercises.findIndex(
+    (exercise) => exercise.kind === "long-mazes",
+  );
   const quizExercises = selectedPlan.exercises.filter(
     (exercise) => exercise.kind === "quiz",
   );
@@ -231,7 +249,7 @@ export function AttentionTrainingGame() {
           <div className="mt-4 space-y-6">
             <div className="space-y-2">
               <h1 className="text-3xl font-semibold text-zinc-900">
-                Treino de Atenção Seletiva
+                Treino de {formatAttentionType(selectedAttentionType)}
               </h1>
               <p className="text-zinc-600">
                 Selecione o tipo de atencao e escolha seguir a sequencia de
@@ -242,11 +260,22 @@ export function AttentionTrainingGame() {
             <div className="grid gap-2 text-sm text-zinc-700 sm:grid-cols-2">
               {(Object.keys(attentionTypeDescriptions) as AttentionType[]).map(
                 (type) => {
-                  const isCurrentType = type === "seletiva";
-                  const isDisabled = type !== "seletiva";
+                  const isCurrentType = type === selectedAttentionType;
+                  const isSustentadaAvailable =
+                    type === "sustentada" &&
+                    (ENABLE_COUNTING_FLOW_TASK || ENABLE_LONG_MAZES);
+                  const isDisabled = type !== "seletiva" && !isSustentadaAvailable;
                   return (
-                    <div
+                    <button
                       key={type}
+                      type="button"
+                      onClick={() => {
+                        if (isDisabled) return;
+                        setSelectedAttentionType(type);
+                        setSelectedPlanId(getPlanIdByAttentionType(type));
+                        setIntroSelection("initial");
+                      }}
+                      disabled={isDisabled}
                       className={`rounded-lg border p-3 ${
                         isCurrentType
                           ? "border-4 border-blue-500 bg-blue-50"
@@ -262,7 +291,7 @@ export function AttentionTrainingGame() {
                           Indisponivel no momento
                         </p>
                       )}
-                    </div>
+                    </button>
                   );
                 },
               )}
@@ -284,6 +313,30 @@ export function AttentionTrainingGame() {
                 >
                   Escolher exercicio
                 </button>
+                {selectedAttentionType === "sustentada" &&
+                  countingFlowExerciseIndex >= 0 && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      startFromExercise(countingFlowExerciseIndex, undefined, "instructions")
+                    }
+                    className="rounded-lg border border-amber-300 bg-amber-100 px-4 py-2 font-medium text-amber-900 hover:bg-amber-200"
+                  >
+                    Teste rápido: Contagem de Estímulos em Fluxo
+                  </button>
+                )}
+                {selectedAttentionType === "sustentada" &&
+                  longMazesExerciseIndex >= 0 && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      startFromExercise(longMazesExerciseIndex, undefined, "instructions")
+                    }
+                    className="rounded-lg border border-emerald-300 bg-emerald-100 px-4 py-2 font-medium text-emerald-900 hover:bg-emerald-200"
+                  >
+                    Teste rápido: Labirintos Prolongados
+                  </button>
+                )}
               </div>
             )}
 
@@ -358,6 +411,14 @@ export function AttentionTrainingGame() {
               ) : currentExercise.kind === "filtro-cores-com-som" ? (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Filtro de Cores com Som
+                </h2>
+              ) : currentExercise.kind === "counting-flow-task" ? (
+                <h2 className="text-xl font-semibold text-zinc-900">
+                  Contagem de Estímulos em Fluxo
+                </h2>
+              ) : currentExercise.kind === "long-mazes" ? (
+                <h2 className="text-xl font-semibold text-zinc-900">
+                  Labirintos Prolongados
                 </h2>
               ) : currentExercise.kind === "go-no-go" ? (
                 <h2 className="text-xl font-semibold text-zinc-900">
@@ -493,6 +554,48 @@ export function AttentionTrainingGame() {
               />
             ) : currentExercise.kind === "filtro-cores-com-som" ? (
               <FiltroCoresComSomGame
+                basePoints={currentExercise.points}
+                startingLevel={currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= selectedPlan.exercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage("instructions");
+                  }
+                }}
+              />
+            ) : currentExercise.kind === "counting-flow-task" ? (
+              <ContagemEstimulosFluxoGame
+                basePoints={currentExercise.points}
+                startingLevel={currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= selectedPlan.exercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage("instructions");
+                  }
+                }}
+              />
+            ) : currentExercise.kind === "long-mazes" ? (
+              <LabirintosProlongadosGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}

@@ -1,5 +1,9 @@
 import { AttentionType, TrainingPlan } from "@/types/game";
-import { ENABLE_COLOR_FILTER_WITH_SOUND } from "@/config/features";
+import {
+  ENABLE_COLOR_FILTER_WITH_SOUND,
+  ENABLE_COUNTING_FLOW_TASK,
+  ENABLE_LONG_MAZES,
+} from "@/config/features";
 
 const typeLabel: Record<AttentionType, string> = {
   seletiva: "Atenção seletiva",
@@ -243,17 +247,6 @@ export const trainingPlans: TrainingPlan[] = [
         points: 30,
       },
       {
-        id: "sel-17",
-        title: "Go / No-Go — Clique Rapido",
-        attentionType: "seletiva",
-        kind: "go-no-go",
-        instructions:
-          "Clique rapidamente nas frutas e nao clique nos distratores.",
-        startingLevel: 1,
-        maxLevelHint: 4,
-        points: 30,
-      },
-      {
         id: "sel-18",
         title: "Go / No-Go",
         attentionType: "seletiva",
@@ -281,6 +274,44 @@ export const trainingPlans: TrainingPlan[] = [
         : []),
     ],
   },
+  ...(ENABLE_COUNTING_FLOW_TASK || ENABLE_LONG_MAZES
+    ? [
+        {
+          id: "foco-sustentada",
+          name: "Sequência focada",
+          description:
+            "Exercícios dedicados de atenção sustentada para manter foco contínuo em tarefas prolongadas.",
+          exercises: [
+            {
+              id: "sust-1",
+              title: "Contagem de Estímulos em Fluxo",
+              attentionType: "sustentada" as const,
+              kind: "counting-flow-task" as const,
+              instructions:
+                "Conte mentalmente quantas vezes o alvo aparece. Não clique durante a sequência; responda apenas ao final.",
+              startingLevel: 1,
+              maxLevelHint: 3,
+              points: 30,
+            },
+            ...(ENABLE_LONG_MAZES
+              ? [
+                  {
+                    id: "sust-2",
+                    title: "Labirintos Prolongados",
+                    attentionType: "sustentada" as const,
+                    kind: "long-mazes" as const,
+                    instructions:
+                      "Navegue do início ao fim sem perder o foco no percurso, mantendo atenção contínua por tempo prolongado.",
+                    startingLevel: 1,
+                    maxLevelHint: 4,
+                    points: 30,
+                  },
+                ]
+              : []),
+          ],
+        },
+      ]
+    : []),
 ];
 
 export const formatAttentionType = (type: AttentionType): string =>

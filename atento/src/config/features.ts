@@ -3,3 +3,9 @@ export const ENABLE_GONOGO_EXPANDIDO =
 
 export const ENABLE_COLOR_FILTER_WITH_SOUND =
   process.env.NEXT_PUBLIC_ENABLE_COLOR_FILTER_WITH_SOUND === "true";
+
+export const ENABLE_COUNTING_FLOW_TASK =
+  process.env.NEXT_PUBLIC_ENABLE_COUNTING_FLOW_TASK === "true";
+
+export const ENABLE_LONG_MAZES =
+  process.env.NEXT_PUBLIC_ENABLE_LONG_MAZES === "true";
