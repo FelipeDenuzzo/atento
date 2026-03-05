@@ -3,6 +3,7 @@ import {
   ENABLE_COLOR_FILTER_WITH_SOUND,
   ENABLE_COUNTING_FLOW_TASK,
   ENABLE_MATRIX_SYMBOL_SEARCH,
+  ENABLE_FIND_MISSING_ITEM,
   ENABLE_LONG_MAZES,
   ENABLE_SYMBOL_MAP,
 } from "@/config/features";
@@ -306,7 +307,10 @@ export const trainingPlans: TrainingPlan[] = [
         : []),
     ],
   },
-  ...(ENABLE_COUNTING_FLOW_TASK || ENABLE_LONG_MAZES || ENABLE_MATRIX_SYMBOL_SEARCH
+  ...(ENABLE_COUNTING_FLOW_TASK ||
+  ENABLE_LONG_MAZES ||
+  ENABLE_MATRIX_SYMBOL_SEARCH ||
+  ENABLE_FIND_MISSING_ITEM
     ? [
         {
           id: "foco-sustentada",
@@ -349,6 +353,21 @@ export const trainingPlans: TrainingPlan[] = [
                     kind: "symbol-matrix-search" as const,
                     instructions:
                       "Marque todos os alvos na matriz por varredura sistemática, mantendo atenção contínua durante toda a tarefa.",
+                    startingLevel: 1,
+                    maxLevelHint: 1,
+                    points: 30,
+                  },
+                ]
+              : []),
+            ...(ENABLE_FIND_MISSING_ITEM
+              ? [
+                  {
+                    id: "sust-4",
+                    title: "Achar o Faltando",
+                    attentionType: "sustentada" as const,
+                    kind: "find-missing-item" as const,
+                    instructions:
+                      "Compare duas grades quase iguais e encontre o item faltando ou extra, mantendo varredura visual contínua.",
                     startingLevel: 1,
                     maxLevelHint: 1,
                     points: 30,

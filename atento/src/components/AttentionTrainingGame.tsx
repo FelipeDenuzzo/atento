@@ -18,6 +18,7 @@ import { ContagemEstimulosFluxoGame } from "@/games/contagem-estimulos-fluxo/Con
 import { LabirintosProlongadosGame } from "@/games/labirintos-prolongados/LabirintosProlongadosGame";
 import { MapaDeSimbolosGame } from "@/games/mapa-de-simbolos/MapaDeSimbolosGame";
 import { BuscaSimbolosMatrizGame } from "@/games/busca-simbolos-matriz/BuscaSimbolosMatrizGame";
+import { AcharOFaltandoGame } from "@/games/achar-o-faltando/AcharOFaltandoGame";
 
 type GameStage = "intro" | "instructions" | "exercise" | "result";
 type TrainingMode = "sequence" | "single" | null;
@@ -135,7 +136,10 @@ export function AttentionTrainingGame() {
 
   const getStageForExercise = (
     exercise: TrainingPlan["exercises"][number] | undefined,
-  ): GameStage => (exercise?.kind === "symbol-matrix-search" ? "exercise" : "instructions");
+  ): GameStage =>
+    exercise?.kind === "symbol-matrix-search" || exercise?.kind === "find-missing-item"
+      ? "exercise"
+      : "instructions";
 
 
   const startPlan = () => {
@@ -180,7 +184,10 @@ export function AttentionTrainingGame() {
     setQuizResults([]);
     setShowingQuizResults(false);
     setStage(
-      selectedExercise.kind === "symbol-matrix-search" ? "exercise" : startStage,
+      selectedExercise.kind === "symbol-matrix-search" ||
+        selectedExercise.kind === "find-missing-item"
+        ? "exercise"
+        : startStage,
     );
   };
 
@@ -733,6 +740,28 @@ export function AttentionTrainingGame() {
               />
             ) : currentExercise.kind === "symbol-matrix-search" ? (
               <BuscaSimbolosMatrizGame
+                basePoints={currentExercise.points}
+                startingLevel={currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= activeExercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
+                  }
+                }}
+              />
+            ) : currentExercise.kind === "find-missing-item" ? (
+              <AcharOFaltandoGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}

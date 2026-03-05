@@ -15,3 +15,6 @@ export const ENABLE_SYMBOL_MAP =
 
 export const ENABLE_MATRIX_SYMBOL_SEARCH =
   process.env.NEXT_PUBLIC_ENABLE_MATRIX_SYMBOL_SEARCH === "true";
+
+export const ENABLE_FIND_MISSING_ITEM =
+  process.env.NEXT_PUBLIC_ENABLE_FIND_MISSING_ITEM === "true";

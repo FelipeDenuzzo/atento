@@ -16,7 +16,8 @@ export type ExerciseKind =
   | "counting-flow-task"
   | "long-mazes"
   | "symbol-map"
-  | "symbol-matrix-search";
+  | "symbol-matrix-search"
+  | "find-missing-item";
 
 type BaseExercise = {
   id: string;
@@ -100,6 +101,12 @@ export type SymbolMatrixSearchExercise = BaseExercise & {
   maxLevelHint: number;
 };
 
+export type FindMissingItemExercise = BaseExercise & {
+  kind: "find-missing-item";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
 export type AttentionExercise =
   | QuizExercise
   | VisualSearchExercise
@@ -112,7 +119,8 @@ export type AttentionExercise =
   | CountingFlowTaskExercise
   | LongMazesExercise
   | SymbolMapExercise
-  | SymbolMatrixSearchExercise;
+  | SymbolMatrixSearchExercise
+  | FindMissingItemExercise;
 
 export type TrainingPlan = {
   id: string;
