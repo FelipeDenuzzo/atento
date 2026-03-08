@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ReportContext } from "@/components/AttentionTrainingGame";
+import { buildTxtReportFileName } from "@/utils/reportFileName";
 
 type ColorName = "vermelho" | "azul" | "verde" | "amarelo" | "roxo" | "laranja";
 type TrialType = "congruent" | "incongruent";
@@ -428,7 +429,11 @@ export function StroopInvertido({
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `atento_stroop_invertido_${new Date().toISOString().split("T")[0]}.txt`;
+    a.download = buildTxtReportFileName({
+      mode: reportContext?.mode ?? "single",
+      attentionTypeLabel: reportContext?.attentionTypeLabel,
+      participantName: reportContext?.participantName,
+    });
     a.click();
     URL.revokeObjectURL(url);
   };

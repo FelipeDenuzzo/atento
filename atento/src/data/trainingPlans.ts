@@ -2,6 +2,18 @@ import { AttentionType, TrainingPlan } from "@/types/game";
 import {
   ENABLE_COLOR_FILTER_WITH_SOUND,
   ENABLE_COUNTING_FLOW_TASK,
+  ENABLE_COPY_MATRICES,
+  ENABLE_CHAT_ERROR_VIGILANCE,
+  ENABLE_DRIVE_SIGNS,
+  ENABLE_DRIVE_WORD_TARGET,
+  ENABLE_SYMBOL_MAP_SOUND_MONITOR,
+  ENABLE_RAPID_CLASSIFICATION_MEMORY,
+  ENABLE_COLOR_SHAPE_SWITCH,
+  ENABLE_POSITION_RULE_SWITCH,
+  ENABLE_REVERSAL_GO_NOGO_SWITCH,
+  ENABLE_TRILHA_ALTERNADA_TMTB,
+  ENABLE_LONG_WORD_SEARCH,
+  ENABLE_RADAR_TONE,
   ENABLE_MATRIX_SYMBOL_SEARCH,
   ENABLE_FIND_MISSING_ITEM,
   ENABLE_LONG_MAZES,
@@ -310,7 +322,9 @@ export const trainingPlans: TrainingPlan[] = [
   ...(ENABLE_COUNTING_FLOW_TASK ||
   ENABLE_LONG_MAZES ||
   ENABLE_MATRIX_SYMBOL_SEARCH ||
-  ENABLE_FIND_MISSING_ITEM
+  ENABLE_FIND_MISSING_ITEM ||
+  ENABLE_COPY_MATRICES ||
+  ENABLE_LONG_WORD_SEARCH
     ? [
         {
           id: "foco-sustentada",
@@ -368,6 +382,210 @@ export const trainingPlans: TrainingPlan[] = [
                     kind: "find-missing-item" as const,
                     instructions:
                       "Compare duas grades quase iguais e encontre o item faltando ou extra, mantendo varredura visual contínua.",
+                    startingLevel: 1,
+                    maxLevelHint: 1,
+                    points: 30,
+                  },
+                ]
+              : []),
+            ...(ENABLE_COPY_MATRICES
+              ? [
+                  {
+                    id: "sust-5",
+                    title: "Cópia de Matrizes",
+                    attentionType: "sustentada" as const,
+                    kind: "copy-matrices" as const,
+                    instructions:
+                      "Copie a matriz modelo com precisão e constância, mantendo foco contínuo durante toda a rodada.",
+                    startingLevel: 1,
+                    maxLevelHint: 1,
+                    points: 30,
+                  },
+                ]
+              : []),
+            ...(ENABLE_LONG_WORD_SEARCH
+              ? [
+                  {
+                    id: "sust-6",
+                    title: "Caça-Palavras Longos",
+                    attentionType: "sustentada" as const,
+                    kind: "long-word-search" as const,
+                    instructions:
+                      "Encontre palavras longas em grades progressivamente maiores mantendo foco contínuo e precisão até o final.",
+                    startingLevel: 1,
+                    maxLevelHint: 1,
+                    points: 30,
+                  },
+                ]
+              : []),
+          ],
+        },
+      ]
+    : []),
+  ...(ENABLE_RADAR_TONE || ENABLE_DRIVE_SIGNS || ENABLE_DRIVE_WORD_TARGET || ENABLE_CHAT_ERROR_VIGILANCE || ENABLE_SYMBOL_MAP_SOUND_MONITOR || ENABLE_RAPID_CLASSIFICATION_MEMORY
+    ? [
+        {
+          id: "foco-dividida",
+          name: "Sequência focada",
+          description:
+            "Exercícios dedicados de atenção dividida para sustentar desempenho simultâneo em duas tarefas.",
+          exercises: [
+            ...(ENABLE_RADAR_TONE
+              ? [
+                  {
+                    id: "div-1",
+                    title: "Radar + Tono",
+                    attentionType: "dividida" as const,
+                    kind: "radar-tone" as const,
+                    instructions:
+                      "Mantenha o cursor sobre o ponto móvel enquanto responde tons graves/agudos com teclas diferentes.",
+                    startingLevel: 1,
+                    maxLevelHint: 1,
+                    points: 30,
+                  },
+                ]
+              : []),
+            ...(ENABLE_DRIVE_SIGNS
+              ? [
+                  {
+                    id: "div-2",
+                    title: "Dirija + Placas",
+                    attentionType: "dividida" as const,
+                    kind: "drive-signs" as const,
+                    instructions:
+                      "Mantenha o carro na faixa enquanto responde apenas à placa-alvo indicada em cada fase.",
+                    startingLevel: 1,
+                    maxLevelHint: 1,
+                    points: 30,
+                  },
+                ]
+              : []),
+            ...(ENABLE_DRIVE_WORD_TARGET
+              ? [
+                  {
+                    id: "div-3",
+                    title: "Dirija + Palavras-Alvo",
+                    attentionType: "dividida" as const,
+                    kind: "drive-word-target" as const,
+                    instructions:
+                      "Mantenha o marcador na faixa e pressione espaço apenas quando a palavra-alvo estiver visível.",
+                    startingLevel: 1,
+                    maxLevelHint: 1,
+                    points: 30,
+                  },
+                ]
+              : []),
+            ...(ENABLE_CHAT_ERROR_VIGILANCE
+              ? [
+                  {
+                    id: "div-4",
+                    title: "Chat + Vigilância de Erros",
+                    attentionType: "dividida" as const,
+                    kind: "chat-error-vigilance" as const,
+                    instructions:
+                      "Responda mensagens do chat enquanto detecta anomalias visuais no fundo com a tecla espaço.",
+                    startingLevel: 1,
+                    maxLevelHint: 1,
+                    points: 30,
+                  },
+                ]
+              : []),
+            ...(ENABLE_SYMBOL_MAP_SOUND_MONITOR
+              ? [
+                  {
+                    id: "div-5",
+                    title: "Mapa de Símbolos + Monitor de Som",
+                    attentionType: "dividida" as const,
+                    kind: "symbol-map-sound-monitor" as const,
+                    instructions:
+                      "Clique rapidamente no símbolo-alvo correto enquanto monitora glitches sonoros com a tecla espaço.",
+                    startingLevel: 1,
+                    maxLevelHint: 1,
+                    points: 30,
+                  },
+                ]
+              : []),
+            ...(ENABLE_RAPID_CLASSIFICATION_MEMORY
+              ? [
+                  {
+                    id: "div-6",
+                    title: "Classificação Rápida + Memória Atualizável",
+                    attentionType: "dividida" as const,
+                    kind: "rapid-classification-updatable-memory" as const,
+                    instructions:
+                      "Classifique rapidamente cada estímulo enquanto atualiza memória ativa para responder checagens pontuais.",
+                    startingLevel: 1,
+                    maxLevelHint: 1,
+                    points: 30,
+                  },
+                ]
+              : []),
+          ],
+        },
+      ]
+    : []),
+  ...(ENABLE_COLOR_SHAPE_SWITCH || ENABLE_POSITION_RULE_SWITCH || ENABLE_REVERSAL_GO_NOGO_SWITCH || ENABLE_TRILHA_ALTERNADA_TMTB
+    ? [
+        {
+          id: "foco-alternada",
+          name: "Sequência focada",
+          description:
+            "Exercícios dedicados de atenção alternada para alternar regras por contexto e posição.",
+          exercises: [
+            ...(ENABLE_COLOR_SHAPE_SWITCH
+              ? [
+                  {
+                    id: "alt-1",
+                    title: "Cor-ou-Forma (Color/Shape Switch)",
+                    attentionType: "alternada" as const,
+                    kind: "color-shape-switch" as const,
+                    instructions:
+                      "Use o cue de fundo para alternar rapidamente entre responder à cor ou à forma do estímulo.",
+                    startingLevel: 1,
+                    maxLevelHint: 1,
+                    points: 30,
+                  },
+                ]
+              : []),
+            ...(ENABLE_POSITION_RULE_SWITCH
+              ? [
+                  {
+                    id: "alt-2",
+                    title: "Topo/Baixo — Position-Rule Switch",
+                    attentionType: "alternada" as const,
+                    kind: "top-bottom-position-rule-switch" as const,
+                    instructions:
+                      "Estímulo no topo ativa Regra A; estímulo embaixo ativa Regra B. Alterne rapidamente entre regras.",
+                    startingLevel: 1,
+                    maxLevelHint: 1,
+                    points: 30,
+                  },
+                ]
+              : []),
+            ...(ENABLE_REVERSAL_GO_NOGO_SWITCH
+              ? [
+                  {
+                    id: "alt-3",
+                    title: "Reversal Go/No-Go Switch",
+                    attentionType: "alternada" as const,
+                    kind: "reversal-go-nogo-switch" as const,
+                    instructions:
+                      "Cue NORMAL ou INVERTIDO define se a estrela exige clique ou inibição. Alterne rapidamente entre regras.",
+                    startingLevel: 1,
+                    maxLevelHint: 1,
+                    points: 30,
+                  },
+                ]
+              : []),
+            ...(ENABLE_TRILHA_ALTERNADA_TMTB
+              ? [
+                  {
+                    id: "alt-4",
+                    title: "Trilha Alternada 1-A-2-B (TMT-B)",
+                    attentionType: "alternada" as const,
+                    kind: "trilha-alternada-tmtb" as const,
+                    instructions:
+                      "Conecte círculos na ordem alternada 1-A-2-B... o mais rápido e corretamente possível.",
                     startingLevel: 1,
                     maxLevelHint: 1,
                     points: 30,

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ReportContext } from "@/components/AttentionTrainingGame";
+import { buildTxtReportFileName } from "@/utils/reportFileName";
 
 type Side = "left" | "right";
 type Phase = 1 | 2 | 3;
@@ -737,7 +738,11 @@ export function EscutaSeletivaCocktailParty({
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `atento_escuta_seletiva_${new Date().toISOString().split("T")[0]}.txt`;
+    link.download = buildTxtReportFileName({
+      mode: reportContext?.mode ?? "single",
+      attentionTypeLabel: reportContext?.attentionTypeLabel,
+      participantName: reportContext?.participantName,
+    });
     link.click();
     URL.revokeObjectURL(url);
   };

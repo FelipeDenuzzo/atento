@@ -19,6 +19,19 @@ import { LabirintosProlongadosGame } from "@/games/labirintos-prolongados/Labiri
 import { MapaDeSimbolosGame } from "@/games/mapa-de-simbolos/MapaDeSimbolosGame";
 import { BuscaSimbolosMatrizGame } from "@/games/busca-simbolos-matriz/BuscaSimbolosMatrizGame";
 import { AcharOFaltandoGame } from "@/games/achar-o-faltando/AcharOFaltandoGame";
+import { CopiaMatrizesGame } from "@/games/copia-matrizes/CopiaMatrizesGame";
+import { CacaPalavrasLongosGame } from "@/games/caca-palavras-longos/CacaPalavrasLongosGame";
+import { RadarTonoGame } from "@/games/radar-tono/RadarTonoGame";
+import { DirijaPlacasGame } from "@/games/dirija-placas/DirijaPlacasGame";
+import { DirijaPalavrasAlvoGame } from "@/games/dirija-palavras-alvo/DirijaPalavrasAlvoGame";
+import { ChatVigilanciaErrosGame } from "@/games/chat-vigilancia-erros/ChatVigilanciaErrosGame";
+import { MapaSimbolosMonitorSomGame } from "@/games/mapa-simbolos-monitor-som/MapaSimbolosMonitorSomGame";
+import { ClassificacaoRapidaMemoriaAtualizavelGame } from "@/games/classificacao-rapida-memoria-atualizavel/ClassificacaoRapidaMemoriaAtualizavelGame";
+import { CorOuFormaSwitchGame } from "@/games/cor-ou-forma-switch/CorOuFormaSwitchGame";
+import { TopoBaixoPositionRuleSwitchGame } from "@/games/topo-baixo-position-rule-switch/TopoBaixoPositionRuleSwitchGame";
+import { ReversalGoNoGoSwitchGame } from "@/games/reversal-go-nogo-switch/ReversalGoNoGoSwitchGame";
+import { TrilhaAlternadaTmtbGame } from "@/games/trilha-alternada-tmtb/TrilhaAlternadaTmtbGame";
+import { buildTxtReportFileName } from "@/utils/reportFileName";
 
 type GameStage = "intro" | "instructions" | "exercise" | "result";
 type TrainingMode = "sequence" | "single" | null;
@@ -27,6 +40,8 @@ type SessionMode = "sequence" | "single";
 export type ReportContext = {
   mode: SessionMode;
   scopeLabel: string;
+  attentionTypeLabel: string;
+  participantName?: string;
 };
 
 const stageTitle: Record<GameStage, string> = {
@@ -98,15 +113,6 @@ export function AttentionTrainingGame() {
   );
   const activeExercises = trainingMode === "sequence" ? sequenceExercises : selectedPlan.exercises;
   const currentExercise = activeExercises[currentIndex];
-  const countingFlowExerciseIndex = selectedPlan.exercises.findIndex(
-    (exercise) =>
-      exercise.kind === "counting-flow-task" &&
-      exercise.attentionType === selectedAttentionType,
-  );
-  const longMazesExerciseIndex = selectedPlan.exercises.findIndex(
-    (exercise) =>
-      exercise.kind === "long-mazes" && exercise.attentionType === selectedAttentionType,
-  );
   const quizExercises = activeExercises.filter(
     (exercise) => exercise.kind === "quiz",
   );
@@ -120,12 +126,20 @@ export function AttentionTrainingGame() {
   );
 
   const resolvedSessionMode: SessionMode = trainingMode === "single" ? "single" : "sequence";
+  const participantName = useMemo(() => {
+    if (typeof window === "undefined") return undefined;
+    const stored = window.localStorage.getItem("atento_user_name");
+    return stored?.trim() || undefined;
+  }, []);
+
   const reportContext: ReportContext = {
     mode: resolvedSessionMode,
     scopeLabel:
       resolvedSessionMode === "single"
         ? selectedSingleTitle ?? currentExercise?.title ?? "Jogo individual"
         : selectedPlan.name,
+    attentionTypeLabel: formatAttentionType(selectedAttentionType),
+    participantName,
   };
 
   const finalHitsTotal = resolvedSessionMode === "single" ? 1 : activeExercises.length;
@@ -137,7 +151,20 @@ export function AttentionTrainingGame() {
   const getStageForExercise = (
     exercise: TrainingPlan["exercises"][number] | undefined,
   ): GameStage =>
-    exercise?.kind === "symbol-matrix-search" || exercise?.kind === "find-missing-item"
+    exercise?.kind === "symbol-matrix-search" ||
+    exercise?.kind === "find-missing-item" ||
+    exercise?.kind === "copy-matrices" ||
+    exercise?.kind === "long-word-search" ||
+    exercise?.kind === "radar-tone" ||
+    exercise?.kind === "drive-signs" ||
+    exercise?.kind === "drive-word-target" ||
+    exercise?.kind === "chat-error-vigilance" ||
+    exercise?.kind === "symbol-map-sound-monitor" ||
+    exercise?.kind === "rapid-classification-updatable-memory" ||
+    exercise?.kind === "color-shape-switch" ||
+    exercise?.kind === "top-bottom-position-rule-switch" ||
+    exercise?.kind === "reversal-go-nogo-switch" ||
+    exercise?.kind === "trilha-alternada-tmtb"
       ? "exercise"
       : "instructions";
 
@@ -185,7 +212,19 @@ export function AttentionTrainingGame() {
     setShowingQuizResults(false);
     setStage(
       selectedExercise.kind === "symbol-matrix-search" ||
-        selectedExercise.kind === "find-missing-item"
+        selectedExercise.kind === "find-missing-item" ||
+        selectedExercise.kind === "copy-matrices" ||
+        selectedExercise.kind === "long-word-search" ||
+        selectedExercise.kind === "radar-tone" ||
+        selectedExercise.kind === "drive-signs" ||
+        selectedExercise.kind === "drive-word-target" ||
+        selectedExercise.kind === "chat-error-vigilance" ||
+        selectedExercise.kind === "symbol-map-sound-monitor" ||
+        selectedExercise.kind === "rapid-classification-updatable-memory" ||
+        selectedExercise.kind === "color-shape-switch" ||
+        selectedExercise.kind === "top-bottom-position-rule-switch" ||
+        selectedExercise.kind === "reversal-go-nogo-switch" ||
+        selectedExercise.kind === "trilha-alternada-tmtb"
         ? "exercise"
         : startStage,
     );
@@ -300,7 +339,7 @@ export function AttentionTrainingGame() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `destaque-o-alvo-resultado-${Date.now()}.txt`;
+    link.download = buildTxtReportFileName(reportContext);
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -396,30 +435,6 @@ export function AttentionTrainingGame() {
                 >
                   Escolher exercicio
                 </button>
-                {selectedAttentionType === "sustentada" &&
-                  countingFlowExerciseIndex >= 0 && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      startFromExercise(countingFlowExerciseIndex, undefined, "instructions")
-                    }
-                    className="rounded-lg border border-amber-300 bg-amber-100 px-4 py-2 font-medium text-amber-900 hover:bg-amber-200"
-                  >
-                    Teste rápido: Contagem de Estímulos em Fluxo
-                  </button>
-                )}
-                {selectedAttentionType === "sustentada" &&
-                  longMazesExerciseIndex >= 0 && (
-                  <button
-                    type="button"
-                    onClick={() =>
-                      startFromExercise(longMazesExerciseIndex, undefined, "instructions")
-                    }
-                    className="rounded-lg border border-emerald-300 bg-emerald-100 px-4 py-2 font-medium text-emerald-900 hover:bg-emerald-200"
-                  >
-                    Teste rápido: Labirintos Prolongados
-                  </button>
-                )}
               </div>
             )}
 
@@ -522,6 +537,46 @@ export function AttentionTrainingGame() {
               ) : currentExercise.kind === "go-no-go-expandido" ? (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Go / No-Go
+                </h2>
+              ) : currentExercise.kind === "radar-tone" ? (
+                <h2 className="text-xl font-semibold text-zinc-900">
+                  Radar + Tono
+                </h2>
+              ) : currentExercise.kind === "drive-signs" ? (
+                <h2 className="text-xl font-semibold text-zinc-900">
+                  Dirija + Placas
+                </h2>
+              ) : currentExercise.kind === "drive-word-target" ? (
+                <h2 className="text-xl font-semibold text-zinc-900">
+                  Dirija + Palavras-Alvo
+                </h2>
+              ) : currentExercise.kind === "chat-error-vigilance" ? (
+                <h2 className="text-xl font-semibold text-zinc-900">
+                  Chat + Vigilância de Erros
+                </h2>
+              ) : currentExercise.kind === "symbol-map-sound-monitor" ? (
+                <h2 className="text-xl font-semibold text-zinc-900">
+                  Mapa de Símbolos + Monitor de Som
+                </h2>
+              ) : currentExercise.kind === "rapid-classification-updatable-memory" ? (
+                <h2 className="text-xl font-semibold text-zinc-900">
+                  Classificação Rápida + Memória Atualizável
+                </h2>
+              ) : currentExercise.kind === "color-shape-switch" ? (
+                <h2 className="text-xl font-semibold text-zinc-900">
+                  Cor-ou-Forma (Color/Shape Switch)
+                </h2>
+              ) : currentExercise.kind === "top-bottom-position-rule-switch" ? (
+                <h2 className="text-xl font-semibold text-zinc-900">
+                  Topo/Baixo — Position-Rule Switch
+                </h2>
+              ) : currentExercise.kind === "reversal-go-nogo-switch" ? (
+                <h2 className="text-xl font-semibold text-zinc-900">
+                  Reversal Go/No-Go Switch
+                </h2>
+              ) : currentExercise.kind === "trilha-alternada-tmtb" ? (
+                <h2 className="text-xl font-semibold text-zinc-900">
+                  Trilha Alternada 1-A-2-B (TMT-B)
                 </h2>
               ) : (
                 <h2 className="text-xl font-semibold text-zinc-900">
@@ -762,6 +817,270 @@ export function AttentionTrainingGame() {
               />
             ) : currentExercise.kind === "find-missing-item" ? (
               <AcharOFaltandoGame
+                basePoints={currentExercise.points}
+                startingLevel={currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= activeExercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
+                  }
+                }}
+              />
+            ) : currentExercise.kind === "copy-matrices" ? (
+              <CopiaMatrizesGame
+                basePoints={currentExercise.points}
+                startingLevel={currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= activeExercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
+                  }
+                }}
+              />
+            ) : currentExercise.kind === "long-word-search" ? (
+              <CacaPalavrasLongosGame
+                basePoints={currentExercise.points}
+                startingLevel={currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= activeExercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
+                  }
+                }}
+              />
+            ) : currentExercise.kind === "radar-tone" ? (
+              <RadarTonoGame
+                basePoints={currentExercise.points}
+                startingLevel={currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= activeExercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
+                  }
+                }}
+              />
+            ) : currentExercise.kind === "drive-signs" ? (
+              <DirijaPlacasGame
+                basePoints={currentExercise.points}
+                startingLevel={currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= activeExercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
+                  }
+                }}
+              />
+            ) : currentExercise.kind === "drive-word-target" ? (
+              <DirijaPalavrasAlvoGame
+                basePoints={currentExercise.points}
+                startingLevel={currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= activeExercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
+                  }
+                }}
+              />
+            ) : currentExercise.kind === "chat-error-vigilance" ? (
+              <ChatVigilanciaErrosGame
+                basePoints={currentExercise.points}
+                startingLevel={currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= activeExercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
+                  }
+                }}
+              />
+            ) : currentExercise.kind === "symbol-map-sound-monitor" ? (
+              <MapaSimbolosMonitorSomGame
+                basePoints={currentExercise.points}
+                startingLevel={currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= activeExercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
+                  }
+                }}
+              />
+            ) : currentExercise.kind === "rapid-classification-updatable-memory" ? (
+              <ClassificacaoRapidaMemoriaAtualizavelGame
+                basePoints={currentExercise.points}
+                startingLevel={currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= activeExercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
+                  }
+                }}
+              />
+            ) : currentExercise.kind === "color-shape-switch" ? (
+              <CorOuFormaSwitchGame
+                basePoints={currentExercise.points}
+                startingLevel={currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= activeExercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
+                  }
+                }}
+              />
+            ) : currentExercise.kind === "top-bottom-position-rule-switch" ? (
+              <TopoBaixoPositionRuleSwitchGame
+                basePoints={currentExercise.points}
+                startingLevel={currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= activeExercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
+                  }
+                }}
+              />
+            ) : currentExercise.kind === "reversal-go-nogo-switch" ? (
+              <ReversalGoNoGoSwitchGame
+                basePoints={currentExercise.points}
+                startingLevel={currentExercise.startingLevel}
+                maxLevelHint={currentExercise.maxLevelHint}
+                reportContext={reportContext}
+                onComplete={({ success, pointsEarned }) => {
+                  setScore((value) => value + pointsEarned);
+                  if (success) {
+                    setHits((value) => value + 1);
+                  }
+                  const nextIndex = currentIndex + 1;
+                  if (nextIndex >= activeExercises.length) {
+                    setStage("result");
+                  } else {
+                    setCurrentIndex(nextIndex);
+                    setSelectedOption(null);
+                    setSubmitted(false);
+                    setStage(getStageForExercise(activeExercises[nextIndex]));
+                  }
+                }}
+              />
+            ) : currentExercise.kind === "trilha-alternada-tmtb" ? (
+              <TrilhaAlternadaTmtbGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}

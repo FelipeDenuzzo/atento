@@ -18,3 +18,39 @@ export const ENABLE_MATRIX_SYMBOL_SEARCH =
 
 export const ENABLE_FIND_MISSING_ITEM =
   process.env.NEXT_PUBLIC_ENABLE_FIND_MISSING_ITEM === "true";
+
+export const ENABLE_COPY_MATRICES =
+  process.env.NEXT_PUBLIC_ENABLE_COPY_MATRICES === "true";
+
+export const ENABLE_LONG_WORD_SEARCH =
+  process.env.NEXT_PUBLIC_ENABLE_LONG_WORD_SEARCH === "true";
+
+export const ENABLE_RADAR_TONE =
+  process.env.NEXT_PUBLIC_ENABLE_RADAR_TONE === "true";
+
+export const ENABLE_DRIVE_SIGNS =
+  process.env.NEXT_PUBLIC_ENABLE_DRIVE_SIGNS === "true";
+
+export const ENABLE_DRIVE_WORD_TARGET =
+  process.env.NEXT_PUBLIC_ENABLE_DRIVE_WORD_TARGET === "true";
+
+export const ENABLE_CHAT_ERROR_VIGILANCE =
+  process.env.NEXT_PUBLIC_ENABLE_CHAT_ERROR_VIGILANCE === "true";
+
+export const ENABLE_SYMBOL_MAP_SOUND_MONITOR =
+  process.env.NEXT_PUBLIC_ENABLE_SYMBOL_MAP_SOUND_MONITOR === "true";
+
+export const ENABLE_RAPID_CLASSIFICATION_MEMORY =
+  process.env.NEXT_PUBLIC_ENABLE_RAPID_CLASSIFICATION_MEMORY === "true";
+
+export const ENABLE_COLOR_SHAPE_SWITCH =
+  process.env.NEXT_PUBLIC_ENABLE_COLOR_SHAPE_SWITCH === "true";
+
+export const ENABLE_POSITION_RULE_SWITCH =
+  process.env.NEXT_PUBLIC_ENABLE_POSITION_RULE_SWITCH === "true";
+
+export const ENABLE_REVERSAL_GO_NOGO_SWITCH =
+  process.env.NEXT_PUBLIC_ENABLE_REVERSAL_GO_NOGO_SWITCH === "true";
+
+export const ENABLE_TRILHA_ALTERNADA_TMTB =
+  process.env.NEXT_PUBLIC_ENABLE_TRILHA_ALTERNADA_TMTB === "true";

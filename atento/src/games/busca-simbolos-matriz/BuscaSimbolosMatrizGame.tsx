@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ReportContext } from "@/components/AttentionTrainingGame";
+import { buildTxtReportFileName } from "@/utils/reportFileName";
 import {
   buildSessionLog,
   computeMetrics,
@@ -299,7 +300,11 @@ export function BuscaSimbolosMatrizGame({
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `busca-simbolos-matriz-${Date.now()}.txt`;
+    link.download = buildTxtReportFileName({
+      mode: reportContext?.mode ?? "single",
+      attentionTypeLabel: reportContext?.attentionTypeLabel,
+      participantName: reportContext?.participantName,
+    });
     link.click();
     URL.revokeObjectURL(url);
   }

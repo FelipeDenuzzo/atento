@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ReportContext } from "@/components/AttentionTrainingGame";
+import { buildTxtReportFileName } from "@/utils/reportFileName";
 
 type Shape = "circle" | "square" | "triangle";
 type Color = "red" | "blue" | "green" | "yellow";
@@ -403,7 +404,11 @@ export function VisualSearchHunt({
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `atento_caca_ao_alvo_${new Date().toISOString().split("T")[0]}.txt`;
+    a.download = buildTxtReportFileName({
+      mode: reportContext?.mode ?? "single",
+      attentionTypeLabel: reportContext?.attentionTypeLabel,
+      participantName: reportContext?.participantName,
+    });
     a.click();
     URL.revokeObjectURL(url);
   };

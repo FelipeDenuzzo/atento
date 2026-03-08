@@ -17,7 +17,19 @@ export type ExerciseKind =
   | "long-mazes"
   | "symbol-map"
   | "symbol-matrix-search"
-  | "find-missing-item";
+  | "find-missing-item"
+  | "copy-matrices"
+  | "long-word-search"
+  | "radar-tone"
+  | "drive-signs"
+  | "drive-word-target"
+  | "chat-error-vigilance"
+  | "symbol-map-sound-monitor"
+  | "rapid-classification-updatable-memory"
+  | "color-shape-switch"
+  | "top-bottom-position-rule-switch"
+  | "reversal-go-nogo-switch"
+  | "trilha-alternada-tmtb";
 
 type BaseExercise = {
   id: string;
@@ -107,6 +119,78 @@ export type FindMissingItemExercise = BaseExercise & {
   maxLevelHint: number;
 };
 
+export type CopyMatricesExercise = BaseExercise & {
+  kind: "copy-matrices";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
+export type LongWordSearchExercise = BaseExercise & {
+  kind: "long-word-search";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
+export type RadarToneExercise = BaseExercise & {
+  kind: "radar-tone";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
+export type DriveSignsExercise = BaseExercise & {
+  kind: "drive-signs";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
+export type DriveWordTargetExercise = BaseExercise & {
+  kind: "drive-word-target";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
+export type ChatErrorVigilanceExercise = BaseExercise & {
+  kind: "chat-error-vigilance";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
+export type SymbolMapSoundMonitorExercise = BaseExercise & {
+  kind: "symbol-map-sound-monitor";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
+export type RapidClassificationUpdatableMemoryExercise = BaseExercise & {
+  kind: "rapid-classification-updatable-memory";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
+export type ColorShapeSwitchExercise = BaseExercise & {
+  kind: "color-shape-switch";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
+export type TopBottomPositionRuleSwitchExercise = BaseExercise & {
+  kind: "top-bottom-position-rule-switch";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
+export type ReversalGoNoGoSwitchExercise = BaseExercise & {
+  kind: "reversal-go-nogo-switch";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
+export type TrilhaAlternadaTmtbExercise = BaseExercise & {
+  kind: "trilha-alternada-tmtb";
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
 export type AttentionExercise =
   | QuizExercise
   | VisualSearchExercise
@@ -120,7 +204,19 @@ export type AttentionExercise =
   | LongMazesExercise
   | SymbolMapExercise
   | SymbolMatrixSearchExercise
-  | FindMissingItemExercise;
+  | FindMissingItemExercise
+  | CopyMatricesExercise
+  | LongWordSearchExercise
+  | RadarToneExercise
+  | DriveSignsExercise
+  | DriveWordTargetExercise
+  | ChatErrorVigilanceExercise
+  | SymbolMapSoundMonitorExercise
+  | RapidClassificationUpdatableMemoryExercise
+  | ColorShapeSwitchExercise
+  | TopBottomPositionRuleSwitchExercise
+  | ReversalGoNoGoSwitchExercise
+  | TrilhaAlternadaTmtbExercise;
 
 export type TrainingPlan = {
   id: string;

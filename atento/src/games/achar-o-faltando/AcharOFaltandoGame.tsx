@@ -2,11 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReportContext } from "@/components/AttentionTrainingGame";
+import { buildTxtReportFileName } from "@/utils/reportFileName";
 import {
   buildRoundResult,
   computeMetrics,
-  exportCSV,
-  exportJSON,
   generateRound,
 } from "./logic";
 import {
@@ -334,12 +333,33 @@ export function AcharOFaltandoGame({
     URL.revokeObjectURL(url);
   }
 
-  function downloadCsv() {
-    downloadFile(exportCSV(results), `achar-o-faltando-${Date.now()}.csv`, "text/csv;charset=utf-8");
-  }
+  function downloadTxt() {
+    const lines: string[] = [];
+    lines.push("== RELATÓRIO - ACHAR O FALTANDO ==");
+    lines.push("");
+    lines.push(`Rodadas jogadas: ${metrics.roundsPlayed}`);
+    lines.push(`Acertos: ${metrics.totalHits}`);
+    lines.push(`Omissões: ${metrics.totalOmissions}`);
+    lines.push(`Falsos positivos: ${metrics.totalFalsePositives}`);
+    lines.push(`Acertos por minuto: ${metrics.accuracyPerMinute.toFixed(2)}`);
+    lines.push(`Tempo médio por rodada: ${(metrics.averageResponseMs / 1000).toFixed(1)} s`);
+    lines.push("");
+    lines.push("Curva por rodada");
+    metrics.roundCurve.forEach((entry) => {
+      lines.push(
+        `- R${entry.roundNumber}: acertos ${entry.hits}, omissões ${entry.omissions}, falsos ${entry.falsePositives}, tempo ${(entry.responseTimeMs / 1000).toFixed(1)} s`,
+      );
+    });
 
-  function downloadJson() {
-    downloadFile(exportJSON(results), `achar-o-faltando-${Date.now()}.json`, "application/json;charset=utf-8");
+    downloadFile(
+      lines.join("\n"),
+      buildTxtReportFileName({
+        mode: reportContext?.mode ?? "single",
+        attentionTypeLabel: reportContext?.attentionTypeLabel,
+        participantName: reportContext?.participantName,
+      }),
+      "text/plain;charset=utf-8",
+    );
   }
 
   function concludeExercise() {
@@ -652,17 +672,10 @@ export function AcharOFaltandoGame({
           <div className="flex flex-wrap gap-3">
             <button
               type="button"
-              onClick={downloadJson}
+              onClick={downloadTxt}
               className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50"
             >
-              Baixar JSON
-            </button>
-            <button
-              type="button"
-              onClick={downloadCsv}
-              className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50"
-            >
-              Baixar CSV
+              Baixar resultados (.txt)
             </button>
             <button
               type="button"
