@@ -379,6 +379,70 @@ export function AttentionTrainingGame() {
               </p>
             </div>
 
+            <div className="space-y-4 rounded-xl border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
+              <section className="space-y-1">
+                <h2 className="text-base font-semibold text-zinc-900">O que é Atenção?</h2>
+                <p>
+                  A atenção é a capacidade de focar no que é importante e filtrar distrações.
+                  Ela é essencial para aprender, trabalhar, conversar, dirigir e organizar tarefas do dia a dia.
+                </p>
+              </section>
+
+              <section className="space-y-1">
+                <h2 className="text-base font-semibold text-zinc-900">Os 4 tipos de Atenção</h2>
+                <ul className="list-disc space-y-1 pl-5">
+                  <li>
+                    <strong>Atenção Seletiva:</strong> focar em um estímulo e ignorar distrações.
+                  </li>
+                  <li>
+                    <strong>Atenção Sustentada:</strong> manter o foco por um período contínuo.
+                  </li>
+                  <li>
+                    <strong>Atenção Alternada:</strong> mudar o foco entre tarefas diferentes com eficiência.
+                  </li>
+                  <li>
+                    <strong>Atenção Dividida:</strong> lidar com mais de uma demanda ao mesmo tempo, quando possível.
+                  </li>
+                </ul>
+              </section>
+
+              <section className="space-y-1">
+                <h2 className="text-base font-semibold text-zinc-900">Atenção e Envelhecimento</h2>
+                <p>
+                  Com o envelhecimento, é comum haver mais lentidão mental, maior cansaço cognitivo e
+                  dificuldade de concentração em algumas situações. Ainda assim, o cérebro mantém capacidade
+                  de adaptação ao longo da vida. Com treino adequado, é possível fortalecer atenção, memória
+                  e velocidade de processamento.
+                </p>
+              </section>
+
+              <section className="space-y-1">
+                <h2 className="text-base font-semibold text-zinc-900">Como funciona este Treino</h2>
+                <p>
+                  Neste programa, você treina os 4 tipos de atenção com exercícios curtos, progressivos e objetivos.
+                </p>
+                <ul className="list-disc space-y-1 pl-5">
+                  <li>
+                    <strong>Modo Trilha (Sequencial):</strong> sequência pronta de exercícios, com progressão
+                    gradual de dificuldade.
+                  </li>
+                  <li>
+                    <strong>Modo Individual (Exercícios Soltos):</strong> escolha livre de exercícios para focar em
+                    um tipo de atenção específico.
+                  </li>
+                </ul>
+              </section>
+
+              <section className="space-y-1">
+                <h2 className="text-base font-semibold text-zinc-900">Acompanhe sua Evolução</h2>
+                <p>
+                  Ao final de cada sessão, você vê seus resultados na tela e pode acompanhar seu histórico no site.
+                  Assim, fica fácil comparar seu desempenho ao longo do tempo, identificar avanços e direcionar melhor
+                  seus próximos treinos.
+                </p>
+              </section>
+            </div>
+
             <div className="grid gap-2 text-sm text-zinc-700 sm:grid-cols-2">
               {(Object.keys(attentionTypeDescriptions) as AttentionType[]).map(
                 (type) => {
