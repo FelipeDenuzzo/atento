@@ -371,11 +371,10 @@ export function AttentionTrainingGame() {
           <div className="mt-4 space-y-6">
             <div className="space-y-2">
               <h1 className="text-3xl font-semibold text-zinc-900">
-                Treino de {formatAttentionType(selectedAttentionType)}
+                ATENTO – Programa de Treino de Atenção
               </h1>
               <p className="text-zinc-600">
-                Selecione o tipo de atencao e escolha seguir a sequencia de
-                exercicios ou treinar um exercicio especifico.
+                No ATENTO, você treina os 4 tipos de atenção (seletiva, sustentada, alternada e dividida) por meio de exercícios pensados para o dia a dia. Você pode seguir uma trilha de exercícios organizada para avançar passo a passo ou escolher treinar um exercício específico, focando no aspecto da atenção que quiser trabalhar mais.
               </p>
             </div>
 
