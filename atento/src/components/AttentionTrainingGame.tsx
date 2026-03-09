@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   attentionTypeDescriptions,
   formatAttentionType,
@@ -36,6 +36,9 @@ import { buildTxtReportFileName } from "@/utils/reportFileName";
 type GameStage = "intro" | "instructions" | "exercise" | "result";
 type TrainingMode = "sequence" | "single" | null;
 type SessionMode = "sequence" | "single";
+type IntroStep = "didactic" | "mode-choice" | "name-capture" | "menu";
+
+const ATENTO_USER_KEY = "atentoUser";
 
 export type ReportContext = {
   mode: SessionMode;
@@ -80,12 +83,13 @@ export function AttentionTrainingGame() {
   );
   const defaultPlanId = getPlanIdByAttentionType("seletiva");
   const [stage, setStage] = useState<GameStage>("intro");
+  const [introStep, setIntroStep] = useState<IntroStep>("didactic");
+  const [selectedEntryMode, setSelectedEntryMode] = useState<SessionMode | null>(null);
   const [selectedPlanId, setSelectedPlanId] = useState<string>(defaultPlanId);
   const [trainingMode, setTrainingMode] = useState<TrainingMode>(null);
   const [selectedSingleTitle, setSelectedSingleTitle] = useState<string | null>(null);
-  const [introSelection, setIntroSelection] = useState<"initial" | "choose-exercise">(
-    "initial",
-  );
+  const [nameInput, setNameInput] = useState("");
+  const [participantName, setParticipantName] = useState<string | undefined>(undefined);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [cocktailStartLevelOverride, setCocktailStartLevelOverride] = useState<number | null>(null);
   const [score, setScore] = useState(0);
@@ -126,11 +130,51 @@ export function AttentionTrainingGame() {
   );
 
   const resolvedSessionMode: SessionMode = trainingMode === "single" ? "single" : "sequence";
-  const participantName = useMemo(() => {
-    if (typeof window === "undefined") return undefined;
-    const stored = window.localStorage.getItem("atento_user_name");
-    return stored?.trim() || undefined;
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const parseAtentoUser = (): string | undefined => {
+      const raw = window.localStorage.getItem(ATENTO_USER_KEY);
+      if (!raw) return undefined;
+
+      try {
+        const parsed = JSON.parse(raw) as { name?: string };
+        const normalizedName = parsed?.name?.trim();
+        if (normalizedName) return normalizedName;
+      } catch {
+        return undefined;
+      }
+
+      return undefined;
+    };
+
+    const fromObject = parseAtentoUser();
+    const fromLegacy = window.localStorage.getItem("atento_user_name")?.trim();
+    const resolvedName = fromObject ?? fromLegacy ?? undefined;
+
+    if (resolvedName) {
+      setParticipantName(resolvedName);
+      setNameInput(resolvedName);
+    }
   }, []);
+
+  const persistParticipant = (name: string) => {
+    if (typeof window === "undefined") return;
+    const trimmedName = name.trim();
+    if (!trimmedName) return;
+
+    window.localStorage.setItem(
+      ATENTO_USER_KEY,
+      JSON.stringify({
+        name: trimmedName,
+        updatedAt: new Date().toISOString(),
+      }),
+    );
+    window.localStorage.setItem("atento_user_name", trimmedName);
+    setParticipantName(trimmedName);
+    setNameInput(trimmedName);
+  };
 
   const reportContext: ReportContext = {
     mode: resolvedSessionMode,
@@ -183,7 +227,29 @@ export function AttentionTrainingGame() {
     setSubmitted(false);
     setQuizResults([]);
     setShowingQuizResults(false);
-    setStage(getStageForExercise(activeExercises[0]));
+    setStage(getStageForExercise(sequenceExercises[0]));
+  };
+
+  const handleSelectGuidedTrail = () => {
+    setSelectedEntryMode("sequence");
+    if (participantName) {
+      setIntroStep("menu");
+      return;
+    }
+    setIntroStep("name-capture");
+  };
+
+  const handleSelectIndividual = () => {
+    setSelectedEntryMode("single");
+    setIntroStep("menu");
+  };
+
+  const handleSubmitNameAndContinue = () => {
+    const trimmedName = nameInput.trim();
+    if (!trimmedName) return;
+    persistParticipant(trimmedName);
+    setSelectedEntryMode("sequence");
+    setIntroStep("menu");
   };
 
   const startFromExercise = (
@@ -276,7 +342,8 @@ export function AttentionTrainingGame() {
   const restart = () => {
     setTrainingMode(null);
     setSelectedSingleTitle(null);
-    setIntroSelection("initial");
+    setIntroStep("didactic");
+    setSelectedEntryMode(null);
     setStage("intro");
     setCurrentIndex(0);
     setCocktailStartLevelOverride(null);
@@ -369,167 +436,269 @@ export function AttentionTrainingGame() {
 
         {stage === "intro" && (
           <div className="mt-4 space-y-6">
-            <div className="space-y-2">
-              <h1 className="text-3xl font-semibold text-zinc-900">
-                ATENTO – Programa de Treino de Atenção
-              </h1>
-              <p className="text-zinc-600">
-                No ATENTO, você treina os 4 tipos de atenção (seletiva, sustentada, alternada e dividida) por meio de exercícios pensados para o dia a dia. Você pode seguir uma trilha de exercícios organizada para avançar passo a passo ou escolher treinar um exercício específico, focando no aspecto da atenção que quiser trabalhar mais.
-              </p>
-            </div>
+            {introStep === "didactic" && (
+              <>
+                <div className="space-y-2">
+                  <h1 className="text-3xl font-semibold text-zinc-900">
+                    ATENTO – Programa de Treino de Atenção
+                  </h1>
+                  <p className="text-zinc-600">
+                    No ATENTO, você treina os 4 tipos de atenção (seletiva, sustentada, alternada e dividida) por meio de exercícios pensados para o dia a dia. Você pode seguir uma trilha de exercícios organizada para avançar passo a passo ou escolher treinar um exercício específico, focando no aspecto da atenção que quiser trabalhar mais.
+                  </p>
+                </div>
 
-            <div className="space-y-4 rounded-xl border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
-              <section className="space-y-1">
-                <h2 className="text-base font-semibold text-zinc-900">O que é Atenção?</h2>
-                <p>
-                  A atenção é a capacidade de focar no que é importante e filtrar distrações.
-                  Ela é essencial para aprender, trabalhar, conversar, dirigir e organizar tarefas do dia a dia.
-                </p>
-              </section>
+                <div className="space-y-4 rounded-xl border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
+                  <section className="space-y-1">
+                    <h2 className="text-base font-semibold text-zinc-900">O que é Atenção?</h2>
+                    <p>
+                      A atenção é a capacidade de focar no que é importante e filtrar distrações.
+                      Ela é essencial para aprender, trabalhar, conversar, dirigir e organizar tarefas do dia a dia.
+                    </p>
+                  </section>
 
-              <section className="space-y-1">
-                <h2 className="text-base font-semibold text-zinc-900">Os 4 tipos de Atenção</h2>
-                <ul className="list-disc space-y-1 pl-5">
-                  <li>
-                    <strong>Atenção Seletiva:</strong> focar em um estímulo e ignorar distrações.
-                  </li>
-                  <li>
-                    <strong>Atenção Sustentada:</strong> manter o foco por um período contínuo.
-                  </li>
-                  <li>
-                    <strong>Atenção Alternada:</strong> mudar o foco entre tarefas diferentes com eficiência.
-                  </li>
-                  <li>
-                    <strong>Atenção Dividida:</strong> lidar com mais de uma demanda ao mesmo tempo, quando possível.
-                  </li>
-                </ul>
-              </section>
+                  <section className="space-y-1">
+                    <h2 className="text-base font-semibold text-zinc-900">Os 4 tipos de Atenção</h2>
+                    <ul className="list-disc space-y-1 pl-5">
+                      <li>
+                        <strong>Atenção Seletiva:</strong> focar em um estímulo e ignorar distrações.
+                      </li>
+                      <li>
+                        <strong>Atenção Sustentada:</strong> manter o foco por um período contínuo.
+                      </li>
+                      <li>
+                        <strong>Atenção Alternada:</strong> mudar o foco entre tarefas diferentes com eficiência.
+                      </li>
+                      <li>
+                        <strong>Atenção Dividida:</strong> lidar com mais de uma demanda ao mesmo tempo, quando possível.
+                      </li>
+                    </ul>
+                  </section>
 
-              <section className="space-y-1">
-                <h2 className="text-base font-semibold text-zinc-900">Atenção e Envelhecimento</h2>
-                <p>
-                  Com o envelhecimento, é comum haver mais lentidão mental, maior cansaço cognitivo e
-                  dificuldade de concentração em algumas situações. Ainda assim, o cérebro mantém capacidade
-                  de adaptação ao longo da vida. Com treino adequado, é possível fortalecer atenção, memória
-                  e velocidade de processamento.
-                </p>
-              </section>
+                  <section className="space-y-1">
+                    <h2 className="text-base font-semibold text-zinc-900">Atenção e Envelhecimento</h2>
+                    <p>
+                      Com o envelhecimento, é comum haver mais lentidão mental, maior cansaço cognitivo e
+                      dificuldade de concentração em algumas situações. Ainda assim, o cérebro mantém capacidade
+                      de adaptação ao longo da vida. Com treino adequado, é possível fortalecer atenção, memória
+                      e velocidade de processamento.
+                    </p>
+                  </section>
 
-              <section className="space-y-1">
-                <h2 className="text-base font-semibold text-zinc-900">Como funciona este Treino</h2>
-                <p>
-                  Neste programa, você treina os 4 tipos de atenção com exercícios curtos, progressivos e objetivos.
-                </p>
-                <ul className="list-disc space-y-1 pl-5">
-                  <li>
-                    <strong>Modo Trilha (Sequencial):</strong> sequência pronta de exercícios, com progressão
-                    gradual de dificuldade.
-                  </li>
-                  <li>
-                    <strong>Modo Individual (Exercícios Soltos):</strong> escolha livre de exercícios para focar em
-                    um tipo de atenção específico.
-                  </li>
-                </ul>
-              </section>
+                  <section className="space-y-1">
+                    <h2 className="text-base font-semibold text-zinc-900">Como funciona este Treino</h2>
+                    <p>
+                      Neste programa, você treina os 4 tipos de atenção com exercícios curtos, progressivos e objetivos.
+                    </p>
+                    <ul className="list-disc space-y-1 pl-5">
+                      <li>
+                        <strong>Modo Trilha (Sequencial):</strong> sequência pronta de exercícios, com progressão
+                        gradual de dificuldade.
+                      </li>
+                      <li>
+                        <strong>Modo Individual (Exercícios Soltos):</strong> escolha livre de exercícios para focar em
+                        um tipo de atenção específico.
+                      </li>
+                    </ul>
+                  </section>
 
-              <section className="space-y-1">
-                <h2 className="text-base font-semibold text-zinc-900">Acompanhe sua Evolução</h2>
-                <p>
-                  Ao final de cada sessão, você vê seus resultados na tela e pode acompanhar seu histórico no site.
-                  Assim, fica fácil comparar seu desempenho ao longo do tempo, identificar avanços e direcionar melhor
-                  seus próximos treinos.
-                </p>
-              </section>
-            </div>
+                  <section className="space-y-1">
+                    <h2 className="text-base font-semibold text-zinc-900">Acompanhe sua Evolução</h2>
+                    <p>
+                      Ao final de cada sessão, você vê seus resultados na tela e pode acompanhar seu histórico no site.
+                      Assim, fica fácil comparar seu desempenho ao longo do tempo, identificar avanços e direcionar melhor
+                      seus próximos treinos.
+                    </p>
+                  </section>
+                </div>
 
-            <div className="grid gap-2 text-sm text-zinc-700 sm:grid-cols-2">
-              {(Object.keys(attentionTypeDescriptions) as AttentionType[]).map(
-                (type) => {
-                  const isCurrentType = type === selectedAttentionType;
-                  const isDisabled = type !== "seletiva" && !hasExercisesByAttentionType(type);
-                  return (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={() => {
-                        if (isDisabled) return;
-                        setSelectedAttentionType(type);
-                        const planId = getPlanIdByAttentionType(type);
-                        if (planId) {
-                          setSelectedPlanId(planId);
-                        }
-                        setIntroSelection("initial");
-                      }}
-                      disabled={isDisabled}
-                      className={`rounded-lg border p-3 ${
-                        isCurrentType
-                          ? "border-4 border-blue-500 bg-blue-50"
-                          : "border border-black/10 bg-zinc-50 opacity-50"
-                      }`}
-                    >
-                      <p className="font-semibold text-zinc-900">
-                        {formatAttentionType(type)}
-                      </p>
-                      <p>{attentionTypeDescriptions[type]}</p>
-                      {isDisabled && (
-                        <p className="mt-2 text-xs text-zinc-500">
-                          Indisponivel no momento
-                        </p>
-                      )}
-                    </button>
-                  );
-                },
-              )}
-            </div>
-
-            {introSelection === "initial" && (
-              <div className="grid gap-3">
                 <button
                   type="button"
-                  onClick={startPlan}
-                  className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
+                  onClick={() => setIntroStep("mode-choice")}
+                  className="w-full rounded-lg bg-zinc-900 px-4 py-3 font-semibold text-white hover:bg-zinc-700"
                 >
-                  Seguir sequencia de exercicios
+                  Começar meu treino
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setIntroSelection("choose-exercise")}
-                  className="rounded-lg border border-zinc-200 px-4 py-2 font-medium text-zinc-800 hover:bg-zinc-50"
-                >
-                  Escolher exercicio
-                </button>
-              </div>
+              </>
             )}
 
-            {introSelection === "choose-exercise" && (
+            {introStep === "mode-choice" && (
               <div className="space-y-4">
-                <div className="grid gap-2 sm:grid-cols-2">
-                  {selectedPlan.exercises
-                    .map((exercise, index) => ({ exercise, index }))
-                    .filter(
-                      ({ exercise }) =>
-                        exercise.kind !== "quiz" &&
-                        exercise.attentionType === selectedAttentionType,
-                    )
-                    .map(({ exercise, index }) => (
-                    <button
-                      key={`choose-exercise-${exercise.id}`}
-                      type="button"
-                      onClick={() => startFromExercise(index, undefined, "instructions")}
-                      className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-left text-sm font-medium text-zinc-800 hover:bg-zinc-50"
-                    >
-                      {exercise.title}
-                    </button>
-                  ))}
+                <div className="space-y-1">
+                  <h1 className="text-2xl font-semibold text-zinc-900">Como você quer treinar hoje?</h1>
                 </div>
+
                 <button
                   type="button"
-                  onClick={() => setIntroSelection("initial")}
+                  onClick={handleSelectGuidedTrail}
+                  className="w-full rounded-xl border border-zinc-200 bg-white p-4 text-left hover:bg-zinc-50"
+                >
+                  <p className="text-base font-semibold text-zinc-900">Trilha guiada</p>
+                  <p className="mt-1 text-sm text-zinc-700">
+                    Siga uma sequência de exercícios já organizada para treinar, ao longo do tempo, os 4 tipos de atenção.
+                    Vamos pedir seu nome para salvar sua evolução neste dispositivo e mostrar seu progresso.
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSelectIndividual}
+                  className="w-full rounded-xl border border-zinc-200 bg-white p-4 text-left hover:bg-zinc-50"
+                >
+                  <p className="text-base font-semibold text-zinc-900">Exercício individual</p>
+                  <p className="mt-1 text-sm text-zinc-700">
+                    Escolha um exercício específico para treinar só o que você quiser hoje.
+                    Neste modo, você pode praticar sem cadastro e sem salvar histórico de resultados.
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIntroStep("didactic")}
                   className="w-full rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
                 >
                   Voltar
                 </button>
               </div>
+            )}
+
+            {introStep === "name-capture" && (
+              <div className="space-y-4 rounded-xl border border-zinc-200 bg-white p-4">
+                <h1 className="text-2xl font-semibold text-zinc-900">Antes de começar a Trilha</h1>
+                <label className="block space-y-2">
+                  <span className="text-sm font-medium text-zinc-800">Como você prefere ser chamado(a)?</span>
+                  <input
+                    type="text"
+                    value={nameInput}
+                    onChange={(event) => setNameInput(event.target.value)}
+                    className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-zinc-900 outline-none focus:border-zinc-500"
+                    placeholder="Digite seu nome"
+                  />
+                </label>
+                <p className="text-sm text-zinc-600">
+                  Seu nome e seus resultados ficarão salvos apenas neste dispositivo, no seu navegador,
+                  para você acompanhar sua evolução.
+                </p>
+                <div className="grid gap-2">
+                  <button
+                    type="button"
+                    onClick={handleSubmitNameAndContinue}
+                    disabled={!nameInput.trim()}
+                    className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700 disabled:cursor-not-allowed disabled:bg-zinc-400"
+                  >
+                    Continuar para os exercícios
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIntroStep("mode-choice")}
+                    className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                  >
+                    Voltar
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {introStep === "menu" && (
+              <>
+                <div className="space-y-2">
+                  {selectedEntryMode === "sequence" && participantName && (
+                    <p className="text-sm font-medium text-zinc-500">Olá, {participantName}</p>
+                  )}
+                  <h1 className="text-2xl font-semibold text-zinc-900">
+                    Treino de {formatAttentionType(selectedAttentionType)}
+                  </h1>
+                  <p className="text-zinc-600">
+                    Selecione o tipo de atenção para continuar.
+                  </p>
+                </div>
+
+                <div className="grid gap-2 text-sm text-zinc-700 sm:grid-cols-2">
+                  {(Object.keys(attentionTypeDescriptions) as AttentionType[]).map(
+                    (type) => {
+                      const isCurrentType = type === selectedAttentionType;
+                      const isDisabled = type !== "seletiva" && !hasExercisesByAttentionType(type);
+                      return (
+                        <button
+                          key={type}
+                          type="button"
+                          onClick={() => {
+                            if (isDisabled) return;
+                            setSelectedAttentionType(type);
+                            const planId = getPlanIdByAttentionType(type);
+                            if (planId) {
+                              setSelectedPlanId(planId);
+                            }
+                          }}
+                          disabled={isDisabled}
+                          className={`rounded-lg border p-3 ${
+                            isCurrentType
+                              ? "border-4 border-blue-500 bg-blue-50"
+                              : "border border-black/10 bg-zinc-50 opacity-50"
+                          }`}
+                        >
+                          <p className="font-semibold text-zinc-900">
+                            {formatAttentionType(type)}
+                          </p>
+                          <p>{attentionTypeDescriptions[type]}</p>
+                          {isDisabled && (
+                            <p className="mt-2 text-xs text-zinc-500">
+                              Indisponivel no momento
+                            </p>
+                          )}
+                        </button>
+                      );
+                    },
+                  )}
+                </div>
+
+                {selectedEntryMode === "sequence" ? (
+                  <div className="grid gap-3">
+                    <button
+                      type="button"
+                      onClick={startPlan}
+                      className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
+                    >
+                      Iniciar Trilha guiada
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIntroStep("mode-choice")}
+                      className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                    >
+                      Trocar modo de treino
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {selectedPlan.exercises
+                        .map((exercise, index) => ({ exercise, index }))
+                        .filter(
+                          ({ exercise }) =>
+                            exercise.kind !== "quiz" &&
+                            exercise.attentionType === selectedAttentionType,
+                        )
+                        .map(({ exercise, index }) => (
+                          <button
+                            key={`choose-exercise-${exercise.id}`}
+                            type="button"
+                            onClick={() => startFromExercise(index, undefined, "instructions")}
+                            className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-left text-sm font-medium text-zinc-800 hover:bg-zinc-50"
+                          >
+                            {exercise.title}
+                          </button>
+                        ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIntroStep("mode-choice")}
+                      className="w-full rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                    >
+                      Trocar modo de treino
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
