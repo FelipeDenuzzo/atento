@@ -740,7 +740,7 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
               onPointerDown={() => handleToneTouch("agudo")}
               onPointerUp={() => setActiveToneButton(null)}
               onPointerCancel={() => setActiveToneButton(null)}
-              className={`h-[58%] rounded-xl border px-3 text-sm font-semibold transition-all ${
+              className={`h-[58%] min-h-[180px] rounded-xl border px-3 text-sm font-semibold transition-all ${
                 activeToneButton === "agudo"
                   ? "scale-[0.98] border-zinc-900 bg-zinc-900 text-white shadow-inner"
                   : "border-zinc-300 bg-zinc-100 text-zinc-900"
