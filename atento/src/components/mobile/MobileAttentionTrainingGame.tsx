@@ -22,7 +22,7 @@ import { AcharOFaltandoGame } from "@/games/achar-o-faltando/AcharOFaltandoGame"
 import { CopiaMatrizesGame } from "@/games/copia-matrizes/CopiaMatrizesGame";
 import { CacaPalavrasLongosGame } from "@/games/caca-palavras-longos/CacaPalavrasLongosGame";
 import { RadarTonoMobileGame } from "@/games/radar-tono/mobile/RadarTonoMobileGame";
-import { DirijaPlacasGame } from "@/games/dirija-placas/DirijaPlacasGame";
+import { DirijaPlacasMobileGame } from "@/games/dirija-placas/mobile/DirijaPlacasMobileGame";
 import { DirijaPalavrasAlvoGame } from "@/games/dirija-palavras-alvo/DirijaPalavrasAlvoGame";
 import { ChatVigilanciaErrosGame } from "@/games/chat-vigilancia-erros/ChatVigilanciaErrosGame";
 import { MapaSimbolosMonitorSomGame } from "@/games/mapa-simbolos-monitor-som/MapaSimbolosMonitorSomGame";
@@ -421,7 +421,7 @@ export function MobileAttentionTrainingGame() {
   };
 
   const isImmersiveRadarTone =
-    stage === "exercise" && currentExercise?.kind === "radar-tone";
+    stage === "exercise" && (currentExercise?.kind === "radar-tone" || currentExercise?.kind === "drive-signs");
 
   return (
     <main
@@ -1155,7 +1155,7 @@ export function MobileAttentionTrainingGame() {
                 }}
               />
             ) : currentExercise.kind === "drive-signs" ? (
-              <DirijaPlacasGame
+              <DirijaPlacasMobileGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
