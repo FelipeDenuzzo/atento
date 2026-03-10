@@ -39,6 +39,7 @@ const MOBILE_MIN_ARENA_WIDTH_PX = 180;
 const MOBILE_MAX_ARENA_WIDTH_PX = 720;
 const MOBILE_MIN_ARENA_HEIGHT_PX = 180;
 const MOBILE_MAX_ARENA_HEIGHT_PX = 360;
+const MOBILE_GHOST_TARGET_OFFSET_RENDER_PX = 34;
 
 const ROUND_CONFIGS: RadarToneRoundConfig[] = [
   {
@@ -298,6 +299,7 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
   const [redDotPosition, setRedDotPosition] = useState<{ x: number; y: number } | null>(null);
   const [arenaRectPx, setArenaRectPx] = useState<{ width: number; height: number }>({ width: 360, height: 300 });
   const [isTrackingTarget, setIsTrackingTarget] = useState(false);
+  const [ghostPointerPosition, setGhostPointerPosition] = useState<{ x: number; y: number } | null>(null);
   const [activeToneButton, setActiveToneButton] = useState<ToneType | null>(null);
   const [roundLogs, setRoundLogs] = useState<RadarToneRoundLog[]>([]);
   const [sessionResult, setSessionResult] = useState<RadarToneSessionResult | null>(null);
@@ -371,16 +373,24 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
   }
 
   function updatePointerPosition(event: React.PointerEvent<HTMLDivElement>) {
+    event.preventDefault();
     const rect = event.currentTarget.getBoundingClientRect();
     const logicalArenaSize = roundRuntimeRef.current?.config.arenaSizePx ?? currentConfig.arenaSizePx;
     const xRatio = clamp(0, (event.clientX - rect.left) / rect.width, 1);
     const yRatio = clamp(0, (event.clientY - rect.top) / rect.height, 1);
-    const x = xRatio * logicalArenaSize;
-    const y = yRatio * logicalArenaSize;
-    mouseRef.current = { x, y, valid: true };
+    const pointerX = xRatio * logicalArenaSize;
+    const pointerY = yRatio * logicalArenaSize;
+
+    const ghostOffsetLogicalY = (MOBILE_GHOST_TARGET_OFFSET_RENDER_PX / Math.max(rect.height, 1)) * logicalArenaSize;
+    const ghostX = pointerX;
+    const ghostY = clamp(0, pointerY - ghostOffsetLogicalY, logicalArenaSize);
+
+    mouseRef.current = { x: ghostX, y: ghostY, valid: true };
+    setGhostPointerPosition({ x: ghostX, y: ghostY });
   }
 
   function clearMousePosition() {
+    setGhostPointerPosition(null);
     mouseRef.current = { x: 0, y: 0, valid: false };
     if (trackingStateRef.current) {
       trackingStateRef.current = false;
@@ -663,7 +673,10 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
       )}
 
       {phase === "running" && currentConfig && (
-        <div className="space-y-3 rounded-lg border border-black/10 bg-white p-3 sm:p-4">
+        <div
+          className="space-y-3 rounded-lg border border-black/10 bg-white p-3 sm:p-4 select-none"
+          style={{ WebkitUserSelect: "none", userSelect: "none" }}
+        >
           <div className="flex justify-center">
             <div className="rounded-xl border border-zinc-300 bg-zinc-50 px-3 py-2 text-center" style={{ width: MOBILE_SIDE_BUTTON_WIDTH_PX }}>
               <p className="text-[11px] leading-tight text-zinc-500">Tempo</p>
@@ -693,8 +706,16 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
               onPointerUp={clearMousePosition}
               onPointerCancel={clearMousePosition}
               onPointerLeave={clearMousePosition}
+              onContextMenu={(event) => event.preventDefault()}
               className="relative touch-none rounded-lg border border-zinc-300 bg-zinc-50"
-              style={{ width: arenaRectPx.width, height: arenaRectPx.height }}
+              style={{
+                width: arenaRectPx.width,
+                height: arenaRectPx.height,
+                WebkitUserSelect: "none",
+                userSelect: "none",
+                WebkitTouchCallout: "none",
+                touchAction: "none",
+              }}
             >
               <div
                 className="absolute rounded-full bg-zinc-900 transition-shadow"
@@ -730,6 +751,27 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
                       (redDotPosition.y / currentConfig.arenaSizePx) * arenaRectPx.height - currentConfig.dotRadiusPx,
                       arenaRectPx.height - currentConfig.dotRadiusPx * 2,
                     ),
+                  }}
+                />
+              )}
+
+              {ghostPointerPosition && (
+                <div
+                  className="pointer-events-none absolute rounded-full border-2 border-sky-500/80"
+                  style={{
+                    width: 28,
+                    height: 28,
+                    left: clamp(
+                      0,
+                      (ghostPointerPosition.x / currentConfig.arenaSizePx) * arenaRectPx.width - 14,
+                      arenaRectPx.width - 28,
+                    ),
+                    top: clamp(
+                      0,
+                      (ghostPointerPosition.y / currentConfig.arenaSizePx) * arenaRectPx.height - 14,
+                      arenaRectPx.height - 28,
+                    ),
+                    boxShadow: "0 0 0 4px rgba(56, 189, 248, 0.2)",
                   }}
                 />
               )}
