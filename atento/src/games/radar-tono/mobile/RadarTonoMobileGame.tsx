@@ -664,26 +664,26 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
 
       {phase === "running" && currentConfig && (
         <div className="space-y-3 rounded-lg border border-black/10 bg-white p-3 sm:p-4">
-          <div className="rounded-lg border border-black/10 bg-zinc-50 p-2 text-center">
-            <p className="text-xs text-zinc-500">Tempo restante</p>
-            <p className="font-semibold text-zinc-900">{formatClock(remainingMs)}</p>
-          </div>
-
           <div className="mx-auto flex h-[calc(100dvh-10rem)] max-h-[680px] items-center justify-center gap-3 overflow-hidden">
-            <button
-              type="button"
-              onPointerDown={() => handleToneTouch("grave")}
-              onPointerUp={() => setActiveToneButton(null)}
-              onPointerCancel={() => setActiveToneButton(null)}
-              className={`h-[58%] rounded-xl border px-3 text-sm font-semibold transition-all ${
-                activeToneButton === "grave"
-                  ? "scale-[0.98] border-zinc-900 bg-zinc-900 text-white shadow-inner"
-                  : "border-zinc-300 bg-zinc-100 text-zinc-900"
-              }`}
-              style={{ width: MOBILE_SIDE_BUTTON_WIDTH_PX }}
-            >
-              Tom grave
-            </button>
+            <div className="flex h-[58%] flex-col justify-between" style={{ width: MOBILE_SIDE_BUTTON_WIDTH_PX }}>
+              <div className="rounded-xl border border-zinc-300 bg-zinc-50 p-2 text-center">
+                <p className="text-[11px] leading-tight text-zinc-500">Tempo</p>
+                <p className="text-sm font-semibold text-zinc-900">{formatClock(remainingMs)}</p>
+              </div>
+              <button
+                type="button"
+                onPointerDown={() => handleToneTouch("grave")}
+                onPointerUp={() => setActiveToneButton(null)}
+                onPointerCancel={() => setActiveToneButton(null)}
+                className={`h-[72%] rounded-xl border px-3 text-sm font-semibold transition-all ${
+                  activeToneButton === "grave"
+                    ? "scale-[0.98] border-zinc-900 bg-zinc-900 text-white shadow-inner"
+                    : "border-zinc-300 bg-zinc-100 text-zinc-900"
+                }`}
+              >
+                Tom grave
+              </button>
+            </div>
 
             <div
               onPointerDown={updatePointerPosition}
