@@ -34,7 +34,7 @@ type Phase = "intro" | "orientation" | "running" | "round-feedback" | "result";
 const MOBILE_SIDE_BUTTON_WIDTH_PX = 96;
 const MOBILE_LAYOUT_GAP_PX = 12;
 const MOBILE_HORIZONTAL_PADDING_PX = 24;
-const MOBILE_VERTICAL_RESERVED_PX = 260;
+const MOBILE_VERTICAL_RESERVED_PX = 140;
 const MOBILE_MIN_ARENA_PX = 220;
 const MOBILE_MAX_ARENA_PX = 540;
 
@@ -639,7 +639,7 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
             <p className="font-semibold text-zinc-900">{formatClock(remainingMs)}</p>
           </div>
 
-          <div className="mx-auto flex h-[calc(100dvh-18rem)] max-h-[520px] items-center justify-center gap-3 overflow-hidden">
+          <div className="mx-auto flex h-[calc(100dvh-10rem)] max-h-[680px] items-center justify-center gap-3 overflow-hidden">
             <button
               type="button"
               onPointerDown={() => handleToneTouch("grave")}

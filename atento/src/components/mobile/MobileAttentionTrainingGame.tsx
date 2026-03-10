@@ -420,11 +420,28 @@ export function MobileAttentionTrainingGame() {
     setStage(getStageForExercise(activeExercises[currentIndex]));
   };
 
+  const isImmersiveRadarTone =
+    stage === "exercise" && currentExercise?.kind === "radar-tone";
+
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-3xl items-center px-6 py-10">
-      <section className="w-full rounded-2xl border border-black/10 bg-white p-6 shadow-sm sm:p-8">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-sm font-medium text-zinc-500">{stageTitle[stage]}</p>
+    <main
+      className={`mx-auto w-full ${
+        isImmersiveRadarTone
+          ? "max-w-4xl px-2 py-2"
+          : "flex min-h-screen max-w-3xl items-center px-6 py-10"
+      }`}
+    >
+      <section
+        className={`w-full border border-black/10 bg-white shadow-sm ${
+          isImmersiveRadarTone
+            ? "rounded-xl p-2 sm:p-3"
+            : "rounded-2xl p-6 sm:p-8"
+        }`}
+      >
+        <div className={`flex items-center justify-between gap-3 ${isImmersiveRadarTone ? "mb-2" : ""}`}>
+          {!isImmersiveRadarTone && (
+            <p className="text-sm font-medium text-zinc-500">{stageTitle[stage]}</p>
+          )}
           <button
             type="button"
             onClick={handleReturnToMenu}
@@ -724,8 +741,9 @@ export function MobileAttentionTrainingGame() {
         )}
 
         {stage === "exercise" && currentExercise && (
-          <div className="mt-4 space-y-6">
-            <div className="space-y-1">
+          <div className={isImmersiveRadarTone ? "mt-1 space-y-3" : "mt-4 space-y-6"}>
+            {!isImmersiveRadarTone && (
+              <div className="space-y-1">
               {currentExercise.kind === "quiz" ? (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   {currentExercise.question}
@@ -815,7 +833,8 @@ export function MobileAttentionTrainingGame() {
                   Stroop Invertido
                 </h2>
               )}
-            </div>
+              </div>
+            )}
 
             {currentExercise.kind === "quiz" ? (
               <>
