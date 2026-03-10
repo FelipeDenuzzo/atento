@@ -4,6 +4,28 @@ type ReportNamingContext = {
   participantName?: string;
 };
 
+function resolveParticipantName(initialName?: string): string {
+  const fallback = initialName?.trim() || "usuario";
+  if (typeof window === "undefined") {
+    return fallback;
+  }
+
+  const stored =
+    window.localStorage.getItem("atentoUser") ||
+    window.localStorage.getItem("atento_user_name") ||
+    "";
+  const suggested = initialName?.trim() || stored.trim() || "";
+  const response = window.prompt("Digite seu nome para salvar o resultado:", suggested);
+  const picked = response?.trim() || suggested || fallback;
+
+  if (picked) {
+    window.localStorage.setItem("atentoUser", picked);
+    window.localStorage.setItem("atento_user_name", picked);
+  }
+
+  return picked;
+}
+
 function sanitizeSegment(value: string | undefined, fallback: string): string {
   if (!value) return fallback;
 
@@ -35,12 +57,12 @@ export function buildTxtReportFileName(
   date: Date = new Date(),
 ): string {
   const attentionType = sanitizeSegment(context.attentionTypeLabel, "tipo_atencao");
+  const participant = sanitizeSegment(resolveParticipantName(context.participantName), "usuario");
   const timestamp = buildTimestamp(date);
 
   if (context.mode === "sequence") {
-    const participant = sanitizeSegment(context.participantName, "usuario");
     return `${participant}_${attentionType}_${timestamp}.txt`;
   }
 
-  return `${attentionType}_${timestamp}.txt`;
+  return `${participant}_${attentionType}_${timestamp}.txt`;
 }

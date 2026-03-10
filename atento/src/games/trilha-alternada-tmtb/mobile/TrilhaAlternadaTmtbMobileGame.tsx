@@ -197,6 +197,7 @@ export function TrilhaAlternadaTmtbMobileGame({ basePoints, reportContext, onCom
   const [targetBlinkBlue, setTargetBlinkBlue] = useState(false);
 
   const [result, setResult] = useState<TmtbSessionResult | null>(null);
+  const [isResultPopupOpen, setIsResultPopupOpen] = useState(false);
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const phaseStartedAtRef = useRef<number | null>(null);
@@ -342,6 +343,7 @@ export function TrilhaAlternadaTmtbMobileGame({ basePoints, reportContext, onCom
     setWrongNodeId(null);
     setWrongDistractorId(null);
     setTargetBlinkBlue(false);
+    setIsResultPopupOpen(false);
     setPhase("running");
   }
 
@@ -386,6 +388,7 @@ export function TrilhaAlternadaTmtbMobileGame({ basePoints, reportContext, onCom
       setLogs([]);
       setCompletedSequenceLength(0);
       setResult(null);
+      setIsResultPopupOpen(false);
       setValidStartedAtMs(now);
       setElapsedValidMs(0);
       phaseDurationsRef.current = { 1: 0, 2: 0, 3: 0 };
@@ -413,6 +416,7 @@ export function TrilhaAlternadaTmtbMobileGame({ basePoints, reportContext, onCom
     });
 
     setResult(sessionResult);
+    setIsResultPopupOpen(true);
     const pointsEarned = Math.round(basePoints * Math.min(1, sessionResult.finalScore / 100));
     onComplete({ success: sessionResult.finalScore >= 60, pointsEarned });
     setPhase("result");
@@ -673,8 +677,9 @@ export function TrilhaAlternadaTmtbMobileGame({ basePoints, reportContext, onCom
         </div>
       )}
 
-      {phase === "result" && result && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
+      {phase === "result" && result && isResultPopupOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-3">
+          <div className="max-h-[94svh] w-full max-w-3xl space-y-4 overflow-y-auto rounded-lg border border-black/10 bg-white p-4 shadow-xl sm:p-5">
           <h3 className="text-xl font-semibold text-zinc-900">Resultado final</h3>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
@@ -735,12 +740,16 @@ export function TrilhaAlternadaTmtbMobileGame({ basePoints, reportContext, onCom
             </button>
             <button
               type="button"
-              onClick={() => setPhase("intro")}
+              onClick={() => {
+                setIsResultPopupOpen(false);
+                setPhase("intro");
+              }}
               className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
             >
               Jogar novamente
             </button>
           </div>
+        </div>
         </div>
       )}
     </div>
