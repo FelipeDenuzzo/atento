@@ -35,8 +35,10 @@ const MOBILE_SIDE_BUTTON_WIDTH_PX = 96;
 const MOBILE_LAYOUT_GAP_PX = 12;
 const MOBILE_HORIZONTAL_PADDING_PX = 24;
 const MOBILE_VERTICAL_RESERVED_PX = 140;
-const MOBILE_MIN_ARENA_PX = 220;
-const MOBILE_MAX_ARENA_PX = 540;
+const MOBILE_MIN_ARENA_WIDTH_PX = 180;
+const MOBILE_MAX_ARENA_WIDTH_PX = 720;
+const MOBILE_MIN_ARENA_HEIGHT_PX = 180;
+const MOBILE_MAX_ARENA_HEIGHT_PX = 420;
 
 const ROUND_CONFIGS: RadarToneRoundConfig[] = [
   {
@@ -172,16 +174,42 @@ function scaleVelocityToSpeed(state: RadarState, targetSpeed: number): RadarStat
   };
 }
 
-function getMobileArenaSizePx(): number {
-  if (typeof window === "undefined") return 320;
+function clamp(min: number, value: number, max: number): number {
+  return Math.max(min, Math.min(max, value));
+}
+
+function getViewportSize(): { width: number; height: number } {
+  if (typeof window === "undefined") {
+    return { width: 390, height: 844 };
+  }
+
+  const viewport = window.visualViewport;
+  return {
+    width: Math.round(viewport?.width ?? window.innerWidth),
+    height: Math.round(viewport?.height ?? window.innerHeight),
+  };
+}
+
+function getMobileArenaRectPx(): { width: number; height: number } {
+  const viewport = getViewportSize();
 
   const widthBudget =
-    window.innerWidth -
+    viewport.width -
     (MOBILE_SIDE_BUTTON_WIDTH_PX * 2 + MOBILE_LAYOUT_GAP_PX * 2 + MOBILE_HORIZONTAL_PADDING_PX);
-  const heightBudget = window.innerHeight - MOBILE_VERTICAL_RESERVED_PX;
+  const heightBudget = viewport.height - MOBILE_VERTICAL_RESERVED_PX;
 
-  const nextSize = Math.floor(Math.min(widthBudget, heightBudget, MOBILE_MAX_ARENA_PX));
-  return Math.max(MOBILE_MIN_ARENA_PX, nextSize);
+  const width = clamp(
+    MOBILE_MIN_ARENA_WIDTH_PX,
+    Math.floor(widthBudget),
+    MOBILE_MAX_ARENA_WIDTH_PX,
+  );
+  const height = clamp(
+    MOBILE_MIN_ARENA_HEIGHT_PX,
+    Math.floor(heightBudget),
+    MOBILE_MAX_ARENA_HEIGHT_PX,
+  );
+
+  return { width, height };
 }
 
 function applySphereCollision(params: {
@@ -268,7 +296,7 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
   const [remainingMs, setRemainingMs] = useState(ROUND_CONFIGS[0]?.durationMs ?? 0);
   const [dotPosition, setDotPosition] = useState<{ x: number; y: number }>({ x: 180, y: 180 });
   const [redDotPosition, setRedDotPosition] = useState<{ x: number; y: number } | null>(null);
-  const [arenaSizePx, setArenaSizePx] = useState(320);
+  const [arenaRectPx, setArenaRectPx] = useState<{ width: number; height: number }>({ width: 360, height: 300 });
   const [isTrackingTarget, setIsTrackingTarget] = useState(false);
   const [activeToneButton, setActiveToneButton] = useState<ToneType | null>(null);
   const [roundLogs, setRoundLogs] = useState<RadarToneRoundLog[]>([]);
@@ -291,14 +319,15 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
   const toneFeedbackTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
-    setArenaSizePx(getMobileArenaSizePx());
+    setArenaRectPx(getMobileArenaRectPx());
 
-    function updateArenaSize() {
-      setArenaSizePx(getMobileArenaSizePx());
+    function updateArenaRect() {
+      setArenaRectPx(getMobileArenaRectPx());
     }
 
-    window.addEventListener("resize", updateArenaSize);
-    window.addEventListener("orientationchange", updateArenaSize);
+    window.addEventListener("resize", updateArenaRect);
+    window.addEventListener("orientationchange", updateArenaRect);
+    window.visualViewport?.addEventListener("resize", updateArenaRect);
 
     return () => {
       if (frameRef.current) cancelAnimationFrame(frameRef.current);
@@ -309,8 +338,9 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
       if (audioContextRef.current) {
         audioContextRef.current.close();
       }
-      window.removeEventListener("resize", updateArenaSize);
-      window.removeEventListener("orientationchange", updateArenaSize);
+      window.removeEventListener("resize", updateArenaRect);
+      window.removeEventListener("orientationchange", updateArenaRect);
+      window.visualViewport?.removeEventListener("resize", updateArenaRect);
     };
   }, []);
 
@@ -342,8 +372,11 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
 
   function updatePointerPosition(event: React.PointerEvent<HTMLDivElement>) {
     const rect = event.currentTarget.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    const logicalArenaSize = roundRuntimeRef.current?.config.arenaSizePx ?? currentConfig.arenaSizePx;
+    const xRatio = clamp(0, (event.clientX - rect.left) / rect.width, 1);
+    const yRatio = clamp(0, (event.clientY - rect.top) / rect.height, 1);
+    const x = xRatio * logicalArenaSize;
+    const y = yRatio * logicalArenaSize;
     mouseRef.current = { x, y, valid: true };
   }
 
@@ -461,10 +494,7 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
       audioContextRef.current = createAudioContext();
     }
 
-    const roundConfig: RadarToneRoundConfig = {
-      ...currentConfig,
-      arenaSizePx,
-    };
+    const roundConfig: RadarToneRoundConfig = { ...currentConfig };
 
     const runtime = startRound(roundConfig);
     roundRuntimeRef.current = runtime;
@@ -662,15 +692,19 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
               onPointerCancel={clearMousePosition}
               onPointerLeave={clearMousePosition}
               className="relative touch-none rounded-lg border border-zinc-300 bg-zinc-50"
-              style={{ width: arenaSizePx, height: arenaSizePx }}
+              style={{ width: arenaRectPx.width, height: arenaRectPx.height }}
             >
               <div
                 className="absolute rounded-full bg-zinc-900 transition-shadow"
                 style={{
                   width: currentConfig.dotRadiusPx * 2,
                   height: currentConfig.dotRadiusPx * 2,
-                  left: dotPosition.x - currentConfig.dotRadiusPx,
-                  top: dotPosition.y - currentConfig.dotRadiusPx,
+                  left:
+                    (dotPosition.x / currentConfig.arenaSizePx) * arenaRectPx.width -
+                    currentConfig.dotRadiusPx,
+                  top:
+                    (dotPosition.y / currentConfig.arenaSizePx) * arenaRectPx.height -
+                    currentConfig.dotRadiusPx,
                   boxShadow: isTrackingTarget ? "0 0 0 10px rgba(37, 99, 235, 0.35)" : "none",
                 }}
               />
@@ -680,8 +714,12 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
                   style={{
                     width: currentConfig.dotRadiusPx * 2,
                     height: currentConfig.dotRadiusPx * 2,
-                    left: redDotPosition.x - currentConfig.dotRadiusPx,
-                    top: redDotPosition.y - currentConfig.dotRadiusPx,
+                    left:
+                      (redDotPosition.x / currentConfig.arenaSizePx) * arenaRectPx.width -
+                      currentConfig.dotRadiusPx,
+                    top:
+                      (redDotPosition.y / currentConfig.arenaSizePx) * arenaRectPx.height -
+                      currentConfig.dotRadiusPx,
                   }}
                 />
               )}
