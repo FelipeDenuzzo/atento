@@ -38,7 +38,7 @@ const MOBILE_VERTICAL_RESERVED_PX = 140;
 const MOBILE_MIN_ARENA_WIDTH_PX = 180;
 const MOBILE_MAX_ARENA_WIDTH_PX = 720;
 const MOBILE_MIN_ARENA_HEIGHT_PX = 180;
-const MOBILE_MAX_ARENA_HEIGHT_PX = 420;
+const MOBILE_MAX_ARENA_HEIGHT_PX = 360;
 
 const ROUND_CONFIGS: RadarToneRoundConfig[] = [
   {
@@ -664,26 +664,28 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
 
       {phase === "running" && currentConfig && (
         <div className="space-y-3 rounded-lg border border-black/10 bg-white p-3 sm:p-4">
-          <div className="mx-auto flex h-[calc(100dvh-10rem)] max-h-[680px] items-center justify-center gap-3 overflow-hidden">
-            <div className="flex h-[58%] flex-col justify-between" style={{ width: MOBILE_SIDE_BUTTON_WIDTH_PX }}>
-              <div className="rounded-xl border border-zinc-300 bg-zinc-50 p-2 text-center">
-                <p className="text-[11px] leading-tight text-zinc-500">Tempo</p>
-                <p className="text-sm font-semibold text-zinc-900">{formatClock(remainingMs)}</p>
-              </div>
-              <button
-                type="button"
-                onPointerDown={() => handleToneTouch("grave")}
-                onPointerUp={() => setActiveToneButton(null)}
-                onPointerCancel={() => setActiveToneButton(null)}
-                className={`h-[72%] rounded-xl border px-3 text-sm font-semibold transition-all ${
-                  activeToneButton === "grave"
-                    ? "scale-[0.98] border-zinc-900 bg-zinc-900 text-white shadow-inner"
-                    : "border-zinc-300 bg-zinc-100 text-zinc-900"
-                }`}
-              >
-                Tom grave
-              </button>
+          <div className="flex justify-center">
+            <div className="rounded-xl border border-zinc-300 bg-zinc-50 px-3 py-2 text-center" style={{ width: MOBILE_SIDE_BUTTON_WIDTH_PX }}>
+              <p className="text-[11px] leading-tight text-zinc-500">Tempo</p>
+              <p className="text-sm font-semibold text-zinc-900">{formatClock(remainingMs)}</p>
             </div>
+          </div>
+
+          <div className="mx-auto flex w-full items-center justify-center gap-3 overflow-hidden">
+            <button
+              type="button"
+              onPointerDown={() => handleToneTouch("grave")}
+              onPointerUp={() => setActiveToneButton(null)}
+              onPointerCancel={() => setActiveToneButton(null)}
+              className={`h-[58%] min-h-[180px] rounded-xl border px-3 text-sm font-semibold transition-all ${
+                activeToneButton === "grave"
+                  ? "scale-[0.98] border-zinc-900 bg-zinc-900 text-white shadow-inner"
+                  : "border-zinc-300 bg-zinc-100 text-zinc-900"
+              }`}
+              style={{ width: MOBILE_SIDE_BUTTON_WIDTH_PX }}
+            >
+              Tom grave
+            </button>
 
             <div
               onPointerDown={updatePointerPosition}
@@ -699,12 +701,16 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
                 style={{
                   width: currentConfig.dotRadiusPx * 2,
                   height: currentConfig.dotRadiusPx * 2,
-                  left:
-                    (dotPosition.x / currentConfig.arenaSizePx) * arenaRectPx.width -
-                    currentConfig.dotRadiusPx,
-                  top:
-                    (dotPosition.y / currentConfig.arenaSizePx) * arenaRectPx.height -
-                    currentConfig.dotRadiusPx,
+                  left: clamp(
+                    0,
+                    (dotPosition.x / currentConfig.arenaSizePx) * arenaRectPx.width - currentConfig.dotRadiusPx,
+                    arenaRectPx.width - currentConfig.dotRadiusPx * 2,
+                  ),
+                  top: clamp(
+                    0,
+                    (dotPosition.y / currentConfig.arenaSizePx) * arenaRectPx.height - currentConfig.dotRadiusPx,
+                    arenaRectPx.height - currentConfig.dotRadiusPx * 2,
+                  ),
                   boxShadow: isTrackingTarget ? "0 0 0 10px rgba(37, 99, 235, 0.35)" : "none",
                 }}
               />
@@ -714,12 +720,16 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
                   style={{
                     width: currentConfig.dotRadiusPx * 2,
                     height: currentConfig.dotRadiusPx * 2,
-                    left:
-                      (redDotPosition.x / currentConfig.arenaSizePx) * arenaRectPx.width -
-                      currentConfig.dotRadiusPx,
-                    top:
-                      (redDotPosition.y / currentConfig.arenaSizePx) * arenaRectPx.height -
-                      currentConfig.dotRadiusPx,
+                    left: clamp(
+                      0,
+                      (redDotPosition.x / currentConfig.arenaSizePx) * arenaRectPx.width - currentConfig.dotRadiusPx,
+                      arenaRectPx.width - currentConfig.dotRadiusPx * 2,
+                    ),
+                    top: clamp(
+                      0,
+                      (redDotPosition.y / currentConfig.arenaSizePx) * arenaRectPx.height - currentConfig.dotRadiusPx,
+                      arenaRectPx.height - currentConfig.dotRadiusPx * 2,
+                    ),
                   }}
                 />
               )}
