@@ -434,7 +434,7 @@ export const trainingPlans: TrainingPlan[] = [
               ? [
                   {
                     id: "div-1",
-                    title: "Radar + Tono",
+                    title: "Radar e Tom",
                     attentionType: "dividida" as const,
                     kind: "radar-tone" as const,
                     instructions:

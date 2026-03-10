@@ -1,4 +1,4 @@
-# Radar + Tono
+# Radar e Tom
 
 Treino de atenção dividida em dupla tarefa visual + auditiva.
 

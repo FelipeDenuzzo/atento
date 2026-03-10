@@ -772,7 +772,7 @@ export function AttentionTrainingGame() {
                 </h2>
               ) : currentExercise.kind === "radar-tone" ? (
                 <h2 className="text-xl font-semibold text-zinc-900">
-                  Radar + Tono
+                  Radar e Tom
                 </h2>
               ) : currentExercise.kind === "drive-signs" ? (
                 <h2 className="text-xl font-semibold text-zinc-900">

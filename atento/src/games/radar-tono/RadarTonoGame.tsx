@@ -106,11 +106,6 @@ const ROUND_CONFIGS: RadarToneRoundConfig[] = [
   },
 ];
 
-function toneFrequencyForUi(config: RadarToneRoundConfig): number {
-  const avgIntervalMs = (config.toneIntervalMinMs + config.toneIntervalMaxMs) / 2;
-  return Math.round(60000 / avgIntervalMs);
-}
-
 function formatClock(ms: number): string {
   const sec = Math.max(0, Math.ceil(ms / 1000));
   const min = Math.floor(sec / 60);
@@ -220,7 +215,7 @@ function applySphereCollision(params: {
 function buildResultText(result: RadarToneSessionResult, reportContext?: ReportContext): string {
   const lines: string[] = [];
   lines.push("=" + "=".repeat(60));
-  lines.push("RESULTADO - RADAR + TONO");
+  lines.push("RESULTADO - RADAR E TOM");
   lines.push("=" + "=".repeat(60));
   lines.push("");
   if (reportContext) {
@@ -528,7 +523,7 @@ export function RadarTonoGame({ basePoints, reportContext, onComplete }: Props) 
     <div className="space-y-5">
       {phase === "intro" && currentConfig && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <h3 className="text-xl font-semibold text-zinc-900">Radar + Tono</h3>
+          <h3 className="text-xl font-semibold text-zinc-900">Radar e Tom</h3>
           <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
             <p className="font-semibold text-zinc-900">{currentConfig.name}</p>
             <p className="mt-1">Mantenha o cursor sobre o ponto em movimento o maior tempo possível.</p>
@@ -550,19 +545,9 @@ export function RadarTonoGame({ basePoints, reportContext, onComplete }: Props) 
 
       {phase === "running" && currentConfig && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Fase</p>
-              <p className="font-semibold text-zinc-900">{roundIndex + 1}/{ROUND_CONFIGS.length}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
+          <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
               <p className="text-xs text-zinc-500">Tempo restante</p>
               <p className="font-semibold text-zinc-900">{formatClock(remainingMs)}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Tons (ritmo)</p>
-              <p className="font-semibold text-zinc-900">~{toneFrequencyForUi(currentConfig)}/min</p>
-            </div>
           </div>
 
           <div className="space-y-3">

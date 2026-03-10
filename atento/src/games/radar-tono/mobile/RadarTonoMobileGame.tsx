@@ -29,7 +29,14 @@ type Props = {
   onComplete: (result: { success: boolean; pointsEarned: number }) => void;
 };
 
-type Phase = "intro" | "running" | "round-feedback" | "result";
+type Phase = "intro" | "orientation" | "running" | "round-feedback" | "result";
+
+const MOBILE_SIDE_BUTTON_WIDTH_PX = 96;
+const MOBILE_LAYOUT_GAP_PX = 12;
+const MOBILE_HORIZONTAL_PADDING_PX = 24;
+const MOBILE_VERTICAL_RESERVED_PX = 260;
+const MOBILE_MIN_ARENA_PX = 220;
+const MOBILE_MAX_ARENA_PX = 540;
 
 const ROUND_CONFIGS: RadarToneRoundConfig[] = [
   {
@@ -106,11 +113,6 @@ const ROUND_CONFIGS: RadarToneRoundConfig[] = [
   },
 ];
 
-function toneFrequencyForUi(config: RadarToneRoundConfig): number {
-  const avgIntervalMs = (config.toneIntervalMinMs + config.toneIntervalMaxMs) / 2;
-  return Math.round(60000 / avgIntervalMs);
-}
-
 function formatClock(ms: number): string {
   const sec = Math.max(0, Math.ceil(ms / 1000));
   const min = Math.floor(sec / 60);
@@ -170,6 +172,18 @@ function scaleVelocityToSpeed(state: RadarState, targetSpeed: number): RadarStat
   };
 }
 
+function getMobileArenaSizePx(): number {
+  if (typeof window === "undefined") return 320;
+
+  const widthBudget =
+    window.innerWidth -
+    (MOBILE_SIDE_BUTTON_WIDTH_PX * 2 + MOBILE_LAYOUT_GAP_PX * 2 + MOBILE_HORIZONTAL_PADDING_PX);
+  const heightBudget = window.innerHeight - MOBILE_VERTICAL_RESERVED_PX;
+
+  const nextSize = Math.floor(Math.min(widthBudget, heightBudget, MOBILE_MAX_ARENA_PX));
+  return Math.max(MOBILE_MIN_ARENA_PX, nextSize);
+}
+
 function applySphereCollision(params: {
   black: RadarState;
   red: RadarState;
@@ -220,7 +234,7 @@ function applySphereCollision(params: {
 function buildResultText(result: RadarToneSessionResult, reportContext?: ReportContext): string {
   const lines: string[] = [];
   lines.push("=" + "=".repeat(60));
-  lines.push("RESULTADO - RADAR + TONO");
+  lines.push("RESULTADO - RADAR E TOM");
   lines.push("=" + "=".repeat(60));
   lines.push("");
   if (reportContext) {
@@ -250,9 +264,13 @@ function buildResultText(result: RadarToneSessionResult, reportContext?: ReportC
 export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: Props) {
   const [phase, setPhase] = useState<Phase>("intro");
   const [roundIndex, setRoundIndex] = useState(0);
+  const [orientationCountdown, setOrientationCountdown] = useState(4);
   const [remainingMs, setRemainingMs] = useState(ROUND_CONFIGS[0]?.durationMs ?? 0);
   const [dotPosition, setDotPosition] = useState<{ x: number; y: number }>({ x: 180, y: 180 });
   const [redDotPosition, setRedDotPosition] = useState<{ x: number; y: number } | null>(null);
+  const [arenaSizePx, setArenaSizePx] = useState(320);
+  const [isTrackingTarget, setIsTrackingTarget] = useState(false);
+  const [activeToneButton, setActiveToneButton] = useState<ToneType | null>(null);
   const [roundLogs, setRoundLogs] = useState<RadarToneRoundLog[]>([]);
   const [sessionResult, setSessionResult] = useState<RadarToneSessionResult | null>(null);
 
@@ -267,18 +285,53 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
   const tonesRef = useRef<ToneEvent[]>([]);
   const trackedMsRef = useRef(0);
   const mouseRef = useRef<{ x: number; y: number; valid: boolean }>({ x: 0, y: 0, valid: false });
+  const trackingStateRef = useRef(false);
   const sessionStartedAtRef = useRef<number | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const toneFeedbackTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
+    setArenaSizePx(getMobileArenaSizePx());
+
+    function updateArenaSize() {
+      setArenaSizePx(getMobileArenaSizePx());
+    }
+
+    window.addEventListener("resize", updateArenaSize);
+    window.addEventListener("orientationchange", updateArenaSize);
+
     return () => {
       if (frameRef.current) cancelAnimationFrame(frameRef.current);
       frameRef.current = null;
+      if (toneFeedbackTimeoutRef.current) {
+        window.clearTimeout(toneFeedbackTimeoutRef.current);
+      }
       if (audioContextRef.current) {
         audioContextRef.current.close();
       }
+      window.removeEventListener("resize", updateArenaSize);
+      window.removeEventListener("orientationchange", updateArenaSize);
     };
   }, []);
+
+  useEffect(() => {
+    if (phase !== "orientation") return;
+
+    setOrientationCountdown(4);
+    const intervalId = window.setInterval(() => {
+      setOrientationCountdown((value) => (value > 0 ? value - 1 : 0));
+    }, 1000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase !== "orientation") return;
+    if (orientationCountdown !== 0) return;
+    startCurrentRound();
+  }, [phase, orientationCountdown]);
 
   function stopRoundLoop() {
     if (frameRef.current) {
@@ -296,6 +349,10 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
 
   function clearMousePosition() {
     mouseRef.current = { x: 0, y: 0, valid: false };
+    if (trackingStateRef.current) {
+      trackingStateRef.current = false;
+      setIsTrackingTarget(false);
+    }
   }
 
   function processRoundFrame(now: number) {
@@ -353,11 +410,18 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
     setDotPosition({ x: nextBlackState.x, y: nextBlackState.y });
     setRedDotPosition(nextRedState ? { x: nextRedState.x, y: nextRedState.y } : null);
 
+    let trackingNow = false;
     if (mouseRef.current.valid) {
       const distance = Math.hypot(mouseRef.current.x - nextBlackState.x, mouseRef.current.y - nextBlackState.y);
       if (distance <= config.dotRadiusPx + config.hitTolerancePx) {
         trackedMsRef.current += dtMs;
+        trackingNow = true;
       }
+    }
+
+    if (trackingNow !== trackingStateRef.current) {
+      trackingStateRef.current = trackingNow;
+      setIsTrackingTarget(trackingNow);
     }
 
     let changed = false;
@@ -397,15 +461,20 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
       audioContextRef.current = createAudioContext();
     }
 
-    const runtime = startRound(currentConfig);
+    const roundConfig: RadarToneRoundConfig = {
+      ...currentConfig,
+      arenaSizePx,
+    };
+
+    const runtime = startRound(roundConfig);
     roundRuntimeRef.current = runtime;
     radarStateRef.current = runtime.radarInitialState;
-    redRadarStateRef.current = currentConfig.hasDistractorSphere
+    redRadarStateRef.current = roundConfig.hasDistractorSphere
       ? {
-          x: currentConfig.arenaSizePx * 0.25,
-          y: currentConfig.arenaSizePx * 0.75,
-          vx: (currentConfig.distractorBaseSpeedPxPerSec ?? currentConfig.radarSpeedPxPerSec) * Math.cos(Math.PI / 6),
-          vy: (currentConfig.distractorBaseSpeedPxPerSec ?? currentConfig.radarSpeedPxPerSec) * Math.sin(Math.PI / 6),
+          x: roundConfig.arenaSizePx * 0.25,
+          y: roundConfig.arenaSizePx * 0.75,
+          vx: (roundConfig.distractorBaseSpeedPxPerSec ?? roundConfig.radarSpeedPxPerSec) * Math.cos(Math.PI / 6),
+          vy: (roundConfig.distractorBaseSpeedPxPerSec ?? roundConfig.radarSpeedPxPerSec) * Math.sin(Math.PI / 6),
         }
       : null;
     tonesRef.current = runtime.tones;
@@ -417,13 +486,17 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
         ? { x: redRadarStateRef.current.x, y: redRadarStateRef.current.y }
         : null,
     );
-    setRemainingMs(currentConfig.durationMs);
+    setRemainingMs(roundConfig.durationMs);
 
     roundStartRef.current = performance.now();
     lastFrameRef.current = roundStartRef.current;
     setPhase("running");
     stopRoundLoop();
     frameRef.current = requestAnimationFrame(processRoundFrame);
+  }
+
+  function beginRoundOrientationPopup() {
+    setPhase("orientation");
   }
 
   function finalizeRound() {
@@ -465,8 +538,18 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
     setPhase("result");
   }
 
-  function handleToneTouch(key: "j" | "k") {
+  function handleToneTouch(tone: ToneType) {
     if (phase !== "running" || !roundRuntimeRef.current) return;
+
+    setActiveToneButton(tone);
+    if (toneFeedbackTimeoutRef.current) {
+      window.clearTimeout(toneFeedbackTimeoutRef.current);
+    }
+    toneFeedbackTimeoutRef.current = window.setTimeout(() => {
+      setActiveToneButton((value) => (value === tone ? null : value));
+    }, 160);
+
+    const key = tone === "grave" ? "j" : "k";
     const elapsedMs = Math.max(0, performance.now() - roundStartRef.current);
     const handled = handleKeyPress({
       key,
@@ -518,7 +601,7 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
     <div className="space-y-5">
       {phase === "intro" && currentConfig && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <h3 className="text-xl font-semibold text-zinc-900">Radar + Tono</h3>
+          <h3 className="text-xl font-semibold text-zinc-900">Radar e Tom</h3>
           <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
             <p className="font-semibold text-zinc-900">{currentConfig.name}</p>
             <p className="mt-1">Mantenha o dedo sobre a arena, acompanhando o ponto preto em movimento.</p>
@@ -531,7 +614,7 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
           </div>
           <button
             type="button"
-            onClick={startCurrentRound}
+            onClick={beginRoundOrientationPopup}
             className="w-full rounded-lg bg-zinc-900 px-4 py-3 font-semibold text-white hover:bg-zinc-700"
           >
             Iniciar fase
@@ -539,40 +622,56 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
         </div>
       )}
 
-      {phase === "running" && currentConfig && (
+      {phase === "orientation" && currentConfig && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Fase</p>
-              <p className="font-semibold text-zinc-900">{roundIndex + 1}/{ROUND_CONFIGS.length}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Tempo restante</p>
-              <p className="font-semibold text-zinc-900">{formatClock(remainingMs)}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Tons (ritmo)</p>
-              <p className="font-semibold text-zinc-900">~{toneFrequencyForUi(currentConfig)}/min</p>
-            </div>
+          <h3 className="text-xl font-semibold text-zinc-900">Prepare-se</h3>
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            <p className="font-semibold">Gire o celular para horizontal</p>
+            <p className="mt-1">A fase {currentConfig.id} vai iniciar automaticamente em {orientationCountdown}s.</p>
+          </div>
+        </div>
+      )}
+
+      {phase === "running" && currentConfig && (
+        <div className="space-y-3 rounded-lg border border-black/10 bg-white p-3 sm:p-4">
+          <div className="rounded-lg border border-black/10 bg-zinc-50 p-2 text-center">
+            <p className="text-xs text-zinc-500">Tempo restante</p>
+            <p className="font-semibold text-zinc-900">{formatClock(remainingMs)}</p>
           </div>
 
-          <div className="space-y-3">
+          <div className="mx-auto flex h-[calc(100dvh-18rem)] max-h-[520px] items-center justify-center gap-3 overflow-hidden">
+            <button
+              type="button"
+              onPointerDown={() => handleToneTouch("grave")}
+              onPointerUp={() => setActiveToneButton(null)}
+              onPointerCancel={() => setActiveToneButton(null)}
+              className={`h-[58%] rounded-xl border px-3 text-sm font-semibold transition-all ${
+                activeToneButton === "grave"
+                  ? "scale-[0.98] border-zinc-900 bg-zinc-900 text-white shadow-inner"
+                  : "border-zinc-300 bg-zinc-100 text-zinc-900"
+              }`}
+              style={{ width: MOBILE_SIDE_BUTTON_WIDTH_PX }}
+            >
+              Tom grave
+            </button>
+
             <div
               onPointerDown={updatePointerPosition}
               onPointerMove={updatePointerPosition}
               onPointerUp={clearMousePosition}
               onPointerCancel={clearMousePosition}
               onPointerLeave={clearMousePosition}
-              className="relative mx-auto touch-none rounded-lg border border-zinc-300 bg-zinc-50"
-              style={{ width: currentConfig.arenaSizePx, height: currentConfig.arenaSizePx }}
+              className="relative touch-none rounded-lg border border-zinc-300 bg-zinc-50"
+              style={{ width: arenaSizePx, height: arenaSizePx }}
             >
               <div
-                className="absolute rounded-full bg-zinc-900"
+                className="absolute rounded-full bg-zinc-900 transition-shadow"
                 style={{
                   width: currentConfig.dotRadiusPx * 2,
                   height: currentConfig.dotRadiusPx * 2,
                   left: dotPosition.x - currentConfig.dotRadiusPx,
                   top: dotPosition.y - currentConfig.dotRadiusPx,
+                  boxShadow: isTrackingTarget ? "0 0 0 10px rgba(37, 99, 235, 0.35)" : "none",
                 }}
               />
               {redDotPosition && (
@@ -587,22 +686,21 @@ export function RadarTonoMobileGame({ basePoints, reportContext, onComplete }: P
                 />
               )}
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onPointerDown={() => handleToneTouch("j")}
-                className="rounded-lg border border-zinc-300 bg-zinc-100 px-4 py-3 text-sm font-semibold text-zinc-900"
-              >
-                Tom grave
-              </button>
-              <button
-                type="button"
-                onPointerDown={() => handleToneTouch("k")}
-                className="rounded-lg border border-zinc-300 bg-zinc-100 px-4 py-3 text-sm font-semibold text-zinc-900"
-              >
-                Tom agudo
-              </button>
-            </div>
+
+            <button
+              type="button"
+              onPointerDown={() => handleToneTouch("agudo")}
+              onPointerUp={() => setActiveToneButton(null)}
+              onPointerCancel={() => setActiveToneButton(null)}
+              className={`h-[58%] rounded-xl border px-3 text-sm font-semibold transition-all ${
+                activeToneButton === "agudo"
+                  ? "scale-[0.98] border-zinc-900 bg-zinc-900 text-white shadow-inner"
+                  : "border-zinc-300 bg-zinc-100 text-zinc-900"
+              }`}
+              style={{ width: MOBILE_SIDE_BUTTON_WIDTH_PX }}
+            >
+              Tom agudo
+            </button>
           </div>
         </div>
       )}
