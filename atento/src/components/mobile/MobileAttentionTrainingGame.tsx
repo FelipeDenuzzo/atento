@@ -22,7 +22,6 @@ import { AcharOFaltandoGame } from "@/games/achar-o-faltando/AcharOFaltandoGame"
 import { CopiaMatrizesGame } from "@/games/copia-matrizes/CopiaMatrizesGame";
 import { CacaPalavrasLongosGame } from "@/games/caca-palavras-longos/CacaPalavrasLongosGame";
 import { RadarTonoMobileGame } from "@/games/radar-tono/mobile/RadarTonoMobileGame";
-import { DirijaPlacasMobileGame } from "@/games/dirija-placas/mobile/DirijaPlacasMobileGame";
 import { DirijaPalavrasAlvoGame } from "@/games/dirija-palavras-alvo/DirijaPalavrasAlvoGame";
 import { ChatVigilanciaErrosGame } from "@/games/chat-vigilancia-erros/ChatVigilanciaErrosGame";
 import { MapaSimbolosMonitorSomGame } from "@/games/mapa-simbolos-monitor-som/MapaSimbolosMonitorSomGame";
@@ -200,7 +199,6 @@ export function MobileAttentionTrainingGame() {
     exercise?.kind === "copy-matrices" ||
     exercise?.kind === "long-word-search" ||
     exercise?.kind === "radar-tone" ||
-    exercise?.kind === "drive-signs" ||
     exercise?.kind === "drive-word-target" ||
     exercise?.kind === "chat-error-vigilance" ||
     exercise?.kind === "symbol-map-sound-monitor" ||
@@ -282,7 +280,6 @@ export function MobileAttentionTrainingGame() {
         selectedExercise.kind === "copy-matrices" ||
         selectedExercise.kind === "long-word-search" ||
         selectedExercise.kind === "radar-tone" ||
-        selectedExercise.kind === "drive-signs" ||
         selectedExercise.kind === "drive-word-target" ||
         selectedExercise.kind === "chat-error-vigilance" ||
         selectedExercise.kind === "symbol-map-sound-monitor" ||
@@ -421,7 +418,7 @@ export function MobileAttentionTrainingGame() {
   };
 
   const isImmersiveRadarTone =
-    stage === "exercise" && (currentExercise?.kind === "radar-tone" || currentExercise?.kind === "drive-signs");
+    stage === "exercise" && currentExercise?.kind === "radar-tone";
 
   return (
     <main
@@ -792,10 +789,6 @@ export function MobileAttentionTrainingGame() {
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Radar e Tom
                 </h2>
-              ) : currentExercise.kind === "drive-signs" ? (
-                <h2 className="text-xl font-semibold text-zinc-900">
-                  Dirija + Placas
-                </h2>
               ) : currentExercise.kind === "drive-word-target" ? (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Dirija + Palavras-Alvo
@@ -1134,28 +1127,6 @@ export function MobileAttentionTrainingGame() {
               />
             ) : currentExercise.kind === "radar-tone" ? (
               <RadarTonoMobileGame
-                basePoints={currentExercise.points}
-                startingLevel={currentExercise.startingLevel}
-                maxLevelHint={currentExercise.maxLevelHint}
-                reportContext={reportContext}
-                onComplete={({ success, pointsEarned }) => {
-                  setScore((value) => value + pointsEarned);
-                  if (success) {
-                    setHits((value) => value + 1);
-                  }
-                  const nextIndex = currentIndex + 1;
-                  if (nextIndex >= activeExercises.length) {
-                    setStage("result");
-                  } else {
-                    setCurrentIndex(nextIndex);
-                    setSelectedOption(null);
-                    setSubmitted(false);
-                    setStage(getStageForExercise(activeExercises[nextIndex]));
-                  }
-                }}
-              />
-            ) : currentExercise.kind === "drive-signs" ? (
-              <DirijaPlacasMobileGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}

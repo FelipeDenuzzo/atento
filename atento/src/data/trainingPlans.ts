@@ -4,7 +4,6 @@ import {
   ENABLE_COUNTING_FLOW_TASK,
   ENABLE_COPY_MATRICES,
   ENABLE_CHAT_ERROR_VIGILANCE,
-  ENABLE_DRIVE_SIGNS,
   ENABLE_DRIVE_WORD_TARGET,
   ENABLE_SYMBOL_MAP_SOUND_MONITOR,
   ENABLE_RAPID_CLASSIFICATION_MEMORY,
@@ -422,7 +421,7 @@ export const trainingPlans: TrainingPlan[] = [
         },
       ]
     : []),
-  ...(ENABLE_RADAR_TONE || ENABLE_DRIVE_SIGNS || ENABLE_DRIVE_WORD_TARGET || ENABLE_CHAT_ERROR_VIGILANCE || ENABLE_SYMBOL_MAP_SOUND_MONITOR || ENABLE_RAPID_CLASSIFICATION_MEMORY
+  ...(ENABLE_RADAR_TONE || ENABLE_DRIVE_WORD_TARGET || ENABLE_CHAT_ERROR_VIGILANCE || ENABLE_SYMBOL_MAP_SOUND_MONITOR || ENABLE_RAPID_CLASSIFICATION_MEMORY
     ? [
         {
           id: "foco-dividida",
@@ -439,21 +438,6 @@ export const trainingPlans: TrainingPlan[] = [
                     kind: "radar-tone" as const,
                     instructions:
                       "Mantenha o cursor sobre o ponto móvel enquanto responde tons graves/agudos com teclas diferentes.",
-                    startingLevel: 1,
-                    maxLevelHint: 1,
-                    points: 30,
-                  },
-                ]
-              : []),
-            ...(ENABLE_DRIVE_SIGNS
-              ? [
-                  {
-                    id: "div-2",
-                    title: "Dirija + Placas",
-                    attentionType: "dividida" as const,
-                    kind: "drive-signs" as const,
-                    instructions:
-                      "Mantenha o carro na faixa enquanto responde apenas à placa-alvo indicada em cada fase.",
                     startingLevel: 1,
                     maxLevelHint: 1,
                     points: 30,

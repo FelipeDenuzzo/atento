@@ -22,7 +22,6 @@ import { AcharOFaltandoGame } from "@/games/achar-o-faltando/AcharOFaltandoGame"
 import { CopiaMatrizesGame } from "@/games/copia-matrizes/CopiaMatrizesGame";
 import { CacaPalavrasLongosGame } from "@/games/caca-palavras-longos/CacaPalavrasLongosGame";
 import { RadarTonoGame } from "@/games/radar-tono/RadarTonoGame";
-import { DirijaPlacasGame } from "@/games/dirija-placas/DirijaPlacasGame";
 import { DirijaPalavrasAlvoGame } from "@/games/dirija-palavras-alvo/DirijaPalavrasAlvoGame";
 import { ChatVigilanciaErrosGame } from "@/games/chat-vigilancia-erros/ChatVigilanciaErrosGame";
 import { MapaSimbolosMonitorSomGame } from "@/games/mapa-simbolos-monitor-som/MapaSimbolosMonitorSomGame";
@@ -200,7 +199,6 @@ export function AttentionTrainingGame() {
     exercise?.kind === "copy-matrices" ||
     exercise?.kind === "long-word-search" ||
     exercise?.kind === "radar-tone" ||
-    exercise?.kind === "drive-signs" ||
     exercise?.kind === "drive-word-target" ||
     exercise?.kind === "chat-error-vigilance" ||
     exercise?.kind === "symbol-map-sound-monitor" ||
@@ -282,7 +280,6 @@ export function AttentionTrainingGame() {
         selectedExercise.kind === "copy-matrices" ||
         selectedExercise.kind === "long-word-search" ||
         selectedExercise.kind === "radar-tone" ||
-        selectedExercise.kind === "drive-signs" ||
         selectedExercise.kind === "drive-word-target" ||
         selectedExercise.kind === "chat-error-vigilance" ||
         selectedExercise.kind === "symbol-map-sound-monitor" ||
@@ -774,10 +771,6 @@ export function AttentionTrainingGame() {
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Radar e Tom
                 </h2>
-              ) : currentExercise.kind === "drive-signs" ? (
-                <h2 className="text-xl font-semibold text-zinc-900">
-                  Dirija + Placas
-                </h2>
               ) : currentExercise.kind === "drive-word-target" ? (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Dirija + Palavras-Alvo
@@ -1115,28 +1108,6 @@ export function AttentionTrainingGame() {
               />
             ) : currentExercise.kind === "radar-tone" ? (
               <RadarTonoGame
-                basePoints={currentExercise.points}
-                startingLevel={currentExercise.startingLevel}
-                maxLevelHint={currentExercise.maxLevelHint}
-                reportContext={reportContext}
-                onComplete={({ success, pointsEarned }) => {
-                  setScore((value) => value + pointsEarned);
-                  if (success) {
-                    setHits((value) => value + 1);
-                  }
-                  const nextIndex = currentIndex + 1;
-                  if (nextIndex >= activeExercises.length) {
-                    setStage("result");
-                  } else {
-                    setCurrentIndex(nextIndex);
-                    setSelectedOption(null);
-                    setSubmitted(false);
-                    setStage(getStageForExercise(activeExercises[nextIndex]));
-                  }
-                }}
-              />
-            ) : currentExercise.kind === "drive-signs" ? (
-              <DirijaPlacasGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
