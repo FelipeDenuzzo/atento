@@ -7,28 +7,28 @@ import {
   trainingPlans,
 } from "@/data/trainingPlans";
 import { AttentionType, TrainingPlan } from "@/types/game";
-import { VisualSearchHunt } from "@/components/VisualSearchHunt";
-import { StroopInvertido } from "@/components/StroopInvertido";
-import { FlankerSetas } from "@/components/FlankerSetas";
-import { EscutaSeletivaCocktailParty } from "@/components/EscutaSeletivaCocktailParty";
-import { GoNoGoQuickClick } from "@/components/GoNoGoQuickClick";
-import { GoNoGoExpandidoGame } from "@/games/go-no-go-expandido/GoNoGoExpandidoGame";
-import { FiltroCoresComSomGame } from "@/games/filtro-cores-com-som/FiltroCoresComSomGame";
-import { ContagemEstimulosFluxoGame } from "@/games/contagem-estimulos-fluxo/ContagemEstimulosFluxoGame";
-import { LabirintosProlongadosGame } from "@/games/labirintos-prolongados/LabirintosProlongadosGame";
-import { MapaDeSimbolosGame } from "@/games/mapa-de-simbolos/MapaDeSimbolosGame";
-import { BuscaSimbolosMatrizGame } from "@/games/busca-simbolos-matriz/BuscaSimbolosMatrizGame";
-import { AcharOFaltandoGame } from "@/games/achar-o-faltando/AcharOFaltandoGame";
-import { CopiaMatrizesGame } from "@/games/copia-matrizes/CopiaMatrizesGame";
-import { CacaPalavrasLongosGame } from "@/games/caca-palavras-longos/CacaPalavrasLongosGame";
+import { VisualSearchHuntMobileGame } from "@/games/visual-search-hunt/mobile/VisualSearchHuntMobileGame";
+import { StroopInvertidoMobileGame } from "@/games/stroop-invertido/mobile/StroopInvertidoMobileGame";
+import { FlankerSetasMobileGame } from "@/games/flanker-setas/mobile/FlankerSetasMobileGame";
+import { EscutaSeletivaCocktailPartyMobileGame } from "@/games/escuta-seletiva-cocktail-party/mobile/EscutaSeletivaCocktailPartyMobileGame";
+import { GoNoGoQuickClickMobileGame } from "@/games/go-no-go-quick-click/mobile/GoNoGoQuickClickMobileGame";
+import { GoNoGoExpandidoMobileGame } from "@/games/go-no-go-expandido/mobile/GoNoGoExpandidoMobileGame";
+import { FiltroCoresComSomMobileGame } from "@/games/filtro-cores-com-som/mobile/FiltroCoresComSomMobileGame";
+import { ContagemEstimulosFluxoMobileGame } from "@/games/contagem-estimulos-fluxo/mobile/ContagemEstimulosFluxoMobileGame";
+import { LabirintosProlongadosMobileGame } from "@/games/labirintos-prolongados/mobile/LabirintosProlongadosMobileGame";
+import { MapaDeSimbolosMobileGame } from "@/games/mapa-de-simbolos/mobile/MapaDeSimbolosMobileGame";
+import { BuscaSimbolosMatrizMobileGame } from "@/games/busca-simbolos-matriz/mobile/BuscaSimbolosMatrizMobileGame";
+import { AcharOFaltandoMobileGame } from "@/games/achar-o-faltando/mobile/AcharOFaltandoMobileGame";
+import { CopiaMatrizesMobileGame } from "@/games/copia-matrizes/mobile/CopiaMatrizesMobileGame";
+import { CacaPalavrasLongosMobileGame } from "@/games/caca-palavras-longos/mobile/CacaPalavrasLongosMobileGame";
 import { RadarTonoMobileGame } from "@/games/radar-tono/mobile/RadarTonoMobileGame";
-import { DirijaPalavrasAlvoGame } from "@/games/dirija-palavras-alvo/DirijaPalavrasAlvoGame";
-import { ChatVigilanciaErrosGame } from "@/games/chat-vigilancia-erros/ChatVigilanciaErrosGame";
-import { MapaSimbolosMonitorSomGame } from "@/games/mapa-simbolos-monitor-som/MapaSimbolosMonitorSomGame";
-import { ClassificacaoRapidaMemoriaAtualizavelGame } from "@/games/classificacao-rapida-memoria-atualizavel/ClassificacaoRapidaMemoriaAtualizavelGame";
-import { CorOuFormaSwitchGame } from "@/games/cor-ou-forma-switch/CorOuFormaSwitchGame";
-import { TopoBaixoPositionRuleSwitchGame } from "@/games/topo-baixo-position-rule-switch/TopoBaixoPositionRuleSwitchGame";
-import { ReversalGoNoGoSwitchGame } from "@/games/reversal-go-nogo-switch/ReversalGoNoGoSwitchGame";
+import { DirijaPalavrasAlvoMobileGame } from "@/games/dirija-palavras-alvo/mobile/DirijaPalavrasAlvoMobileGame";
+import { ChatVigilanciaErrosMobileGame } from "@/games/chat-vigilancia-erros/mobile/ChatVigilanciaErrosMobileGame";
+import { MapaSimbolosMonitorSomMobileGame } from "@/games/mapa-simbolos-monitor-som/mobile/MapaSimbolosMonitorSomMobileGame";
+import { ClassificacaoRapidaMemoriaAtualizavelMobileGame } from "@/games/classificacao-rapida-memoria-atualizavel/mobile/ClassificacaoRapidaMemoriaAtualizavelMobileGame";
+import { CorOuFormaSwitchMobileGame } from "@/games/cor-ou-forma-switch/mobile/CorOuFormaSwitchMobileGame";
+import { TopoBaixoPositionRuleSwitchMobileGame } from "@/games/topo-baixo-position-rule-switch/mobile/TopoBaixoPositionRuleSwitchMobileGame";
+import { ReversalGoNoGoSwitchMobileGame } from "@/games/reversal-go-nogo-switch/mobile/ReversalGoNoGoSwitchMobileGame";
 import { TrilhaAlternadaTmtbMobileGame } from "@/games/trilha-alternada-tmtb/mobile/TrilhaAlternadaTmtbMobileGame";
 import { buildTxtReportFileName } from "@/utils/reportFileName";
 
@@ -883,7 +883,7 @@ export function MobileAttentionTrainingGame() {
                 </div>
               </>
             ) : currentExercise.kind === "visual-search" ? (
-              <VisualSearchHunt
+              <VisualSearchHuntMobileGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
@@ -905,7 +905,7 @@ export function MobileAttentionTrainingGame() {
                 }}
               />
             ) : currentExercise.kind === "flanker" ? (
-              <FlankerSetas
+              <FlankerSetasMobileGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
@@ -927,7 +927,7 @@ export function MobileAttentionTrainingGame() {
                 }}
               />
             ) : currentExercise.kind === "cocktail-party" ? (
-              <EscutaSeletivaCocktailParty
+              <EscutaSeletivaCocktailPartyMobileGame
                 basePoints={currentExercise.points}
                 startingLevel={cocktailStartLevelOverride ?? currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
@@ -950,7 +950,7 @@ export function MobileAttentionTrainingGame() {
                 }}
               />
             ) : currentExercise.kind === "filtro-cores-com-som" ? (
-              <FiltroCoresComSomGame
+              <FiltroCoresComSomMobileGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
@@ -972,7 +972,7 @@ export function MobileAttentionTrainingGame() {
                 }}
               />
             ) : currentExercise.kind === "counting-flow-task" ? (
-              <ContagemEstimulosFluxoGame
+              <ContagemEstimulosFluxoMobileGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
@@ -994,7 +994,7 @@ export function MobileAttentionTrainingGame() {
                 }}
               />
             ) : currentExercise.kind === "long-mazes" ? (
-              <LabirintosProlongadosGame
+              <LabirintosProlongadosMobileGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
@@ -1016,7 +1016,7 @@ export function MobileAttentionTrainingGame() {
                 }}
               />
             ) : currentExercise.kind === "symbol-map" ? (
-              <MapaDeSimbolosGame
+              <MapaDeSimbolosMobileGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
@@ -1038,7 +1038,7 @@ export function MobileAttentionTrainingGame() {
                 }}
               />
             ) : currentExercise.kind === "symbol-matrix-search" ? (
-              <BuscaSimbolosMatrizGame
+              <BuscaSimbolosMatrizMobileGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
@@ -1060,7 +1060,7 @@ export function MobileAttentionTrainingGame() {
                 }}
               />
             ) : currentExercise.kind === "find-missing-item" ? (
-              <AcharOFaltandoGame
+              <AcharOFaltandoMobileGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
@@ -1082,7 +1082,7 @@ export function MobileAttentionTrainingGame() {
                 }}
               />
             ) : currentExercise.kind === "copy-matrices" ? (
-              <CopiaMatrizesGame
+              <CopiaMatrizesMobileGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
@@ -1104,7 +1104,7 @@ export function MobileAttentionTrainingGame() {
                 }}
               />
             ) : currentExercise.kind === "long-word-search" ? (
-              <CacaPalavrasLongosGame
+              <CacaPalavrasLongosMobileGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
@@ -1148,7 +1148,7 @@ export function MobileAttentionTrainingGame() {
                 }}
               />
             ) : currentExercise.kind === "drive-word-target" ? (
-              <DirijaPalavrasAlvoGame
+              <DirijaPalavrasAlvoMobileGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
@@ -1170,7 +1170,7 @@ export function MobileAttentionTrainingGame() {
                 }}
               />
             ) : currentExercise.kind === "chat-error-vigilance" ? (
-              <ChatVigilanciaErrosGame
+              <ChatVigilanciaErrosMobileGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
@@ -1192,7 +1192,7 @@ export function MobileAttentionTrainingGame() {
                 }}
               />
             ) : currentExercise.kind === "symbol-map-sound-monitor" ? (
-              <MapaSimbolosMonitorSomGame
+              <MapaSimbolosMonitorSomMobileGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
@@ -1214,7 +1214,7 @@ export function MobileAttentionTrainingGame() {
                 }}
               />
             ) : currentExercise.kind === "rapid-classification-updatable-memory" ? (
-              <ClassificacaoRapidaMemoriaAtualizavelGame
+              <ClassificacaoRapidaMemoriaAtualizavelMobileGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
@@ -1236,7 +1236,7 @@ export function MobileAttentionTrainingGame() {
                 }}
               />
             ) : currentExercise.kind === "color-shape-switch" ? (
-              <CorOuFormaSwitchGame
+              <CorOuFormaSwitchMobileGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
@@ -1258,7 +1258,7 @@ export function MobileAttentionTrainingGame() {
                 }}
               />
             ) : currentExercise.kind === "top-bottom-position-rule-switch" ? (
-              <TopoBaixoPositionRuleSwitchGame
+              <TopoBaixoPositionRuleSwitchMobileGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
@@ -1280,7 +1280,7 @@ export function MobileAttentionTrainingGame() {
                 }}
               />
             ) : currentExercise.kind === "reversal-go-nogo-switch" ? (
-              <ReversalGoNoGoSwitchGame
+              <ReversalGoNoGoSwitchMobileGame
                 basePoints={currentExercise.points}
                 startingLevel={currentExercise.startingLevel}
                 maxLevelHint={currentExercise.maxLevelHint}
