@@ -495,14 +495,17 @@ export function EscutaSeletivaCocktailParty({
         let cursor = startAt;
 
         channel.sequence.forEach((digit) => {
+          const buffer = bufferCacheRef.current.get(
+            VOICE_SAMPLE_PATHS[channel.voiceProfile][digit]
+          );
+          if (!buffer) {
+            throw new Error(`Áudio não encontrado para o dígito ${digit} (${channel.voiceProfile})`);
+          }
           const source = audioContext.createBufferSource();
           const gainNode = audioContext.createGain();
           const panner = audioContext.createStereoPanner();
 
-          source.buffer = bufferCacheRef.current.get(
-            VOICE_SAMPLE_PATHS[channel.voiceProfile][digit],
-          ) as AudioBuffer;
-
+          source.buffer = buffer;
           gainNode.gain.value = 0.95;
           panner.pan.value = channel.pan;
 
@@ -511,8 +514,7 @@ export function EscutaSeletivaCocktailParty({
           panner.connect(audioContext.destination);
 
           source.start(cursor);
-
-          cursor += source.buffer.duration + levelConfig.digitGapSeconds;
+          cursor += buffer.duration + levelConfig.digitGapSeconds;
         });
 
         latestEnd = Math.max(latestEnd, cursor);
