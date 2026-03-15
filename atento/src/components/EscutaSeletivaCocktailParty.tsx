@@ -840,26 +840,7 @@ export function EscutaSeletivaCocktailParty({
           </div>
 
           <div className="grid gap-3 text-sm sm:grid-cols-4">
-            {!hideInGameInfo && (
-              <>
-                <div className="rounded-lg border border-black/10 p-3">
-                  <p className="text-zinc-500">Nível</p>
-                  <p className="font-semibold text-zinc-900">{level}/{maxLevelHint}</p>
-                </div>
-                <div className="rounded-lg border border-black/10 p-3">
-                  <p className="text-zinc-500">Fase</p>
-                  <p className="font-semibold text-zinc-900">{config.phase}</p>
-                </div>
-                <div className="rounded-lg border border-black/10 p-3">
-                  <p className="text-zinc-500">Tentativa</p>
-                  <p className="font-semibold text-zinc-900">{currentTrialIndex + 1}/{trials.length}</p>
-                </div>
-                <div className="rounded-lg border border-black/10 p-3">
-                  <p className="text-zinc-500">Pontuação</p>
-                  <p className="font-semibold text-zinc-900">{score}</p>
-                </div>
-              </>
-            )}
+            {/* Nenhuma info extra, apenas barra de progresso e instrução */}
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">

@@ -356,22 +356,6 @@ export function CacaPalavrasLongosGame({ basePoints, reportContext, onComplete }
 
       {phase === "running" && round && (
         <div className="space-y-4">
-          {!hideInGameInfo && (
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-                <p className="text-xs text-zinc-500">Rodada</p>
-                <p className="font-semibold text-zinc-900">{roundIndex + 1}/{ROUND_PRESETS.length}</p>
-              </div>
-              <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-                <p className="text-xs text-zinc-500">Tempo total</p>
-                <p className="font-semibold text-zinc-900">{formatClock(elapsedMs)}</p>
-              </div>
-              <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-                <p className="text-xs text-zinc-500">Palavras</p>
-                <p className="font-semibold text-zinc-900">{foundWords.size}/{round.config.words.length}</p>
-              </div>
-            </div>
-          )}
 
           <div className="grid gap-4 lg:grid-cols-[1fr_260px]">
             <div
@@ -416,9 +400,7 @@ export function CacaPalavrasLongosGame({ basePoints, reportContext, onComplete }
                   );
                 })}
               </div>
-              {!hideInGameInfo && (
-                <p className="text-xs text-zinc-600">Tentativas inválidas: {invalidSelections}</p>
-              )}
+              {/* Nenhuma info extra, apenas barra de progresso e grid */}
             </div>
           </div>
 
