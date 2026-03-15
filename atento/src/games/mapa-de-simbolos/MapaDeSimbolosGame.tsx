@@ -19,6 +19,7 @@ type Props = {
   maxLevelHint: number;
   reportContext?: ReportContext;
   onComplete: (result: { success: boolean; pointsEarned: number }) => void;
+  hideInGameInfo?: boolean;
 };
 
 type Phase = "intro" | "running" | "result";
@@ -210,28 +211,31 @@ export function MapaDeSimbolosGame({
 
       {phase === "running" && (
         <div className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-4">
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Tempo</p>
-              <p className="font-semibold text-zinc-900">{formatSec(remainingSec)}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Alvo(s)</p>
-              <p className="font-semibold text-zinc-900">{level.targetSymbols.join(" ")}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Acertos</p>
-              <p className="font-semibold text-zinc-900">{targetsFound}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Erros</p>
-              <p className="font-semibold text-zinc-900">{misses}</p>
-            </div>
-          </div>
-
-          <div className="rounded-lg border border-black/10 bg-zinc-50 p-3 text-sm text-zinc-700">
-            Faltam <strong>{remainingTargets}</strong> alvos
-          </div>
+          {!hideInGameInfo && (
+            <>
+              <div className="grid gap-3 sm:grid-cols-4">
+                <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
+                  <p className="text-xs text-zinc-500">Tempo</p>
+                  <p className="font-semibold text-zinc-900">{formatSec(remainingSec)}</p>
+                </div>
+                <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
+                  <p className="text-xs text-zinc-500">Alvo(s)</p>
+                  <p className="font-semibold text-zinc-900">{level.targetSymbols.join(" ")}</p>
+                </div>
+                <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
+                  <p className="text-xs text-zinc-500">Acertos</p>
+                  <p className="font-semibold text-zinc-900">{targetsFound}</p>
+                </div>
+                <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
+                  <p className="text-xs text-zinc-500">Erros</p>
+                  <p className="font-semibold text-zinc-900">{misses}</p>
+                </div>
+              </div>
+              <div className="rounded-lg border border-black/10 bg-zinc-50 p-3 text-sm text-zinc-700">
+                Faltam <strong>{remainingTargets}</strong> alvos
+              </div>
+            </>
+          )}
 
           <div
             className="grid gap-1 rounded-lg border border-zinc-200 bg-white p-2"

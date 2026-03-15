@@ -1,6 +1,6 @@
 "use client";
 
-import { CacaPalavrasLongosGame } from "../CacaPalavrasLongosGame";
+import { FlankerSetas } from "@/components/FlankerSetas";
 import type { ReportContext } from "@/components/mobile/MobileAttentionTrainingGame";
 
 type Props = {
@@ -12,7 +12,7 @@ type Props = {
 };
 
 // Componente mobile: pode ser customizado para UI/UX touch-friendly no futuro
-export function CacaPalavrasLongosMobileGame(props: Props) {
+export function FlankerSetasMobileGame(props: Props) {
   // Aqui pode-se adicionar hooks ou wrappers específicos para mobile (ex: scroll, feedback tátil, etc)
-  return <CacaPalavrasLongosGame {...props} hideInGameInfo />;
+  return <FlankerSetas {...props} hideInGameInfo />;
 }

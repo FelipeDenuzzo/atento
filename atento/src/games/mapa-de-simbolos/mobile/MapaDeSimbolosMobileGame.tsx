@@ -14,5 +14,5 @@ type Props = {
 // Componente mobile: pode ser customizado para UI/UX touch-friendly no futuro
 export function MapaDeSimbolosMobileGame(props: Props) {
   // Aqui pode-se adicionar hooks ou wrappers específicos para mobile (ex: scroll, feedback tátil, etc)
-  return <MapaDeSimbolosGame {...props} />;
+  return <MapaDeSimbolosGame {...props} hideInGameInfo />;
 }

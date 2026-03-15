@@ -21,6 +21,7 @@ type Props = {
   maxLevelHint: number;
   reportContext?: ReportContext;
   onComplete: (result: { success: boolean; pointsEarned: number }) => void;
+  hideInGameInfo?: boolean;
 };
 
 type Phase = "intro" | "running" | "round-feedback" | "result";
@@ -355,20 +356,22 @@ export function CacaPalavrasLongosGame({ basePoints, reportContext, onComplete }
 
       {phase === "running" && round && (
         <div className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Rodada</p>
-              <p className="font-semibold text-zinc-900">{roundIndex + 1}/{ROUND_PRESETS.length}</p>
+          {!hideInGameInfo && (
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
+                <p className="text-xs text-zinc-500">Rodada</p>
+                <p className="font-semibold text-zinc-900">{roundIndex + 1}/{ROUND_PRESETS.length}</p>
+              </div>
+              <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
+                <p className="text-xs text-zinc-500">Tempo total</p>
+                <p className="font-semibold text-zinc-900">{formatClock(elapsedMs)}</p>
+              </div>
+              <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
+                <p className="text-xs text-zinc-500">Palavras</p>
+                <p className="font-semibold text-zinc-900">{foundWords.size}/{round.config.words.length}</p>
+              </div>
             </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Tempo total</p>
-              <p className="font-semibold text-zinc-900">{formatClock(elapsedMs)}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Palavras</p>
-              <p className="font-semibold text-zinc-900">{foundWords.size}/{round.config.words.length}</p>
-            </div>
-          </div>
+          )}
 
           <div className="grid gap-4 lg:grid-cols-[1fr_260px]">
             <div
@@ -413,7 +416,9 @@ export function CacaPalavrasLongosGame({ basePoints, reportContext, onComplete }
                   );
                 })}
               </div>
-              <p className="text-xs text-zinc-600">Tentativas inválidas: {invalidSelections}</p>
+              {!hideInGameInfo && (
+                <p className="text-xs text-zinc-600">Tentativas inválidas: {invalidSelections}</p>
+              )}
             </div>
           </div>
 

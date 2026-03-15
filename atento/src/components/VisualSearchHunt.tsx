@@ -32,6 +32,7 @@ type Props = {
   maxLevelHint: number;
   reportContext?: ReportContext;
   onComplete: (result: { success: boolean; pointsEarned: number }) => void;
+  hideInGameInfo?: boolean;
 };
 
 const SHAPES: Shape[] = ["circle", "square", "triangle"];
@@ -512,24 +513,26 @@ export function VisualSearchHunt({
             </p>
           </div>
 
-          <div className="grid gap-3 text-sm sm:grid-cols-4">
-            <div className="rounded-lg border border-black/10 p-3">
-              <p className="text-zinc-500">Tempo</p>
-              <p className="font-semibold text-zinc-900">{remainingTime.toFixed(1)}s</p>
+          {!hideInGameInfo && (
+            <div className="grid gap-3 text-sm sm:grid-cols-4">
+              <div className="rounded-lg border border-black/10 p-3">
+                <p className="text-zinc-500">Tempo</p>
+                <p className="font-semibold text-zinc-900">{remainingTime.toFixed(1)}s</p>
+              </div>
+              <div className="rounded-lg border border-black/10 p-3">
+                <p className="text-zinc-500">Alvos restantes</p>
+                <p className="font-semibold text-zinc-900">{targetsRemaining}</p>
+              </div>
+              <div className="rounded-lg border border-black/10 p-3">
+                <p className="text-zinc-500">Acertos</p>
+                <p className="font-semibold text-zinc-900">{hits}</p>
+              </div>
+              <div className="rounded-lg border border-black/10 p-3">
+                <p className="text-zinc-500">Erros</p>
+                <p className="font-semibold text-zinc-900">{errors}</p>
+              </div>
             </div>
-            <div className="rounded-lg border border-black/10 p-3">
-              <p className="text-zinc-500">Alvos restantes</p>
-              <p className="font-semibold text-zinc-900">{targetsRemaining}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 p-3">
-              <p className="text-zinc-500">Acertos</p>
-              <p className="font-semibold text-zinc-900">{hits}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 p-3">
-              <p className="text-zinc-500">Erros</p>
-              <p className="font-semibold text-zinc-900">{errors}</p>
-            </div>
-          </div>
+          )}
 
           <div className="h-2 overflow-hidden rounded-full bg-zinc-200">
             <div

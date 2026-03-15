@@ -57,6 +57,7 @@ type Props = {
   maxLevelHint: number;
   reportContext?: ReportContext;
   onComplete: (result: { success: boolean; pointsEarned: number }) => void;
+  hideInGameInfo?: boolean;
 };
 
 const ARROW_SYMBOL: Record<Direction, string> = {
@@ -676,28 +677,30 @@ export function FlankerSetas({
             </p>
           </div>
 
-          <div className="grid gap-3 text-sm sm:grid-cols-5">
-            <div className="rounded-lg border border-black/10 p-3">
-              <p className="text-zinc-500">Tentativa</p>
-              <p className="font-semibold text-zinc-900">{currentTrialIndex + 1}/{trials.length}</p>
+          {!hideInGameInfo && (
+            <div className="grid gap-3 text-sm sm:grid-cols-5">
+              <div className="rounded-lg border border-black/10 p-3">
+                <p className="text-zinc-500">Tentativa</p>
+                <p className="font-semibold text-zinc-900">{currentTrialIndex + 1}/{trials.length}</p>
+              </div>
+              <div className="rounded-lg border border-black/10 p-3">
+                <p className="text-zinc-500">Tempo</p>
+                <p className="font-semibold text-zinc-900">{timeRemaining.toFixed(1)}s</p>
+              </div>
+              <div className="rounded-lg border border-black/10 p-3">
+                <p className="text-zinc-500">Acertos</p>
+                <p className="font-semibold text-zinc-900">{hits}</p>
+              </div>
+              <div className="rounded-lg border border-black/10 p-3">
+                <p className="text-zinc-500">Erros</p>
+                <p className="font-semibold text-zinc-900">{errors}</p>
+              </div>
+              <div className="rounded-lg border border-black/10 p-3">
+                <p className="text-zinc-500">Pontuação</p>
+                <p className="font-semibold text-zinc-900">{score}</p>
+              </div>
             </div>
-            <div className="rounded-lg border border-black/10 p-3">
-              <p className="text-zinc-500">Tempo</p>
-              <p className="font-semibold text-zinc-900">{timeRemaining.toFixed(1)}s</p>
-            </div>
-            <div className="rounded-lg border border-black/10 p-3">
-              <p className="text-zinc-500">Acertos</p>
-              <p className="font-semibold text-zinc-900">{hits}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 p-3">
-              <p className="text-zinc-500">Erros</p>
-              <p className="font-semibold text-zinc-900">{errors}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 p-3">
-              <p className="text-zinc-500">Pontuação</p>
-              <p className="font-semibold text-zinc-900">{score}</p>
-            </div>
-          </div>
+          )}
 
           <div className="h-2 overflow-hidden rounded-full bg-zinc-200">
             <div
