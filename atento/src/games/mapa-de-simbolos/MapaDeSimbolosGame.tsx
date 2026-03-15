@@ -211,8 +211,7 @@ export function MapaDeSimbolosGame({
 
       {phase === "running" && (
         <div className="space-y-4">
-          {/* Nenhuma info extra, apenas barra de progresso e grid */}
-
+          {/* Nenhuma info extra, apenas barra de progresso e grid (alvo NÃO aparece durante o jogo) */}
           <div
             className="grid gap-1 rounded-lg border border-zinc-200 bg-white p-2"
             style={{
