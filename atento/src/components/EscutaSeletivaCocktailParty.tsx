@@ -375,6 +375,7 @@ export function EscutaSeletivaCocktailParty({
   maxLevelHint,
   reportContext,
   onComplete,
+  hideInGameInfo,
 }: Props) {
   const [level, setLevel] = useState(startingLevel);
   const [status, setStatus] = useState<GameStatus>("instructions");
