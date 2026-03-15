@@ -392,6 +392,7 @@ export function EscutaSeletivaCocktailParty({
   const [trialHistory, setTrialHistory] = useState<Trial[]>([]);
 
   const audioContextRef = useRef<AudioContext | null>(null);
+  const audioContextCreatedRef = useRef(false);
   const bufferCacheRef = useRef<Map<string, AudioBuffer>>(new Map());
   const trialStartRef = useRef<number>(0);
   const answerInputRef = useRef<HTMLInputElement | null>(null);
@@ -403,10 +404,7 @@ export function EscutaSeletivaCocktailParty({
     const cached = bufferCacheRef.current.get(url);
     if (cached) return cached;
 
-    if (!audioContextRef.current) {
-      audioContextRef.current = getAudioContext();
-    }
-
+    // Não cria novo AudioContext aqui, apenas usa o já criado na interação do usuário
     if (!audioContextRef.current) {
       throw new Error("AudioContext indisponível no navegador.");
     }
@@ -443,9 +441,7 @@ export function EscutaSeletivaCocktailParty({
 
   const playTrialAudio = useCallback(
     async (trial: Trial, levelConfig: LevelConfig) => {
-      if (!audioContextRef.current) {
-        audioContextRef.current = getAudioContext();
-      }
+      // Não cria novo AudioContext aqui, apenas usa o já criado na interação do usuário
 
       const audioContext = audioContextRef.current;
       if (!audioContext) {
@@ -571,6 +567,11 @@ export function EscutaSeletivaCocktailParty({
 
   const startListening = useCallback(() => {
     setAudioError(null);
+    // Cria o AudioContext apenas na primeira interação do usuário
+    if (!audioContextCreatedRef.current) {
+      audioContextRef.current = getAudioContext();
+      audioContextCreatedRef.current = true;
+    }
     setCountdown(3);
     setStatus("countdown");
   }, []);
