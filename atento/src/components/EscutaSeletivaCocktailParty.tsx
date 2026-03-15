@@ -395,36 +395,42 @@ export function EscutaSeletivaCocktailParty({
   const audioContextCreatedRef = useRef(false);
   // Estado para feedback do teste de áudio
   const [audioTestError, setAudioTestError] = useState<string | null>(null);
-    // Função para tocar teste de áudio (voz masculina: 1 2 3)
-    const playAudioTest = useCallback(async () => {
+    // Função para tocar teste de áudio (voz masculina: 1 2 3) - compatível com mobile
+    const playAudioTest = useCallback(() => {
       setAudioTestError(null);
       try {
-        if (!audioContextCreatedRef.current) {
-          audioContextRef.current = getAudioContext();
+        let audioContext = audioContextRef.current;
+        if (!audioContextCreatedRef.current || !audioContext) {
+          audioContext = getAudioContext();
+          audioContextRef.current = audioContext;
           audioContextCreatedRef.current = true;
         }
-        const audioContext = audioContextRef.current;
         if (!audioContext) throw new Error("Áudio não suportado neste navegador.");
-        await audioContext.resume();
+        audioContext.resume();
         // Carrega buffers dos números 1, 2, 3 (voz masculina)
         const digits = [1, 2, 3];
         const urls = digits.map((d) => VOICE_SAMPLE_PATHS.male[d]);
-        const buffers = await Promise.all(
-          urls.map(async (url) => {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`Arquivo não encontrado: ${url}`);
-            const data = await response.arrayBuffer();
-            return await audioContext.decodeAudioData(data.slice(0));
-          })
-        );
-        let cursor = audioContext.currentTime + 0.1;
-        for (let i = 0; i < buffers.length; i++) {
-          const source = audioContext.createBufferSource();
-          source.buffer = buffers[i];
-          source.connect(audioContext.destination);
-          source.start(cursor);
-          cursor += source.buffer.duration + 0.25;
-        }
+        // Carregar e tocar imediatamente, sem await, para mobile
+        urls.forEach((url, idx) => {
+          fetch(url)
+            .then((response) => {
+              if (!response.ok) throw new Error(`Arquivo não encontrado: ${url}`);
+              return response.arrayBuffer();
+            })
+            .then((data) => {
+              audioContext.decodeAudioData(data.slice(0), (buffer) => {
+                const source = audioContext.createBufferSource();
+                source.buffer = buffer;
+                source.connect(audioContext.destination);
+                // Espaçamento entre os números
+                const startAt = audioContext.currentTime + idx * (buffer.duration + 0.25);
+                source.start(startAt);
+              });
+            })
+            .catch((err) => {
+              setAudioTestError(err instanceof Error ? err.message : "Erro ao tocar áudio de teste");
+            });
+        });
       } catch (err) {
         setAudioTestError(err instanceof Error ? err.message : "Erro ao tocar áudio de teste");
       }
