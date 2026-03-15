@@ -809,6 +809,9 @@ export function EscutaSeletivaCocktailParty({
             <p className="mt-1 text-sm text-zinc-700">
               Você ouvirá duas vozes ao mesmo tempo, cada uma falando uma sequência de números.
             </p>
+            <p className="mt-3 rounded bg-amber-100 px-3 py-2 text-sm text-amber-800 border border-amber-300">
+              <strong>Atenção:</strong> Habilite o som do seu celular e verifique se o volume está alto para ouvir as vozes do treino.
+            </p>
           </div>
 
           <div className="space-y-2 text-sm text-zinc-700">
