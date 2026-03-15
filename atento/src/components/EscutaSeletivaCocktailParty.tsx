@@ -393,6 +393,42 @@ export function EscutaSeletivaCocktailParty({
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioContextCreatedRef = useRef(false);
+  // Estado para feedback do teste de áudio
+  const [audioTestError, setAudioTestError] = useState<string | null>(null);
+    // Função para tocar teste de áudio (voz masculina: 1 2 3)
+    const playAudioTest = useCallback(async () => {
+      setAudioTestError(null);
+      try {
+        if (!audioContextCreatedRef.current) {
+          audioContextRef.current = getAudioContext();
+          audioContextCreatedRef.current = true;
+        }
+        const audioContext = audioContextRef.current;
+        if (!audioContext) throw new Error("Áudio não suportado neste navegador.");
+        await audioContext.resume();
+        // Carrega buffers dos números 1, 2, 3 (voz masculina)
+        const digits = [1, 2, 3];
+        const urls = digits.map((d) => VOICE_SAMPLE_PATHS.male[d]);
+        const buffers = await Promise.all(
+          urls.map(async (url) => {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Arquivo não encontrado: ${url}`);
+            const data = await response.arrayBuffer();
+            return await audioContext.decodeAudioData(data.slice(0));
+          })
+        );
+        let cursor = audioContext.currentTime + 0.1;
+        for (let i = 0; i < buffers.length; i++) {
+          const source = audioContext.createBufferSource();
+          source.buffer = buffers[i];
+          source.connect(audioContext.destination);
+          source.start(cursor);
+          cursor += source.buffer.duration + 0.25;
+        }
+      } catch (err) {
+        setAudioTestError(err instanceof Error ? err.message : "Erro ao tocar áudio de teste");
+      }
+    }, []);
   const bufferCacheRef = useRef<Map<string, AudioBuffer>>(new Map());
   const trialStartRef = useRef<number>(0);
   const answerInputRef = useRef<HTMLInputElement | null>(null);
@@ -826,10 +862,23 @@ export function EscutaSeletivaCocktailParty({
             </ul>
           </div>
 
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+            <button
+              type="button"
+              onClick={playAudioTest}
+              className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-800"
+            >
+              Testar áudio
+            </button>
+            {audioTestError && (
+              <span className="text-sm text-amber-700">{audioTestError}</span>
+            )}
+          </div>
+
           <button
             type="button"
             onClick={() => startLevel()}
-            className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
+            className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700 mt-2"
           >
             Começar
           </button>
