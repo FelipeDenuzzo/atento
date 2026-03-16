@@ -707,7 +707,7 @@ export function AttentionTrainingGame() {
             </h2>
             {currentExercise.instructions && (
               <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
-                <p>{currentExercise.instructions}</p>
+                <p dangerouslySetInnerHTML={{ __html: currentExercise.instructions }} />
               </div>
             )}
             <button
