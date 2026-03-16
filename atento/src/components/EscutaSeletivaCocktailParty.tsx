@@ -947,20 +947,24 @@ export function EscutaSeletivaCocktailParty({
         <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
           <div>
             <h3 className="text-xl font-semibold text-zinc-900">
-              Escuta -Seletiva (Cocktail -Party)
+              Escuta Seletiva (Cocktail Party)
             </h3>
+            <p className="mt-2 text-xs font-semibold text-zinc-700 tracking-wide">
+              IDENTIFIQUE A SEQUÊNCIA ALVO EM MEIO A VOZES SIMULTÂNEAS.
+            </p>
             <p className="mt-2 text-sm font-medium text-zinc-700">
               O que vai acontecer
             </p>
             <p className="mt-1 text-sm text-zinc-700">
-              Neste treino, você vai ouvir duas vozes ao mesmo tempo: uma
-              feminina e outra masculina, cada uma falando uma sequência de
-              números. Abaixo, será indicado em qual das duas vozes você deve
-              prestar atenção para, ao final, escrever a sequência que ouviu.
+              Neste treino, você vai ouvir duas vozes ao mesmo tempo, cada uma
+              falando uma sequência diferente de números. Seu objetivo é focar
+              apenas na voz indicada na instrução da rodada e, ao final, digitar
+              exatamente a sequência que ela falou.
             </p>
             <p className="mt-3 rounded bg-amber-100 px-3 py-2 text-sm text-amber-800 border border-amber-300">
-              <strong>Atenção:</strong> Habilite o som do seu celular e verifique
-              se o volume está alto para ouvir as vozes do treino.
+              <strong>Atenção:</strong> habilite o som do seu celular, use
+              fones de ouvido se possível e verifique se o volume está alto o
+              suficiente para ouvir claramente as vozes do treino.
             </p>
           </div>
 
