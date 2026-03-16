@@ -378,7 +378,7 @@ export function EscutaSeletivaCocktailParty({
   hideInGameInfo,
 }: Props) {
   const [level, setLevel] = useState(startingLevel);
-  const [status, setStatus] = useState<GameStatus>("instructions");
+  const [status, setStatus] = useState<GameStatus>("ready");
   const [trials, setTrials] = useState<Trial[]>([]);
   const [currentTrialIndex, setCurrentTrialIndex] = useState(0);
   const [answerInput, setAnswerInput] = useState("");
@@ -844,45 +844,7 @@ export function EscutaSeletivaCocktailParty({
 
   return (
     <div className="mt-4 space-y-4">
-      {status === "instructions" && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
-          <div>
-            <h3 className="text-xl font-semibold text-zinc-900">
-              Escuta Seletiva (Cocktail Party)
-            </h3>
-            <p className="mt-2 text-sm font-medium text-zinc-700">O que vai acontecer</p>
-            <p className="mt-1 text-sm text-zinc-700">
-              Neste treino, você vai ouvir duas vozes ao mesmo tempo: uma feminina e outra masculina, cada uma falando uma sequência de números. Na próxima tela, será indicado em qual das duas vozes você deve prestar atenção para, ao final, escrever a sequência que ouviu.
-            </p>
-            <p className="mt-3 rounded bg-amber-100 px-3 py-2 text-sm text-amber-800 border border-amber-300">
-              <strong>Atenção:</strong> Habilite o som do seu celular e verifique se o volume está alto para ouvir as vozes do treino.
-            </p>
-          </div>
-
-          {/* Orientações do próximo exercício removidas. Instruções simplificadas conforme solicitado. */}
-
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-            <button
-              type="button"
-              onClick={playAudioTest}
-              className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-800"
-            >
-              Testar áudio
-            </button>
-            {audioTestError && (
-              <span className="text-sm text-amber-700">{audioTestError}</span>
-            )}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => startLevel()}
-            className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700 mt-2"
-          >
-            Começar
-          </button>
-        </div>
-      )}
+      {/* Janela de apresentação removida conforme solicitado */}
 
       {status === "ready" && currentTrial && currentTrialIndex === 0 && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
