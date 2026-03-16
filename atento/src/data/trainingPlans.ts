@@ -270,7 +270,7 @@ export const trainingPlans: TrainingPlan[] = [
         attentionType: "seletiva",
         kind: "cocktail-party",
         instructions:
-          "Identifique o nome alvo em meio a falas simultaneas.",
+          "<strong style='text-transform:uppercase;'>Identifique o nome alvo em meio a falas simultâneas.</strong>",
         startingLevel: 1,
         maxLevelHint: 12,
         points: 30,
