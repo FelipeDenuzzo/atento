@@ -848,16 +848,36 @@ export function EscutaSeletivaCocktailParty({
 
       {status === "ready" && currentTrial && currentTrialIndex === 0 && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
-          <div className="rounded-lg border border-black/10 bg-white p-4">
+          <div>
+            <h3 className="text-xl font-semibold text-zinc-900">
+              Escuta Seletiva (Cocktail Party)
+            </h3>
+            <p className="mt-2 text-sm font-medium text-zinc-700">O que vai acontecer</p>
+            <p className="mt-1 text-sm text-zinc-700">
+              Neste treino, você vai ouvir duas vozes ao mesmo tempo: uma feminina e outra masculina, cada uma falando uma sequência de números. Abaixo, será indicado em qual das duas vozes você deve prestar atenção para, ao final, escrever a sequência que ouviu.
+            </p>
+            <p className="mt-3 rounded bg-amber-100 px-3 py-2 text-sm text-amber-800 border border-amber-300">
+              <strong>Atenção:</strong> Habilite o som do seu celular e verifique se o volume está alto para ouvir as vozes do treino.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+            <button
+              type="button"
+              onClick={playAudioTest}
+              className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-800"
+            >
+              Testar áudio
+            </button>
+            {audioTestError && (
+              <span className="text-sm text-amber-700">{audioTestError}</span>
+            )}
+          </div>
+
+          <div className="rounded-lg border border-black/10 bg-white p-4 mt-4">
             <p className="text-sm text-zinc-500">Instrução da rodada</p>
             <p className="mt-1 font-semibold text-zinc-900">{currentTrial.instruction}</p>
           </div>
-
-          <div className="grid gap-3 text-sm sm:grid-cols-4">
-            {/* Nenhuma info extra, apenas barra de progresso e instrução */}
-          </div>
-
-          {/* Informações de direita e esquerda removidas */}
 
           <button
             type="button"
