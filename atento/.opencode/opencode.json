@@ -6,7 +6,7 @@
       "name": "NVIDIA NIM",
       "options": {
         "baseURL": "https://integrate.api.nvidia.com/v1",
-        "apiKey": "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"
+        "apiKey": "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"
       },
       "models": {
         "nemotron-3-super": {
