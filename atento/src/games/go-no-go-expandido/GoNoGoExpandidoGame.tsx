@@ -275,7 +275,7 @@ export function GoNoGoExpandidoGame({
       )}
 
       {phase === "countdown" && currentTrial && (
-        <div className="flex min-h-[400px] flex-col items-center justify-center space-y-8 rounded-lg border border-black/10 bg-white p-8">
+        <div className="flex min-h-[350px] md:min-h-[500px] flex-col items-center justify-center space-y-8 rounded-lg border border-black/10 bg-white p-8">
           <div className="text-center">
             <p className="text-xl font-medium text-zinc-700">
               Clique quando aparecer somente
@@ -296,7 +296,7 @@ export function GoNoGoExpandidoGame({
       )}
 
       {phase === "running" && currentTrial && (
-        <div className="flex min-h-[500px] items-center justify-center rounded-lg bg-gradient-to-b from-zinc-50 to-white p-8">
+        <div className="flex min-h-[350px] md:min-h-[500px] items-center justify-center rounded-lg bg-gradient-to-b from-zinc-50 to-white p-8">
           <button
             type="button"
             onClick={handleStimulusClick}
@@ -312,7 +312,7 @@ export function GoNoGoExpandidoGame({
       )}
 
       {phase === "iti" && (
-        <div className="flex min-h-[400px] items-center justify-center">
+        <div className="flex min-h-[350px] md:min-h-[500px] items-center justify-center">
           {/* Intervalo entre trials - tela vazia */}
         </div>
       )}

@@ -11,8 +11,7 @@ type Props = {
   onComplete: (result: { success: boolean; pointsEarned: number }) => void;
 };
 
-// Componente mobile: pode ser customizado para UI/UX touch-friendly no futuro
+// Componente mobile: já utiliza o GoNoGoExpandidoGame, que agora está responsivo.
 export function GoNoGoExpandidoMobileGame(props: Props) {
-  // Aqui pode-se adicionar hooks ou wrappers específicos para mobile (ex: scroll, feedback tátil, etc)
   return <GoNoGoExpandidoGame {...props} />;
 }
