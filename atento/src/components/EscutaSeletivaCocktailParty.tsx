@@ -410,7 +410,7 @@ export function EscutaSeletivaCocktailParty({
   hideInGameInfo,
 }: Props) {
   const [level, setLevel] = useState(startingLevel);
-  const [status, setStatus] = useState<GameStatus>("ready");
+  const [status, setStatus] = useState<GameStatus>("instructions");
   const [trials, setTrials] = useState<Trial[]>([]);
   const [currentTrialIndex, setCurrentTrialIndex] = useState(0);
   const [answerInput, setAnswerInput] = useState("");
@@ -942,29 +942,18 @@ export function EscutaSeletivaCocktailParty({
 
   return (
     <div className="mt-4 space-y-4">
-      {/* Introdução + teste de áudio, apenas no primeiro trial do nível */}
-      {status === "ready" && currentTrial && currentTrialIndex === 0 && (
+      {/* Janela única de explicação e instrução antes do treino */}
+      {status === "instructions" && currentTrial && currentTrialIndex === 0 && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
           <div>
             <h3 className="text-xl font-semibold text-zinc-900">
               Escuta Seletiva (Cocktail Party)
             </h3>
-            <p className="mt-2 text-xs font-semibold text-zinc-700 tracking-wide">
-              IDENTIFIQUE A SEQUÊNCIA ALVO EM MEIO A VOZES SIMULTÂNEAS.
-            </p>
             <p className="mt-2 text-sm font-medium text-zinc-700">
-              O que vai acontecer
-            </p>
-            <p className="mt-1 text-sm text-zinc-700">
-              Neste treino, você vai ouvir duas vozes ao mesmo tempo, cada uma
-              falando uma sequência diferente de números. Seu objetivo é focar
-              apenas na voz indicada na instrução da rodada e, ao final, digitar
-              exatamente a sequência que ela falou.
+              Neste treino, você vai ouvir duas vozes ao mesmo tempo, cada uma falando uma sequência diferente de números. Seu objetivo é focar apenas na voz indicada na instrução da rodada e, ao final, digitar exatamente a sequência que ela falou.
             </p>
             <p className="mt-3 rounded bg-amber-100 px-3 py-2 text-sm text-amber-800 border border-amber-300">
-              <strong>Atenção:</strong> habilite o som do seu celular, use
-              fones de ouvido se possível e verifique se o volume está alto o
-              suficiente para ouvir claramente as vozes do treino.
+              <strong>Atenção:</strong> habilite o som do seu celular, use fones de ouvido se possível e verifique se o volume está alto o suficiente para ouvir claramente as vozes do treino.
             </p>
           </div>
 
@@ -981,22 +970,12 @@ export function EscutaSeletivaCocktailParty({
             )}
           </div>
 
-          <div className="rounded-lg border border-black/10 bg-white p-4 mt-4">
-            <p className="text-sm text-zinc-500">Instrução da rodada</p>
-            <p
-              className="mt-1 font-extrabold text-zinc-900 tracking-wide"
-              style={{ textTransform: "uppercase" }}
-            >
-              {currentTrial.instruction}
-            </p>
-          </div>
-
           <button
             type="button"
-            onClick={startListening}
+            onClick={() => setStatus("ready")}
             className="h-11 w-full rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
           >
-            Tocar áudio da rodada
+            Iniciar treino
           </button>
 
           {audioError && (
