@@ -876,7 +876,9 @@ export function EscutaSeletivaCocktailParty({
 
           <div className="rounded-lg border border-black/10 bg-white p-4 mt-4">
             <p className="text-sm text-zinc-500">Instrução da rodada</p>
-            <p className="mt-1 font-semibold text-zinc-900">{currentTrial.instruction}</p>
+            <p className="mt-1 font-extrabold text-zinc-900 tracking-wide" style={{ textTransform: 'uppercase' }}>
+              {currentTrial.instruction}
+            </p>
           </div>
 
           <button
@@ -898,7 +900,9 @@ export function EscutaSeletivaCocktailParty({
       {status === "listening" && currentTrial && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
           <p className="text-center text-sm text-zinc-600">Reproduzindo áudio...</p>
-          <p className="text-center font-semibold text-zinc-900">{currentTrial.instruction}</p>
+          <p className="text-center font-extrabold text-zinc-900 tracking-wide" style={{ textTransform: 'uppercase' }}>
+            {currentTrial.instruction}
+          </p>
           <p className="text-center text-xs text-zinc-500">
             Aguarde o fim da reprodução para digitar a sequência.
           </p>
@@ -908,7 +912,9 @@ export function EscutaSeletivaCocktailParty({
       {status === "countdown" && currentTrial && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
           <p className="text-center text-sm text-zinc-600">Prepare-se</p>
-          <p className="text-center font-semibold text-zinc-900">{currentTrial.instruction}</p>
+          <p className="text-center font-extrabold text-zinc-900 tracking-wide" style={{ textTransform: 'uppercase' }}>
+            {currentTrial.instruction}
+          </p>
           <p className="text-center text-5xl font-semibold text-zinc-900">{countdown}</p>
         </div>
       )}
@@ -916,7 +922,9 @@ export function EscutaSeletivaCocktailParty({
       {status === "answering" && currentTrial && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
           <p className="font-semibold text-zinc-900">Digite a sequência do canal-alvo</p>
-          <p className="text-sm text-zinc-700">{currentTrial.instruction}</p>
+          <p className="text-sm font-extrabold text-zinc-900 tracking-wide" style={{ textTransform: 'uppercase' }}>
+            {currentTrial.instruction}
+          </p>
 
           <input
             ref={answerInputRef}
