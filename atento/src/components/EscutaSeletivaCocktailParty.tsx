@@ -779,7 +779,7 @@ export function EscutaSeletivaCocktailParty({
   const downloadResults = () => {
     const lines: string[] = [];
     lines.push("=" + "=".repeat(60));
-    lines.push("RESULTADO - ESCUTA SELETIVA (COCKTAIL PARTY)");
+    lines.push("RESULTADO - ESCUTA SELETIVA (COCKTAIL -PARTY)");
     lines.push("=" + "=".repeat(60));
     lines.push("");
     if (reportContext) {
@@ -947,7 +947,7 @@ export function EscutaSeletivaCocktailParty({
         <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
           <div>
             <h3 className="text-xl font-semibold text-zinc-900">
-              Escuta Seletiva (Cocktail -Party)
+              Escuta -Seletiva (Cocktail -Party)
             </h3>
             <p className="mt-2 text-sm font-medium text-zinc-700">
               O que vai acontecer
