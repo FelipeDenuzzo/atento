@@ -121,7 +121,8 @@ function getAudioContext(): AudioContext | null {
   if (typeof window === "undefined") return null;
   const AudioCtx =
     window.AudioContext ||
-    (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    (window as unknown as { webkitAudioContext?: typeof AudioContext })
+      .webkitAudioContext;
   if (!AudioCtx) return null;
   return new AudioCtx();
 }
@@ -140,14 +141,20 @@ function playFeedbackSound(correct: boolean) {
     oscillator.frequency.value = 850;
     oscillator.type = "sine";
     gainNode.gain.setValueAtTime(0.25, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.14);
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.01,
+      audioContext.currentTime + 0.14,
+    );
     oscillator.start();
     oscillator.stop(audioContext.currentTime + 0.14);
   } else {
     oscillator.frequency.value = 200;
     oscillator.type = "sawtooth";
     gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.24);
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.01,
+      audioContext.currentTime + 0.24,
+    );
     oscillator.start();
     oscillator.stop(audioContext.currentTime + 0.24);
   }
@@ -209,7 +216,10 @@ function evaluateSequence(
 } {
   const normalizedInput = playerInput.replace(/\D/g, "");
   const playerDigits = normalizedInput.split("").map((digit) => Number(digit));
-  const comparedDigitsCount = Math.min(targetSequence.length, playerDigits.length);
+  const comparedDigitsCount = Math.min(
+    targetSequence.length,
+    playerDigits.length,
+  );
 
   let totalDigitsCorrectPosition = 0;
   let firstErrorPosition: number | null = null;
@@ -230,7 +240,9 @@ function evaluateSequence(
   }
 
   const responseQualityRatio =
-    targetSequence.length > 0 ? totalDigitsCorrectPosition / targetSequence.length : 0;
+    targetSequence.length > 0
+      ? totalDigitsCorrectPosition / targetSequence.length
+      : 0;
 
   let errorSegment: "start" | "middle" | "end" | null = null;
   if (firstErrorPosition !== null && targetSequence.length > 0) {
@@ -292,9 +304,14 @@ function buildTrial(id: number, config: LevelConfig): Trial {
   const rightVoice = config.voiceProfiles[1];
   const sequenceLength = randomInt(config.digitsMin, config.digitsMax);
 
-  // Geração aleatória das sequências numéricas de cada canal.
-  const leftSequence = Array.from({ length: sequenceLength }, () => randomInt(0, 9));
-  const rightSequence = Array.from({ length: sequenceLength }, () => randomInt(0, 9));
+  const leftSequence = Array.from(
+    { length: sequenceLength },
+    () => randomInt(0, 9),
+  );
+  const rightSequence = Array.from(
+    { length: sequenceLength },
+    () => randomInt(0, 9),
+  );
 
   const channels: ChannelTrial[] = [
     {
@@ -311,7 +328,8 @@ function buildTrial(id: number, config: LevelConfig): Trial {
     },
   ];
 
-  const targetChannel = channels.find((channel) => channel.side === targetSide) ?? channels[0];
+  const targetChannel =
+    channels.find((channel) => channel.side === targetSide) ?? channels[0];
 
   return {
     id,
@@ -333,7 +351,12 @@ function buildTrial(id: number, config: LevelConfig): Trial {
   };
 }
 
-function buildLevelMetrics(trials: Trial[], level: number, phase: Phase, score: number): LevelMetrics {
+function buildLevelMetrics(
+  trials: Trial[],
+  level: number,
+  phase: Phase,
+  score: number,
+): LevelMetrics {
   const completedTrials = trials.filter((trial) => trial.correct !== null);
   const correctCount = completedTrials.filter((trial) => trial.correct).length;
   const errorCount = completedTrials.length - correctCount;
@@ -343,13 +366,19 @@ function buildLevelMetrics(trials: Trial[], level: number, phase: Phase, score: 
 
   const averageResponseMs =
     responseTimes.length > 0
-      ? Math.round(responseTimes.reduce((sum, value) => sum + value, 0) / responseTimes.length)
+      ? Math.round(
+          responseTimes.reduce((sum, value) => sum + value, 0) /
+            responseTimes.length,
+        )
       : 0;
 
   const averageDigitsCorrectPercent =
     completedTrials.length > 0
       ? Math.round(
-          (completedTrials.reduce((sum, trial) => sum + trial.responseQualityRatio, 0) /
+          (completedTrials.reduce(
+            (sum, trial) => sum + trial.responseQualityRatio,
+            0,
+          ) /
             completedTrials.length) *
             100,
         )
@@ -361,7 +390,10 @@ function buildLevelMetrics(trials: Trial[], level: number, phase: Phase, score: 
     totalTrials: completedTrials.length,
     correctCount,
     errorCount,
-    accuracy: completedTrials.length > 0 ? correctCount / completedTrials.length : 0,
+    accuracy:
+      completedTrials.length > 0
+        ? correctCount / completedTrials.length
+        : 0,
     averageResponseMs,
     score,
     averageDigitsCorrectPercent,
@@ -382,7 +414,9 @@ export function EscutaSeletivaCocktailParty({
   const [trials, setTrials] = useState<Trial[]>([]);
   const [currentTrialIndex, setCurrentTrialIndex] = useState(0);
   const [answerInput, setAnswerInput] = useState("");
-  const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null);
+  const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(
+    null,
+  );
   const [audioError, setAudioError] = useState<string | null>(null);
   const [countdown, setCountdown] = useState(3);
   const [score, setScore] = useState(0);
@@ -393,48 +427,54 @@ export function EscutaSeletivaCocktailParty({
 
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioContextCreatedRef = useRef(false);
-  // Estado para feedback do teste de áudio
   const [audioTestError, setAudioTestError] = useState<string | null>(null);
-    // Função para tocar teste de áudio (voz masculina: 1 2 3) - compatível com mobile
-    const playAudioTest = useCallback(() => {
-      setAudioTestError(null);
-      try {
-        let audioContext = audioContextRef.current;
-        if (!audioContextCreatedRef.current || !audioContext) {
-          audioContext = getAudioContext();
-          audioContextRef.current = audioContext;
-          audioContextCreatedRef.current = true;
-        }
-        if (!audioContext) throw new Error("Áudio não suportado neste navegador.");
-        audioContext.resume();
-        // Carrega buffers dos números 1, 2, 3 (voz masculina)
-        const digits = [1, 2, 3];
-        const urls = digits.map((d) => VOICE_SAMPLE_PATHS.male[d]);
-        // Carregar e tocar imediatamente, sem await, para mobile
-        urls.forEach((url, idx) => {
-          fetch(url)
-            .then((response) => {
-              if (!response.ok) throw new Error(`Arquivo não encontrado: ${url}`);
-              return response.arrayBuffer();
-            })
-            .then((data) => {
-              audioContext.decodeAudioData(data.slice(0), (buffer) => {
-                const source = audioContext.createBufferSource();
-                source.buffer = buffer;
-                source.connect(audioContext.destination);
-                // Espaçamento entre os números
-                const startAt = audioContext.currentTime + idx * (buffer.duration + 0.25);
-                source.start(startAt);
-              });
-            })
-            .catch((err) => {
-              setAudioTestError(err instanceof Error ? err.message : "Erro ao tocar áudio de teste");
-            });
-        });
-      } catch (err) {
-        setAudioTestError(err instanceof Error ? err.message : "Erro ao tocar áudio de teste");
+
+  const playAudioTest = useCallback(() => {
+    setAudioTestError(null);
+    try {
+      let audioContext = audioContextRef.current;
+      if (!audioContextCreatedRef.current || !audioContext) {
+        audioContext = getAudioContext();
+        audioContextRef.current = audioContext;
+        audioContextCreatedRef.current = true;
       }
-    }, []);
+      if (!audioContext) throw new Error("Áudio não suportado neste navegador.");
+      audioContext.resume();
+
+      const digits = [1, 2, 3];
+      const urls = digits.map((d) => VOICE_SAMPLE_PATHS.male[d]);
+
+      urls.forEach((url, idx) => {
+        fetch(url)
+          .then((response) => {
+            if (!response.ok) throw new Error(`Arquivo não encontrado: ${url}`);
+            return response.arrayBuffer();
+          })
+          .then((data) => {
+            audioContext.decodeAudioData(data.slice(0), (buffer) => {
+              const source = audioContext.createBufferSource();
+              source.buffer = buffer;
+              source.connect(audioContext.destination);
+              const startAt =
+                audioContext.currentTime + idx * (buffer.duration + 0.25);
+              source.start(startAt);
+            });
+          })
+          .catch((err) => {
+            setAudioTestError(
+              err instanceof Error
+                ? err.message
+                : "Erro ao tocar áudio de teste",
+            );
+          });
+      });
+    } catch (err) {
+      setAudioTestError(
+        err instanceof Error ? err.message : "Erro ao tocar áudio de teste",
+      );
+    }
+  }, []);
+
   const bufferCacheRef = useRef<Map<string, AudioBuffer>>(new Map());
   const trialStartRef = useRef<number>(0);
   const answerInputRef = useRef<HTMLInputElement | null>(null);
@@ -446,7 +486,6 @@ export function EscutaSeletivaCocktailParty({
     const cached = bufferCacheRef.current.get(url);
     if (cached) return cached;
 
-    // Não cria novo AudioContext aqui, apenas usa o já criado na interação do usuário
     if (!audioContextRef.current) {
       throw new Error("AudioContext indisponível no navegador.");
     }
@@ -483,8 +522,6 @@ export function EscutaSeletivaCocktailParty({
 
   const playTrialAudio = useCallback(
     async (trial: Trial, levelConfig: LevelConfig) => {
-      // Não cria novo AudioContext aqui, apenas usa o já criado na interação do usuário
-
       const audioContext = audioContextRef.current;
       if (!audioContext) {
         throw new Error("Áudio não suportado neste navegador.");
@@ -496,16 +533,17 @@ export function EscutaSeletivaCocktailParty({
       const startAt = audioContext.currentTime + 0.12;
       let latestEnd = startAt;
 
-      // Configuração de canais em estéreo e concatenação dos samples na ordem da sequência.
       trial.channels.forEach((channel) => {
         let cursor = startAt;
 
         channel.sequence.forEach((digit) => {
           const buffer = bufferCacheRef.current.get(
-            VOICE_SAMPLE_PATHS[channel.voiceProfile][digit]
+            VOICE_SAMPLE_PATHS[channel.voiceProfile][digit],
           );
           if (!buffer) {
-            throw new Error(`Áudio não encontrado para o dígito ${digit} (${channel.voiceProfile})`);
+            throw new Error(
+              `Áudio não encontrado para o dígito ${digit} (${channel.voiceProfile})`,
+            );
           }
           const source = audioContext.createBufferSource();
           const gainNode = audioContext.createGain();
@@ -611,7 +649,6 @@ export function EscutaSeletivaCocktailParty({
 
   const startListening = useCallback(() => {
     setAudioError(null);
-    // Cria o AudioContext apenas na primeira interação do usuário
     if (!audioContextCreatedRef.current) {
       audioContextRef.current = getAudioContext();
       audioContextCreatedRef.current = true;
@@ -621,12 +658,18 @@ export function EscutaSeletivaCocktailParty({
   }, []);
 
   const confirmAnswer = useCallback(() => {
-    if (!currentTrial || (status !== "answering" && status !== "feedback")) return;
+    if (!currentTrial || (status !== "answering" && status !== "feedback"))
+      return;
 
-    const evaluation = evaluateSequence(currentTrial.targetSequence, answerInput);
+    const evaluation = evaluateSequence(
+      currentTrial.targetSequence,
+      answerInput,
+    );
     const expected = currentTrial.targetSequence.join("");
     const isCorrect = evaluation.normalizedInput === expected;
-    const responseTimeMs = Math.round(performance.now() - trialStartRef.current);
+    const responseTimeMs = Math.round(
+      performance.now() - trialStartRef.current,
+    );
 
     playFeedbackSound(isCorrect);
     setFeedback(isCorrect ? "correct" : "incorrect");
@@ -640,7 +683,8 @@ export function EscutaSeletivaCocktailParty({
               correct: isCorrect,
               responseTimeMs,
               comparedDigitsCount: evaluation.comparedDigitsCount,
-              totalDigitsCorrectPosition: evaluation.totalDigitsCorrectPosition,
+              totalDigitsCorrectPosition:
+                evaluation.totalDigitsCorrectPosition,
               firstErrorPosition: evaluation.firstErrorPosition,
               responseQualityRatio: evaluation.responseQualityRatio,
               errorSegment: evaluation.errorSegment,
@@ -668,9 +712,15 @@ export function EscutaSeletivaCocktailParty({
       return;
     }
 
-    const levelMetrics = buildLevelMetrics(trials, level, config.phase, score);
+    const levelMetrics = buildLevelMetrics(
+      trials,
+      level,
+      config.phase,
+      score,
+    );
     const completedTrials = trials.filter(
-      (trial): trial is Trial & { correct: boolean } => trial.correct !== null,
+      (trial): trial is Trial & { correct: boolean } =>
+        trial.correct !== null,
     );
 
     setAllLevelMetrics((prev) => [...prev, levelMetrics]);
@@ -750,17 +800,32 @@ export function EscutaSeletivaCocktailParty({
       lines.push(`  Erros: ${metric.errorCount}`);
       lines.push(`  Acurácia: ${Math.round(metric.accuracy * 100)}%`);
       lines.push(`  Tempo médio de resposta: ${metric.averageResponseMs}ms`);
-      lines.push(`  Dígitos corretos médios (posição): ${metric.averageDigitsCorrectPercent}%`);
+      lines.push(
+        `  Dígitos corretos médios (posição): ${metric.averageDigitsCorrectPercent}%`,
+      );
       lines.push(`  Tendência de erro: ${metric.errorTrend}`);
       lines.push(`  Pontuação: ${metric.score}`);
       lines.push("");
     });
 
-    const totalTrials = allLevelMetrics.reduce((sum, metric) => sum + metric.totalTrials, 0);
-    const totalCorrect = allLevelMetrics.reduce((sum, metric) => sum + metric.correctCount, 0);
-    const totalErrors = allLevelMetrics.reduce((sum, metric) => sum + metric.errorCount, 0);
-    const totalScore = allLevelMetrics.reduce((sum, metric) => sum + metric.score, 0);
-    const totalAccuracy = totalTrials > 0 ? Math.round((totalCorrect / totalTrials) * 100) : 0;
+    const totalTrials = allLevelMetrics.reduce(
+      (sum, metric) => sum + metric.totalTrials,
+      0,
+    );
+    const totalCorrect = allLevelMetrics.reduce(
+      (sum, metric) => sum + metric.correctCount,
+      0,
+    );
+    const totalErrors = allLevelMetrics.reduce(
+      (sum, metric) => sum + metric.errorCount,
+      0,
+    );
+    const totalScore = allLevelMetrics.reduce(
+      (sum, metric) => sum + metric.score,
+      0,
+    );
+    const totalAccuracy =
+      totalTrials > 0 ? Math.round((totalCorrect / totalTrials) * 100) : 0;
 
     lines.push("=" + "=".repeat(60));
     lines.push("RESUMO TOTAL:");
@@ -775,13 +840,25 @@ export function EscutaSeletivaCocktailParty({
 
     trialHistory.forEach((trial, index) => {
       lines.push(
-        `#${index + 1} | fase ${trial.phase} | alvo ${VOICE_LABEL[trial.targetVoiceProfile]} (${SIDE_LABEL[trial.targetSide]}) | correta ${trial.targetSequence.join("")} | resposta ${trial.playerInput || "(vazio)"} | acerto global ${trial.correct ? "sim" : "não"} | acertos por posição ${trial.totalDigitsCorrectPosition}/${trial.targetSequence.length} | 1º erro ${trial.firstErrorPosition ?? "nenhum"} | tempo ${trial.responseTimeMs ?? 0}ms`,
+        `#${index + 1} | fase ${trial.phase} | alvo ${
+          VOICE_LABEL[trial.targetVoiceProfile]
+        } (${SIDE_LABEL[trial.targetSide]}) | correta ${trial.targetSequence.join(
+          "",
+        )} | resposta ${trial.playerInput || "(vazio)"} | acerto global ${
+          trial.correct ? "sim" : "não"
+        } | acertos por posição ${
+          trial.totalDigitsCorrectPosition
+        }/${trial.targetSequence.length} | 1º erro ${
+          trial.firstErrorPosition ?? "nenhum"
+        } | tempo ${trial.responseTimeMs ?? 0}ms`,
       );
     });
 
     lines.push("=" + "=".repeat(60));
 
-    const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+    const blob = new Blob([lines.join("\n")], {
+      type: "text/plain;charset=utf-8",
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -795,8 +872,14 @@ export function EscutaSeletivaCocktailParty({
   };
 
   const finishExercise = () => {
-    const totalTrials = allLevelMetrics.reduce((sum, metric) => sum + metric.totalTrials, 0);
-    const totalCorrect = allLevelMetrics.reduce((sum, metric) => sum + metric.correctCount, 0);
+    const totalTrials = allLevelMetrics.reduce(
+      (sum, metric) => sum + metric.totalTrials,
+      0,
+    );
+    const totalCorrect = allLevelMetrics.reduce(
+      (sum, metric) => sum + metric.correctCount,
+      0,
+    );
     const accuracy = totalTrials > 0 ? totalCorrect / totalTrials : 0;
 
     const success = accuracy >= MIN_ACCURACY_TARGET;
@@ -806,15 +889,28 @@ export function EscutaSeletivaCocktailParty({
 
   const summaryByPhase = useMemo(() => {
     return ([1, 2, 3] as const).map((phase) => {
-      const phaseMetrics = allLevelMetrics.filter((metric) => metric.phase === phase);
-      const totalTrials = phaseMetrics.reduce((sum, metric) => sum + metric.totalTrials, 0);
-      const correctCount = phaseMetrics.reduce((sum, metric) => sum + metric.correctCount, 0);
-      const errorCount = phaseMetrics.reduce((sum, metric) => sum + metric.errorCount, 0);
+      const phaseMetrics = allLevelMetrics.filter(
+        (metric) => metric.phase === phase,
+      );
+      const totalTrials = phaseMetrics.reduce(
+        (sum, metric) => sum + metric.totalTrials,
+        0,
+      );
+      const correctCount = phaseMetrics.reduce(
+        (sum, metric) => sum + metric.correctCount,
+        0,
+      );
+      const errorCount = phaseMetrics.reduce(
+        (sum, metric) => sum + metric.errorCount,
+        0,
+      );
       const responseAvg =
         phaseMetrics.length > 0
           ? Math.round(
-              phaseMetrics.reduce((sum, metric) => sum + metric.averageResponseMs, 0) /
-                phaseMetrics.length,
+              phaseMetrics.reduce(
+                (sum, metric) => sum + metric.averageResponseMs,
+                0,
+              ) / phaseMetrics.length,
             )
           : 0;
 
@@ -828,7 +924,9 @@ export function EscutaSeletivaCocktailParty({
             )
           : 0;
 
-      const phaseTrials = trialHistory.filter((trial) => trial.phase === phase);
+      const phaseTrials = trialHistory.filter(
+        (trial) => trial.phase === phase,
+      );
 
       return {
         phase,
@@ -844,20 +942,25 @@ export function EscutaSeletivaCocktailParty({
 
   return (
     <div className="mt-4 space-y-4">
-      {/* Janela de apresentação removida conforme solicitado */}
-
+      {/* Introdução + teste de áudio, apenas no primeiro trial do nível */}
       {status === "ready" && currentTrial && currentTrialIndex === 0 && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
           <div>
             <h3 className="text-xl font-semibold text-zinc-900">
-              Escuta Seletiva (Cocktail Party)
+              Escuta Seletiva (Cocktail -Party)
             </h3>
-            <p className="mt-2 text-sm font-medium text-zinc-700">O que vai acontecer</p>
+            <p className="mt-2 text-sm font-medium text-zinc-700">
+              O que vai acontecer
+            </p>
             <p className="mt-1 text-sm text-zinc-700">
-              Neste treino, você vai ouvir duas vozes ao mesmo tempo: uma feminina e outra masculina, cada uma falando uma sequência de números. Abaixo, será indicado em qual das duas vozes você deve prestar atenção para, ao final, escrever a sequência que ouviu.
+              Neste treino, você vai ouvir duas vozes ao mesmo tempo: uma
+              feminina e outra masculina, cada uma falando uma sequência de
+              números. Abaixo, será indicado em qual das duas vozes você deve
+              prestar atenção para, ao final, escrever a sequência que ouviu.
             </p>
             <p className="mt-3 rounded bg-amber-100 px-3 py-2 text-sm text-amber-800 border border-amber-300">
-              <strong>Atenção:</strong> Habilite o som do seu celular e verifique se o volume está alto para ouvir as vozes do treino.
+              <strong>Atenção:</strong> Habilite o som do seu celular e verifique
+              se o volume está alto para ouvir as vozes do treino.
             </p>
           </div>
 
@@ -867,7 +970,7 @@ export function EscutaSeletivaCocktailParty({
               onClick={playAudioTest}
               className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-800"
             >
-              Testar áudio
+              Testar áudio agora
             </button>
             {audioTestError && (
               <span className="text-sm text-amber-700">{audioTestError}</span>
@@ -876,7 +979,10 @@ export function EscutaSeletivaCocktailParty({
 
           <div className="rounded-lg border border-black/10 bg-white p-4 mt-4">
             <p className="text-sm text-zinc-500">Instrução da rodada</p>
-            <p className="mt-1 font-extrabold text-zinc-900 tracking-wide" style={{ textTransform: 'uppercase' }}>
+            <p
+              className="mt-1 font-extrabold text-zinc-900 tracking-wide"
+              style={{ textTransform: "uppercase" }}
+            >
               {currentTrial.instruction}
             </p>
           </div>
@@ -899,8 +1005,13 @@ export function EscutaSeletivaCocktailParty({
 
       {status === "listening" && currentTrial && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
-          <p className="text-center text-sm text-zinc-600">Reproduzindo áudio...</p>
-          <p className="text-center font-extrabold text-zinc-900 tracking-wide" style={{ textTransform: 'uppercase' }}>
+          <p className="text-center text-sm text-zinc-600">
+            Reproduzindo áudio...
+          </p>
+          <p
+            className="text-center font-extrabold text-zinc-900 tracking-wide"
+            style={{ textTransform: "uppercase" }}
+          >
             {currentTrial.instruction}
           </p>
           <p className="text-center text-xs text-zinc-500">
@@ -912,17 +1023,27 @@ export function EscutaSeletivaCocktailParty({
       {status === "countdown" && currentTrial && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
           <p className="text-center text-sm text-zinc-600">Prepare-se</p>
-          <p className="text-center font-extrabold text-zinc-900 tracking-wide" style={{ textTransform: 'uppercase' }}>
+          <p
+            className="text-center font-extrabold text-zinc-900 tracking-wide"
+            style={{ textTransform: "uppercase" }}
+          >
             {currentTrial.instruction}
           </p>
-          <p className="text-center text-5xl font-semibold text-zinc-900">{countdown}</p>
+          <p className="text-center text-5xl font-semibold text-zinc-900">
+            {countdown}
+          </p>
         </div>
       )}
 
       {status === "answering" && currentTrial && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
-          <p className="font-semibold text-zinc-900">Digite a sequência do canal-alvo</p>
-          <p className="text-sm font-extrabold text-zinc-900 tracking-wide" style={{ textTransform: 'uppercase' }}>
+          <p className="font-semibold text-zinc-900">
+            Digite a sequência do canal-alvo
+          </p>
+          <p
+            className="text-sm font-extrabold text-zinc-900 tracking-wide"
+            style={{ textTransform: "uppercase" }}
+          >
             {currentTrial.instruction}
           </p>
 
@@ -930,7 +1051,9 @@ export function EscutaSeletivaCocktailParty({
             ref={answerInputRef}
             autoFocus
             value={answerInput}
-            onChange={(event) => setAnswerInput(event.target.value.replace(/\D/g, ""))}
+            onChange={(event) =>
+              setAnswerInput(event.target.value.replace(/\D/g, ""))
+            }
             placeholder="Ex.: 274"
             className="w-full rounded-lg border border-black/20 bg-white px-4 py-3 text-lg tracking-[0.2em] text-zinc-900 outline-none focus:border-zinc-700"
           />
@@ -955,7 +1078,8 @@ export function EscutaSeletivaCocktailParty({
             {feedback === "correct" ? "✓ Acertou" : "✗ Errou"}
           </p>
           <p className="text-center text-sm text-zinc-700">
-            Sequência correta: <strong>{currentTrial.targetSequence.join("")}</strong>
+            Sequência correta:{" "}
+            <strong>{currentTrial.targetSequence.join("")}</strong>
           </p>
           <p className="text-center text-sm text-zinc-700">
             Sua resposta: <strong>{answerInput || "(vazio)"}</strong>
@@ -973,11 +1097,16 @@ export function EscutaSeletivaCocktailParty({
 
       {status === "completed" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
-          <h3 className="text-xl font-semibold text-zinc-900">Jogo concluído!</h3>
+          <h3 className="text-xl font-semibold text-zinc-900">
+            Jogo concluído!
+          </h3>
 
           <div className="space-y-3">
             {allLevelMetrics.map((metric, index) => (
-              <div key={index} className="rounded-lg border border-black/10 bg-white p-3">
+              <div
+                key={index}
+                className="rounded-lg border border-black/10 bg-white p-3"
+              >
                 <p className="text-sm font-medium text-zinc-900">
                   Nível {index + 1} • Fase {metric.phase}
                 </p>
@@ -996,7 +1125,12 @@ export function EscutaSeletivaCocktailParty({
             <div className="mt-2 grid gap-2 text-sm">
               {summaryByPhase.map((phaseSummary) => (
                 <p key={phaseSummary.phase}>
-                  Fase {phaseSummary.phase}: {phaseSummary.totalTrials} tentativas, {phaseSummary.correctCount} acertos, {phaseSummary.errorCount} erros, tempo médio {phaseSummary.responseAvg}ms, dígitos corretos médios {phaseSummary.averageDigitsCorrectPercent}%, {phaseSummary.errorTrend}
+                  Fase {phaseSummary.phase}: {phaseSummary.totalTrials}{" "}
+                  tentativas, {phaseSummary.correctCount} acertos,{" "}
+                  {phaseSummary.errorCount} erros, tempo médio{" "}
+                  {phaseSummary.responseAvg}ms, dígitos corretos médios{" "}
+                  {phaseSummary.averageDigitsCorrectPercent}%,{" "}
+                  {phaseSummary.errorTrend}
                 </p>
               ))}
             </div>
@@ -1020,7 +1154,8 @@ export function EscutaSeletivaCocktailParty({
           </div>
 
           <p className="text-xs text-zinc-500">
-            Meta sugerida de desempenho: {Math.round(MIN_ACCURACY_TARGET * 100)}% de acerto.
+            Meta sugerida de desempenho:{" "}
+            {Math.round(MIN_ACCURACY_TARGET * 100)}% de acerto.
           </p>
         </div>
       )}
