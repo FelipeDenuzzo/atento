@@ -852,23 +852,14 @@ export function EscutaSeletivaCocktailParty({
             </h3>
             <p className="mt-2 text-sm font-medium text-zinc-700">O que vai acontecer</p>
             <p className="mt-1 text-sm text-zinc-700">
-              Você ouvirá duas vozes ao mesmo tempo, cada uma falando uma sequência de números.
+              Neste treino, você vai ouvir duas vozes ao mesmo tempo: uma feminina e outra masculina, cada uma falando uma sequência de números. Na próxima tela, será indicado em qual das duas vozes você deve prestar atenção para, ao final, escrever a sequência que ouviu.
             </p>
             <p className="mt-3 rounded bg-amber-100 px-3 py-2 text-sm text-amber-800 border border-amber-300">
               <strong>Atenção:</strong> Habilite o som do seu celular e verifique se o volume está alto para ouvir as vozes do treino.
             </p>
           </div>
 
-          <div className="space-y-2 text-sm text-zinc-700">
-            <p><strong>Como jogar</strong></p>
-            <p>
-              Antes de cada rodada, diremos qual voz/canal você deve seguir (ex.: "voz feminina", "lado esquerdo").
-            </p>
-            <ul className="ml-4 list-disc space-y-1">
-              <li>Concentre-se somente na voz indicada e ignore a outra.</li>
-              <li>Quando o áudio terminar, digite a sequência de números do canal-alvo, na ordem em que escutou.</li>
-            </ul>
-          </div>
+          {/* Orientações do próximo exercício removidas. Instruções simplificadas conforme solicitado. */}
 
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
             <button
@@ -904,26 +895,7 @@ export function EscutaSeletivaCocktailParty({
             {/* Nenhuma info extra, apenas barra de progresso e instrução */}
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            {currentTrial.channels.map((channel) => {
-              const isTarget = channel.side === currentTrial.targetSide;
-              return (
-                <div
-                  key={channel.side}
-                  className={`rounded-lg border p-3 ${
-                    isTarget ? "border-blue-300 bg-blue-50" : "border-black/10 bg-white"
-                  }`}
-                >
-                  <p className="text-sm font-medium text-zinc-900">
-                    {SIDE_LABEL[channel.side]} • {VOICE_LABEL[channel.voiceProfile]}
-                  </p>
-                  <p className="text-xs text-zinc-600">
-                    {isTarget ? "Canal alvo desta rodada" : "Canal distrator"}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
+          {/* Informações de direita e esquerda removidas */}
 
           <button
             type="button"
