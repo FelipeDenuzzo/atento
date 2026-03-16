@@ -700,10 +700,7 @@ export function AttentionTrainingGame() {
           </div>
         )}
 
-        {stage === "instructions" && currentExercise && currentExercise.kind === "cocktail-party" && (
-          (() => { setStage("exercise"); return null; })()
-        )}
-        {stage === "instructions" && currentExercise && currentExercise.kind !== "cocktail-party" && (
+        {stage === "instructions" && currentExercise && (
           <div className="mt-4 space-y-5">
             <h2 className="text-xl font-semibold text-zinc-900">
               {currentExercise.title}
