@@ -114,30 +114,6 @@ export const EscutaSeletivaCocktailParty: React.FC = () => {
     </div>
   );
 };
-
-  let errorSegment: "start" | "middle" | "end" | null = null;
-  if (firstErrorPosition !== null && targetSequence.length > 0) {
-    const ratio = firstErrorPosition / targetSequence.length;
-    if (ratio < 1 / 3) {
-      errorSegment = "start";
-    } else if (ratio < 2 / 3) {
-      errorSegment = "middle";
-    } else {
-      errorSegment = "end";
-    }
-  }
-
-  return {
-    normalizedInput,
-    comparedDigitsCount,
-    totalDigitsCorrectPosition,
-    firstErrorPosition,
-    responseQualityRatio,
-    errorSegment,
-  };
-}
-
-function getErrorTrendLabel(trials: Trial[]): string {
   const withErrorSegment = trials.filter(
     (trial): trial is Trial & { errorSegment: "start" | "middle" | "end" } =>
       trial.errorSegment !== null,
