@@ -941,8 +941,8 @@ export function AttentionTrainingGame() {
                   }
                 }}
               />
-            ) : null
-            ) : currentExercise.kind === "filtro-cores-com-som" ? (
+            )
+          ) : currentExercise.kind === "filtro-cores-com-som" ? (
               <FiltroCoresComSomGame
                 basePoints={currentExercise.points}
                 startingLevel={"startingLevel" in currentExercise ? currentExercise.startingLevel : 1}
