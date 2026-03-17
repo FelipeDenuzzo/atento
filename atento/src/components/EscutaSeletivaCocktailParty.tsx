@@ -1,24 +1,26 @@
-import React, { useState } from "react";
+"use client";
+
+import React from "react";
 
 type Voice = "masc" | "femi";
 
 type SequenceItem = {
   digit: number;
   voice: Voice;
-}
+};
 
-interface EscutaSeletivaCocktailPartyProps {
-  onComplete?: (report: any) => void;
-  mobile?: boolean;
-}
-
-// Estrutura dos dados de cada rodada
+type RoundData = {
   targetVoice: Voice;
   mascNumbers: number[];
   femiNumbers: number[];
   sequence: SequenceItem[];
   targetSequence: number[];
-}
+};
+
+type EscutaSeletivaCocktailPartyProps = {
+  onComplete?: (result?: unknown) => void;
+  mobile?: boolean;
+};
 
   const targetVoice: Voice = Math.random() < 0.5 ? "masc" : "femi";
   const mascNumbers = Array.from({ length: 3 }, () => Math.floor(Math.random() * 10));
