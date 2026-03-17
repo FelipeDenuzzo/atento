@@ -1,26 +1,31 @@
 import React, { useState } from "react";
 
+type Voice = "masc" | "femi";
+
+interface SequenceItem {
+  digit: number;
+  voice: Voice;
+}
+
 interface EscutaSeletivaCocktailPartyProps {
   onComplete?: (report: any) => void;
   mobile?: boolean;
 }
 
 // Estrutura dos dados de cada rodada
-interface Trial {
-  targetVoice: "masc" | "femi";
+  targetVoice: Voice;
   mascNumbers: number[];
   femiNumbers: number[];
-  sequence: { digit: number; voice: "masc" | "femi" }[];
+  sequence: SequenceItem[];
   targetSequence: number[];
 }
 
-function gerarTrial(): Trial {
-  const targetVoice = Math.random() < 0.5 ? "masc" : "femi";
+  const targetVoice: Voice = Math.random() < 0.5 ? "masc" : "femi";
   const mascNumbers = Array.from({ length: 3 }, () => Math.floor(Math.random() * 10));
   const femiNumbers = Array.from({ length: 3 }, () => Math.floor(Math.random() * 10));
   // Alterna as vozes: masc, femi, masc, femi, masc, femi
-  const sequence = Array.from({ length: 6 }, (_, i) => {
-    const voice = i % 2 === 0 ? "masc" : "femi";
+  const sequence: SequenceItem[] = Array.from({ length: 6 }, (_, i) => {
+    const voice: Voice = i % 2 === 0 ? "masc" : "femi";
     return {
       digit: voice === "masc" ? mascNumbers[Math.floor(i / 2)] : femiNumbers[Math.floor(i / 2)],
       voice,
