@@ -162,7 +162,7 @@ export function MobileAttentionTrainingGame() {
   const finalScoreTotal =
     resolvedSessionMode === "single"
       ? (currentExercise?.points ?? 0)
-      : totalPossible;
+      : quizTotalPossible;
 
   const getStageForExercise = (
     exercise: TrainingPlan["exercises"][number] | undefined,
