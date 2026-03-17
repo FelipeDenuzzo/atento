@@ -1,10 +1,11 @@
+import React, { useState } from "react";
+
 // Componente principal do treino Escuta Seletiva (Cocktail Party)
 // Aceita props genéricos para compatibilidade com mobile
 export function EscutaSeletivaCocktailParty(props: any) {
   // Implementação placeholder para evitar erro de build
   return <div>Treino Escuta Seletiva (Cocktail Party)</div>;
 }
-import React, { useState } from "react";
 
 // Tipos auxiliares
 export type VozAlvo = "masculina" | "feminina";
