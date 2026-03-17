@@ -95,9 +95,6 @@ export function MobileAttentionTrainingGame() {
   const quizExercises = activeExercises.filter(
     (exercise) => exercise.kind === "quiz",
   );
-    (sum, exercise) => sum + exercise.points,
-    0,
-  );
   const quizTotalPossible = quizExercises.reduce(
     (sum, exercise) => sum + exercise.points,
     0,
