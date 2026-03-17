@@ -360,15 +360,6 @@ function buildTrial(id: number, config: LevelConfig): Trial {
 // O restante do componente permanece igual ao que está no seu arquivo atual,
 // incluindo a lógica de reprodução de áudio alternada, coleta de respostas, feedback, relatório, etc.
 
-export function EscutaSeletivaCocktailParty(props: Props) {
-  // ...implemente aqui o restante do componente, conforme necessário...
-  return (
-    <div>
-      <p>Componente Escuta Seletiva (Cocktail Party) - NOVA VERSÃO INLINE</p>
-      {/* TODO: implementar UI e lógica completa */}
-    </div>
-  );
-}
 // --- FIM DA NOVA IMPLEMENTAÇÃO INLINE ---
 "use client";
 
@@ -1711,29 +1702,7 @@ export function AttentionTrainingGame() {
                   }
                 }}
               />
-            ) : (
-              <EscutaSeletivaCocktailParty
-                basePoints={currentExercise.points}
-                startingLevel={"startingLevel" in currentExercise ? currentExercise.startingLevel : 1}
-                maxLevelHint={"maxLevelHint" in currentExercise ? currentExercise.maxLevelHint : 0}
-                reportContext={reportContext}
-                onComplete={({ success, pointsEarned }) => {
-                  setScore((value) => value + pointsEarned);
-                  if (success) {
-                    setHits((value) => value + 1);
-                  }
-                  const nextIndex = currentIndex + 1;
-                  if (nextIndex >= activeExercises.length) {
-                    setStage("result");
-                  } else {
-                    setCurrentIndex(nextIndex);
-                    setSelectedOption(null);
-                    setSubmitted(false);
-                    setStage(getStageForExercise(activeExercises[nextIndex]));
-                  }
-                }}
-              />
-            )}
+            ) : null}
           </div>
         )}
 
