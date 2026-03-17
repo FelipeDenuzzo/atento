@@ -113,21 +113,6 @@ export const EscutaSeletivaCocktailParty: React.FC = () => {
       )}
     </div>
   );
-};
-
-}
-
-// Novo buildTrial: sequência alternada de vozes, 3 dígitos cada
-function buildTrial(id: number, config: LevelConfig): Trial {
-  // Define aleatoriamente qual será a voz-alvo
-  const targetVoiceProfile: VoiceProfileId = randomItem(config.voiceProfiles);
-  const nonTargetVoiceProfile: VoiceProfileId = config.voiceProfiles.find(v => v !== targetVoiceProfile)!;
-  // Lados continuam aleatórios
-  const targetSide = randomItem<Side>(["left", "right"]);
-
-  // Gera 3 dígitos para cada voz
-  const targetDigits = Array.from({ length: 3 }, () => randomInt(0, 9));
-  const nonTargetDigits = Array.from({ length: 3 }, () => randomInt(0, 9));
 
   // Monta sequência alternada: [voz1, voz2, voz1, voz2, ...]
   // Exemplo: [masc, fem, masc, fem, masc, fem] ou vice-versa
