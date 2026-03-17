@@ -372,6 +372,8 @@ import {
 } from "@/data/trainingPlans";
 import { AttentionType, TrainingPlan } from "@/types/game";
 import { VisualSearchHunt } from "@/components/VisualSearchHunt";
+import { EscutaSeletivaCocktailPartyMobileGame } from "@/games/escuta-seletiva-cocktail-party/mobile/EscutaSeletivaCocktailPartyMobileGame";
+import { EscutaSeletivaCocktailPartyDesktopGame } from "@/games/escuta-seletiva-cocktail-party/EscutaSeletivaCocktailPartyDesktopGame";
 import { StroopInvertido } from "@/components/StroopInvertido";
 import { FlankerSetas } from "@/components/FlankerSetas";
 import { GoNoGoQuickClick } from "@/components/GoNoGoQuickClick";
@@ -1092,10 +1094,15 @@ export function AttentionTrainingGame() {
                 </h2>
               )}
               {currentExercise.kind === "visual-search" && (
-                <h2 className="text-xl font-semibold text-zinc-900">
-                  Caça ao Alvo (Visual Search)
-                </h2>
-              )}
+                  <h2 className="text-xl font-semibold text-zinc-900">
+                    Caça ao Alvo (Visual Search)
+                  </h2>
+                )}
+              {currentExercise.kind === "escutaseletiva-cocktail-party" && (
+                  <h2 className="text-xl font-semibold text-zinc-900">
+                    Escuta Seletiva (Cocktail Party)
+                  </h2>
+                )}
               {currentExercise.kind === "flanker" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Flanker de Setas
@@ -1283,6 +1290,44 @@ export function AttentionTrainingGame() {
                   }
                 }}
               />
+            ) : currentExercise.kind === "escutaseletiva-cocktail-party" ? (
+              {typeof window !== "undefined" && window.innerWidth < 768 ? (
+                <EscutaSeletivaCocktailPartyMobileGame
+                  onComplete={({ success, pointsEarned }: any) => {
+                    setScore((value) => value + (pointsEarned || 0));
+                    if (success) {
+                      setHits((value) => value + 1);
+                    }
+                    const nextIndex = currentIndex + 1;
+                    if (nextIndex >= activeExercises.length) {
+                      setStage("result");
+                    } else {
+                      setCurrentIndex(nextIndex);
+                      setSelectedOption(null);
+                      setSubmitted(false);
+                      setStage(getStageForExercise(activeExercises[nextIndex]));
+                    }
+                  }}
+                />
+              ) : (
+                <EscutaSeletivaCocktailPartyDesktopGame
+                  onComplete={({ success, pointsEarned }: any) => {
+                    setScore((value) => value + (pointsEarned || 0));
+                    if (success) {
+                      setHits((value) => value + 1);
+                    }
+                    const nextIndex = currentIndex + 1;
+                    if (nextIndex >= activeExercises.length) {
+                      setStage("result");
+                    } else {
+                      setCurrentIndex(nextIndex);
+                      setSelectedOption(null);
+                      setSubmitted(false);
+                      setStage(getStageForExercise(activeExercises[nextIndex]));
+                    }
+                  }}
+                />
+              )}
             ) : currentExercise.kind === "flanker" ? (
               <FlankerSetas
                 basePoints={currentExercise.points}
