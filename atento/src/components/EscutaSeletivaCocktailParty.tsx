@@ -115,21 +115,6 @@ export const EscutaSeletivaCocktailParty: React.FC = () => {
   );
 };
 
-  const total = withErrorSegment.length;
-  const dominant = Object.entries(count).sort((a, b) => b[1] - a[1])[0];
-  const dominantRatio = dominant[1] / total;
-
-  if (dominantRatio < 0.5) {
-    return "Erros distribuídos de forma uniforme";
-  }
-
-  if (dominant[0] === "start") {
-    return "Erros mais frequentes no início das sequências";
-  }
-  if (dominant[0] === "middle") {
-    return "Erros mais frequentes no meio das sequências";
-  }
-  return "Erros mais frequentes no final das sequências";
 }
 
 // Novo buildTrial: sequência alternada de vozes, 3 dígitos cada
