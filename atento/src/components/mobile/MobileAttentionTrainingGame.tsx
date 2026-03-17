@@ -83,6 +83,7 @@ export function MobileAttentionTrainingGame() {
     [selectedPlanId, fallbackPlanId],
   );
 
+  const sequenceExercises = useMemo(
     () =>
       selectedPlan.exercises.filter(
         (exercise) => exercise.attentionType === selectedAttentionType,
