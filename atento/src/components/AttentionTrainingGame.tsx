@@ -362,7 +362,7 @@ function buildTrial(id: number, config: LevelConfig): Trial {
 // incluindo a lógica de reprodução de áudio alternada, coleta de respostas, feedback, relatório, etc.
 
 // --- FIM DA NOVA IMPLEMENTAÇÃO INLINE ---
-"use client";
+
 
 import { useEffect, useMemo, useState } from "react";
 import {
