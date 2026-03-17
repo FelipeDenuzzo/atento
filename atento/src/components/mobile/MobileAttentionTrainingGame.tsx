@@ -67,7 +67,6 @@ export function MobileAttentionTrainingGame() {
   const [nameInput, setNameInput] = useState("");
   const [participantName, setParticipantName] = useState<string | undefined>(undefined);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [cocktailStartLevelOverride, setCocktailStartLevelOverride] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [hits, setHits] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -84,7 +83,6 @@ export function MobileAttentionTrainingGame() {
     [selectedPlanId, fallbackPlanId],
   );
 
-  const sequenceExercises = useMemo(
     () =>
       selectedPlan.exercises.filter(
         (exercise) => exercise.attentionType === selectedAttentionType,
@@ -96,7 +94,6 @@ export function MobileAttentionTrainingGame() {
   const quizExercises = activeExercises.filter(
     (exercise) => exercise.kind === "quiz",
   );
-  const totalPossible = activeExercises.reduce(
     (sum, exercise) => sum + exercise.points,
     0,
   );
@@ -111,7 +108,6 @@ export function MobileAttentionTrainingGame() {
     if (typeof window === "undefined") return;
 
     const parseAtentoUser = (): string | undefined => {
-      const raw = window.localStorage.getItem(ATENTO_USER_KEY);
       if (!raw) return undefined;
 
       try {
@@ -195,7 +191,7 @@ export function MobileAttentionTrainingGame() {
     setTrainingMode("sequence");
     setSelectedSingleTitle(null);
     setCurrentIndex(0);
-    setCocktailStartLevelOverride(null);
+    // ...existing code...
     setScore(0);
     setHits(0);
     setSelectedOption(null);
@@ -229,7 +225,7 @@ export function MobileAttentionTrainingGame() {
 
   const startFromExercise = (
     exerciseIndex: number,
-    options?: { cocktailStartLevel?: number },
+    // ...existing code...
     startStage: GameStage = "exercise",
   ) => {
     const selectedExercise = selectedPlan.exercises[exerciseIndex];
@@ -244,7 +240,7 @@ export function MobileAttentionTrainingGame() {
     setTrainingMode("single");
     setSelectedSingleTitle(selectedExercise.title);
     setCurrentIndex(exerciseIndex);
-    setCocktailStartLevelOverride(options?.cocktailStartLevel ?? null);
+    // ...existing code...
     setScore(0);
     setHits(0);
     setSelectedOption(null);
@@ -320,7 +316,7 @@ export function MobileAttentionTrainingGame() {
     setSelectedEntryMode(null);
     setStage("intro");
     setCurrentIndex(0);
-    setCocktailStartLevelOverride(null);
+    // ...existing code...
     setScore(0);
     setHits(0);
     setSelectedOption(null);

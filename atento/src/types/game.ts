@@ -9,7 +9,6 @@ export type ExerciseKind =
   | "visual-search"
   | "stroop"
   | "flanker"
-  | "cocktail-party"
   | "go-no-go"
   | "go-no-go-expandido"
   | "filtro-cores-com-som"
@@ -65,11 +64,6 @@ export type FlankerExercise = BaseExercise & {
   maxLevelHint: number;
 };
 
-export type CocktailPartyExercise = BaseExercise & {
-  kind: "cocktail-party";
-  startingLevel: number;
-  maxLevelHint: number;
-};
 
 export type GoNoGoExpandidoExercise = BaseExercise & {
   kind: "go-no-go-expandido";
@@ -196,7 +190,6 @@ export type AttentionExercise =
   | VisualSearchExercise
   | StroopExercise
   | FlankerExercise
-  | CocktailPartyExercise
   | GoNoGoExercise
   | GoNoGoExpandidoExercise
   | FiltroCoresComSomExercise

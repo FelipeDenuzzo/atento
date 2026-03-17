@@ -10,7 +10,6 @@ import { AttentionType, TrainingPlan } from "@/types/game";
 import { VisualSearchHunt } from "@/components/VisualSearchHunt";
 import { StroopInvertido } from "@/components/StroopInvertido";
 import { FlankerSetas } from "@/components/FlankerSetas";
-import { EscutaSeletivaCocktailParty } from "@/components/EscutaSeletivaCocktailParty";
 import { GoNoGoQuickClick } from "@/components/GoNoGoQuickClick";
 import { GoNoGoExpandidoGame } from "@/games/go-no-go-expandido/GoNoGoExpandidoGame";
 import { FiltroCoresComSomGame } from "@/games/filtro-cores-com-som/FiltroCoresComSomGame";
@@ -723,87 +722,122 @@ export function AttentionTrainingGame() {
         {stage === "exercise" && currentExercise && (
           <div className="mt-4 space-y-6">
             <div className="space-y-1">
-              {currentExercise.kind === "quiz" ? (
+              {currentExercise.kind === "quiz" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   {currentExercise.question}
                 </h2>
-              ) : currentExercise.kind === "visual-search" ? (
+              )}
+              {currentExercise.kind === "visual-search" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Caça ao Alvo (Visual Search)
                 </h2>
-              ) : currentExercise.kind === "flanker" ? (
+              )}
+              {currentExercise.kind === "flanker" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Flanker de Setas
                 </h2>
-              ) : currentExercise.kind === "cocktail-party" ? (
-                <h2 className="text-xl font-semibold text-zinc-900">
-                  Escuta Seletiva (Cocktail Party)
-                </h2>
-              ) : currentExercise.kind === "filtro-cores-com-som" ? (
+              )}
+              {currentExercise.kind === "filtro-cores-com-som" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Filtro de Cores com Som
                 </h2>
-              ) : currentExercise.kind === "counting-flow-task" ? (
+              )}
+              {currentExercise.kind === "counting-flow-task" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Contagem de Estímulos em Fluxo
                 </h2>
-              ) : currentExercise.kind === "long-mazes" ? (
+              )}
+              {currentExercise.kind === "long-mazes" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Labirintos Prolongados
                 </h2>
-              ) : currentExercise.kind === "symbol-map" ? (
+              )}
+              {currentExercise.kind === "symbol-map" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Mapa de Símbolos (Symbol Matching)
                 </h2>
-              ) : currentExercise.kind === "symbol-matrix-search" ? (
+              )}
+              {currentExercise.kind === "symbol-matrix-search" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Busca de Símbolos em Matriz
                 </h2>
-              ) : currentExercise.kind === "go-no-go" ? (
+              )}
+              {currentExercise.kind === "go-no-go" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Go / No-Go — Clique Rapido
                 </h2>
-              ) : currentExercise.kind === "go-no-go-expandido" ? (
+              )}
+              {currentExercise.kind === "go-no-go-expandido" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Go / No-Go
                 </h2>
-              ) : currentExercise.kind === "radar-tone" ? (
+              )}
+              {currentExercise.kind === "radar-tone" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Radar e Tom
                 </h2>
-              ) : currentExercise.kind === "drive-word-target" ? (
+              )}
+              {currentExercise.kind === "drive-word-target" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Dirija + Palavras-Alvo
                 </h2>
-              ) : currentExercise.kind === "chat-error-vigilance" ? (
+              )}
+              {currentExercise.kind === "chat-error-vigilance" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Chat + Vigilância de Erros
                 </h2>
-              ) : currentExercise.kind === "symbol-map-sound-monitor" ? (
+              )}
+              {currentExercise.kind === "symbol-map-sound-monitor" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Mapa de Símbolos + Monitor de Som
                 </h2>
-              ) : currentExercise.kind === "rapid-classification-updatable-memory" ? (
+              )}
+              {currentExercise.kind === "rapid-classification-updatable-memory" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Classificação Rápida + Memória Atualizável
                 </h2>
-              ) : currentExercise.kind === "color-shape-switch" ? (
+              )}
+              {currentExercise.kind === "color-shape-switch" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Cor-ou-Forma (Color/Shape Switch)
                 </h2>
-              ) : currentExercise.kind === "top-bottom-position-rule-switch" ? (
+              )}
+              {currentExercise.kind === "top-bottom-position-rule-switch" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Topo/Baixo — Position-Rule Switch
                 </h2>
-              ) : currentExercise.kind === "reversal-go-nogo-switch" ? (
+              )}
+              {currentExercise.kind === "reversal-go-nogo-switch" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Reversal Go/No-Go Switch
                 </h2>
-              ) : currentExercise.kind === "trilha-alternada-tmtb" ? (
+              )}
+              {currentExercise.kind === "trilha-alternada-tmtb" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Trilha Alternada 1-A-2-B (TMT-B)
                 </h2>
-              ) : (
+              )}
+              {![
+                "quiz",
+                "visual-search",
+                "flanker",
+                "filtro-cores-com-som",
+                "counting-flow-task",
+                "long-mazes",
+                "symbol-map",
+                "symbol-matrix-search",
+                "go-no-go",
+                "go-no-go-expandido",
+                "radar-tone",
+                "drive-word-target",
+                "chat-error-vigilance",
+                "symbol-map-sound-monitor",
+                "rapid-classification-updatable-memory",
+                "color-shape-switch",
+                "top-bottom-position-rule-switch",
+                "reversal-go-nogo-switch",
+                "trilha-alternada-tmtb"
+              ].includes(currentExercise.kind) && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Stroop Invertido
                 </h2>
@@ -866,8 +900,8 @@ export function AttentionTrainingGame() {
             ) : currentExercise.kind === "visual-search" ? (
               <VisualSearchHunt
                 basePoints={currentExercise.points}
-                startingLevel={currentExercise.startingLevel}
-                maxLevelHint={currentExercise.maxLevelHint}
+                startingLevel={"startingLevel" in currentExercise ? currentExercise.startingLevel : 1}
+                maxLevelHint={"maxLevelHint" in currentExercise ? currentExercise.maxLevelHint : 0}
                 reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);
@@ -888,8 +922,8 @@ export function AttentionTrainingGame() {
             ) : currentExercise.kind === "flanker" ? (
               <FlankerSetas
                 basePoints={currentExercise.points}
-                startingLevel={currentExercise.startingLevel}
-                maxLevelHint={currentExercise.maxLevelHint}
+                startingLevel={"startingLevel" in currentExercise ? currentExercise.startingLevel : 1}
+                maxLevelHint={"maxLevelHint" in currentExercise ? currentExercise.maxLevelHint : 0}
                 reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);
@@ -907,34 +941,12 @@ export function AttentionTrainingGame() {
                   }
                 }}
               />
-            ) : currentExercise.kind === "cocktail-party" ? (
-              <EscutaSeletivaCocktailParty
-                basePoints={currentExercise.points}
-                startingLevel={cocktailStartLevelOverride ?? currentExercise.startingLevel}
-                maxLevelHint={currentExercise.maxLevelHint}
-                reportContext={reportContext}
-                onComplete={({ success, pointsEarned }) => {
-                  setScore((value) => value + pointsEarned);
-                  if (success) {
-                    setHits((value) => value + 1);
-                  }
-                  setCocktailStartLevelOverride(null);
-                  const nextIndex = currentIndex + 1;
-                  if (nextIndex >= activeExercises.length) {
-                    setStage("result");
-                  } else {
-                    setCurrentIndex(nextIndex);
-                    setSelectedOption(null);
-                    setSubmitted(false);
-                    setStage(getStageForExercise(activeExercises[nextIndex]));
-                  }
-                }}
-              />
+            ) : null
             ) : currentExercise.kind === "filtro-cores-com-som" ? (
               <FiltroCoresComSomGame
                 basePoints={currentExercise.points}
-                startingLevel={currentExercise.startingLevel}
-                maxLevelHint={currentExercise.maxLevelHint}
+                startingLevel={"startingLevel" in currentExercise ? currentExercise.startingLevel : 1}
+                maxLevelHint={"maxLevelHint" in currentExercise ? currentExercise.maxLevelHint : 0}
                 reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);
@@ -955,8 +967,8 @@ export function AttentionTrainingGame() {
             ) : currentExercise.kind === "counting-flow-task" ? (
               <ContagemEstimulosFluxoGame
                 basePoints={currentExercise.points}
-                startingLevel={currentExercise.startingLevel}
-                maxLevelHint={currentExercise.maxLevelHint}
+                startingLevel={"startingLevel" in currentExercise ? currentExercise.startingLevel : 1}
+                maxLevelHint={"maxLevelHint" in currentExercise ? currentExercise.maxLevelHint : 0}
                 reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);
@@ -977,8 +989,8 @@ export function AttentionTrainingGame() {
             ) : currentExercise.kind === "long-mazes" ? (
               <LabirintosProlongadosGame
                 basePoints={currentExercise.points}
-                startingLevel={currentExercise.startingLevel}
-                maxLevelHint={currentExercise.maxLevelHint}
+                startingLevel={"startingLevel" in currentExercise ? currentExercise.startingLevel : 1}
+                maxLevelHint={"maxLevelHint" in currentExercise ? currentExercise.maxLevelHint : 0}
                 reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);
@@ -999,8 +1011,8 @@ export function AttentionTrainingGame() {
             ) : currentExercise.kind === "symbol-map" ? (
               <MapaDeSimbolosGame
                 basePoints={currentExercise.points}
-                startingLevel={currentExercise.startingLevel}
-                maxLevelHint={currentExercise.maxLevelHint}
+                startingLevel={"startingLevel" in currentExercise ? currentExercise.startingLevel : 1}
+                maxLevelHint={"maxLevelHint" in currentExercise ? currentExercise.maxLevelHint : 0}
                 reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);
@@ -1021,8 +1033,8 @@ export function AttentionTrainingGame() {
             ) : currentExercise.kind === "symbol-matrix-search" ? (
               <BuscaSimbolosMatrizGame
                 basePoints={currentExercise.points}
-                startingLevel={currentExercise.startingLevel}
-                maxLevelHint={currentExercise.maxLevelHint}
+                startingLevel={"startingLevel" in currentExercise ? currentExercise.startingLevel : 1}
+                maxLevelHint={"maxLevelHint" in currentExercise ? currentExercise.maxLevelHint : 0}
                 reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);
@@ -1043,8 +1055,8 @@ export function AttentionTrainingGame() {
             ) : currentExercise.kind === "find-missing-item" ? (
               <AcharOFaltandoGame
                 basePoints={currentExercise.points}
-                startingLevel={currentExercise.startingLevel}
-                maxLevelHint={currentExercise.maxLevelHint}
+                startingLevel={"startingLevel" in currentExercise ? currentExercise.startingLevel : 1}
+                maxLevelHint={"maxLevelHint" in currentExercise ? currentExercise.maxLevelHint : 0}
                 reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);
@@ -1065,8 +1077,8 @@ export function AttentionTrainingGame() {
             ) : currentExercise.kind === "copy-matrices" ? (
               <CopiaMatrizesGame
                 basePoints={currentExercise.points}
-                startingLevel={currentExercise.startingLevel}
-                maxLevelHint={currentExercise.maxLevelHint}
+                startingLevel={"startingLevel" in currentExercise ? currentExercise.startingLevel : 1}
+                maxLevelHint={"maxLevelHint" in currentExercise ? currentExercise.maxLevelHint : 0}
                 reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);
@@ -1087,8 +1099,8 @@ export function AttentionTrainingGame() {
             ) : currentExercise.kind === "long-word-search" ? (
               <CacaPalavrasLongosGame
                 basePoints={currentExercise.points}
-                startingLevel={currentExercise.startingLevel}
-                maxLevelHint={currentExercise.maxLevelHint}
+                startingLevel={"startingLevel" in currentExercise ? currentExercise.startingLevel : 1}
+                maxLevelHint={"maxLevelHint" in currentExercise ? currentExercise.maxLevelHint : 0}
                 reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);
@@ -1109,8 +1121,8 @@ export function AttentionTrainingGame() {
             ) : currentExercise.kind === "radar-tone" ? (
               <RadarTonoGame
                 basePoints={currentExercise.points}
-                startingLevel={currentExercise.startingLevel}
-                maxLevelHint={currentExercise.maxLevelHint}
+                startingLevel={"startingLevel" in currentExercise ? currentExercise.startingLevel : 1}
+                maxLevelHint={"maxLevelHint" in currentExercise ? currentExercise.maxLevelHint : 0}
                 reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);
@@ -1131,8 +1143,8 @@ export function AttentionTrainingGame() {
             ) : currentExercise.kind === "drive-word-target" ? (
               <DirijaPalavrasAlvoGame
                 basePoints={currentExercise.points}
-                startingLevel={currentExercise.startingLevel}
-                maxLevelHint={currentExercise.maxLevelHint}
+                startingLevel={"startingLevel" in currentExercise ? currentExercise.startingLevel : 1}
+                maxLevelHint={"maxLevelHint" in currentExercise ? currentExercise.maxLevelHint : 0}
                 reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);
@@ -1153,8 +1165,8 @@ export function AttentionTrainingGame() {
             ) : currentExercise.kind === "chat-error-vigilance" ? (
               <ChatVigilanciaErrosGame
                 basePoints={currentExercise.points}
-                startingLevel={currentExercise.startingLevel}
-                maxLevelHint={currentExercise.maxLevelHint}
+                startingLevel={"startingLevel" in currentExercise ? currentExercise.startingLevel : 1}
+                maxLevelHint={"maxLevelHint" in currentExercise ? currentExercise.maxLevelHint : 0}
                 reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);
@@ -1175,8 +1187,8 @@ export function AttentionTrainingGame() {
             ) : currentExercise.kind === "symbol-map-sound-monitor" ? (
               <MapaSimbolosMonitorSomGame
                 basePoints={currentExercise.points}
-                startingLevel={currentExercise.startingLevel}
-                maxLevelHint={currentExercise.maxLevelHint}
+                startingLevel={"startingLevel" in currentExercise ? currentExercise.startingLevel : 1}
+                maxLevelHint={"maxLevelHint" in currentExercise ? currentExercise.maxLevelHint : 0}
                 reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);

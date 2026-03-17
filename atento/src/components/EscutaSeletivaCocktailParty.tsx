@@ -1,3 +1,119 @@
+import React, { useState } from "react";
+
+// Tipos auxiliares
+export type VozAlvo = "masculina" | "feminina";
+
+export interface Trial {
+  targetVoice: VozAlvo;
+  mascNumbers: number[];
+  femNumbers: number[];
+  sequence: { voice: VozAlvo; digit: number }[];
+  targetSequence: number[];
+}
+
+function gerarTrial(): Trial {
+  const targetVoice: VozAlvo = Math.random() < 0.5 ? "masculina" : "feminina";
+  const mascNumbers = Array.from({ length: 3 }, () => Math.floor(Math.random() * 10));
+  const femNumbers = Array.from({ length: 3 }, () => Math.floor(Math.random() * 10));
+  // Alternância: sempre masc, fem, masc, fem, masc, fem
+  const sequence: { voice: VozAlvo; digit: number }[] = [];
+  for (let i = 0; i < 3; i++) {
+    sequence.push({ voice: "masculina", digit: mascNumbers[i] });
+    sequence.push({ voice: "feminina", digit: femNumbers[i] });
+  }
+  const targetSequence = sequence.filter(s => s.voice === targetVoice).map(s => s.digit);
+  return { targetVoice, mascNumbers, femNumbers, sequence, targetSequence };
+}
+
+export const EscutaSeletivaCocktailParty: React.FC = () => {
+  const [stage, setStage] = useState<"instrucoes" | "reproduzindo" | "resposta" | "feedback" | "finalizado">("instrucoes");
+  const [trial, setTrial] = useState<Trial | null>(null);
+  const [userInput, setUserInput] = useState("");
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [resultados, setResultados] = useState<any[]>([]);
+
+  function iniciarTrial() {
+    const novoTrial = gerarTrial();
+    setTrial(novoTrial);
+    setUserInput("");
+    setFeedback(null);
+    setStage("reproduzindo");
+    // TODO: reproduzir áudios sequenciais
+    setTimeout(() => setStage("resposta"), 4000); // simula duração do áudio
+  }
+
+  function checarResposta() {
+    if (!trial) return;
+    const resposta = userInput.split("").map(Number);
+    const correta = resposta.length === 3 && resposta.every((n, i) => n === trial.targetSequence[i]);
+    setFeedback(correta ? "Acertou!" : `Errou. Resposta correta: ${trial.targetSequence.join("")}`);
+    setResultados([...resultados, {
+      trial,
+      resposta: userInput,
+      correta,
+      tempo: 0 // TODO: medir tempo
+    }]);
+    setStage("feedback");
+  }
+
+  return (
+    <div className="max-w-md mx-auto p-4">
+      {stage === "instrucoes" && (
+        <div className="space-y-4">
+          <h2 className="text-xl font-bold">Escuta Seletiva (Cocktail Party)</h2>
+          <p>
+            Neste treino, você ouvirá uma sequência de 6 números, alternando entre uma voz masculina e uma feminina.<br />
+            Sua tarefa é prestar atenção apenas na voz-alvo indicada (masculina ou feminina) e, ao final, digitar os 3 números falados por essa voz, ignorando os números da outra voz.<br />
+            Use fones de ouvido para melhor desempenho.
+          </p>
+          <button className="btn btn-primary w-full" onClick={iniciarTrial}>Começar</button>
+        </div>
+      )}
+      {stage === "reproduzindo" && trial && (
+        <div className="space-y-4">
+          <p>Voz-alvo: <b>{trial.targetVoice === "masculina" ? "Masculina" : "Feminina"}</b></p>
+          <p>Ouvindo sequência...</p>
+          {/* TODO: animação de reprodução */}
+        </div>
+      )}
+      {stage === "resposta" && trial && (
+        <div className="space-y-4">
+          <p>Voz-alvo: <b>{trial.targetVoice === "masculina" ? "Masculina" : "Feminina"}</b></p>
+          <input
+            type="text"
+            maxLength={3}
+            pattern="[0-9]{3}"
+            value={userInput}
+            onChange={e => setUserInput(e.target.value.replace(/[^0-9]/g, "").slice(0, 3))}
+            className="input input-bordered w-full text-center text-2xl"
+            placeholder="Digite os 3 números"
+          />
+          <button className="btn btn-primary w-full" onClick={checarResposta} disabled={userInput.length !== 3}>Enviar</button>
+        </div>
+      )}
+      {stage === "feedback" && feedback && (
+        <div className="space-y-4">
+          <p>{feedback}</p>
+          <button className="btn btn-primary w-full" onClick={iniciarTrial}>Próxima rodada</button>
+          <button className="btn btn-secondary w-full" onClick={() => setStage("finalizado")}>Finalizar treino</button>
+        </div>
+      )}
+      {stage === "finalizado" && (
+        <div className="space-y-4">
+          <h3 className="font-bold">Relatório</h3>
+          <ul className="text-sm">
+            {resultados.map((r, i) => (
+              <li key={i}>
+                Voz-alvo: {r.trial.targetVoice} | Correta: {r.trial.targetSequence.join("")} | Sua resposta: {r.resposta} | {r.correta ? "✔️" : "❌"}
+              </li>
+            ))}
+          </ul>
+          <button className="btn btn-primary w-full" onClick={() => { setResultados([]); setStage("instrucoes"); }}>Reiniciar</button>
+        </div>
+      )}
+    </div>
+  );
+};
 
   if (level <= 4) {
     return {
@@ -252,7 +368,7 @@ function buildLevelMetrics(
   };
 }
 
-export function EscutaSeletivaCocktailParty({
+// Arquivo removido: componente EscutaSeletivaCocktailParty eliminado do projeto.
   basePoints,
   startingLevel,
   maxLevelHint,
@@ -635,7 +751,7 @@ export function EscutaSeletivaCocktailParty({
   const downloadResults = () => {
     const lines: string[] = [];
     lines.push("=" + "=".repeat(60));
-    lines.push("RESULTADO - ESCUTA SELETIVA (COCKTAIL -PARTY)");
+  // ...existing code...
     lines.push("=" + "=".repeat(60));
     lines.push("");
     if (reportContext) {

@@ -265,17 +265,6 @@ export const trainingPlans: TrainingPlan[] = [
         points: 30,
       },
       {
-        id: "sel-16",
-        title: "Escuta Seletiva (Cocktail Party)",
-        attentionType: "seletiva",
-        kind: "cocktail-party",
-        instructions:
-          "<strong style='text-transform:uppercase;'>Identifique o nome alvo em meio a falas simultâneas.</strong>",
-        startingLevel: 1,
-        maxLevelHint: 12,
-        points: 30,
-      },
-      {
         id: "sel-18",
         title: "Go / No-Go",
         attentionType: "seletiva",
