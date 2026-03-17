@@ -9,35 +9,6 @@ export interface Trial {
   femNumbers: number[];
   sequence: { voice: VozAlvo; digit: number }[];
   targetSequence: number[];
-          <div>
-            <h2 className="text-lg font-bold mb-2">Como funciona o treino?</h2>
-            <p className="mb-2">
-              Neste treino, você ouvirá uma sequência de <b>6 números</b>, alternando entre uma voz masculina e uma feminina. Sua tarefa é prestar atenção <b>apenas na voz-alvo indicada</b> (masculina ou feminina) e, ao final, digitar os <b>3 números</b> falados por essa voz, ignorando os números da outra voz.
-            </p>
-            <ul className="list-disc pl-5 text-sm text-zinc-700 mb-2">
-              <li>A cada rodada, a voz-alvo será informada antes do início.</li>
-              <li>Os números são apresentados um de cada vez, alternando as vozes.</li>
-              <li>Digite apenas os números da voz-alvo, na ordem em que foram falados.</li>
-            </ul>
-            <p className="text-sm text-zinc-600">Use fones de ouvido para melhor desempenho.</p>
-          </div>
-
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-            <button
-              type="button"
-              onClick={playAudioTest}
-              className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-800"
-            >
-              Testar áudio agora
-            </button>
-            {audioTestError && (
-              <span className="text-sm text-amber-700">{audioTestError}</span>
-            )}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setStatus("ready")}
             className="h-11 w-full rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
           >
             Iniciar treino
