@@ -1,4 +1,5 @@
 // --- NOVA IMPLEMENTAÇÃO INLINE DO COMPONENTE ESCUTA SELETIVA COCKTAIL PARTY ---
+"use client";
 
 type Side = "left" | "right";
 type Phase = 1 | 2 | 3;
