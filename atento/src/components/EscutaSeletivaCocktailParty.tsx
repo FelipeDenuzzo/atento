@@ -7,37 +7,8 @@ export interface Trial {
   targetVoice: VozAlvo;
   mascNumbers: number[];
   femNumbers: number[];
-      const averageDigitsCorrectPercent =
-        phaseMetrics.length > 0
-          ? Math.round(
-              phaseMetrics.reduce(
-                (sum, metric) => sum + metric.averageDigitsCorrectPercent,
-                0,
-              ) / phaseMetrics.length,
-            )
-          : 0;
-
-      const phaseTrials = trialHistory.filter(
-        (trial) => trial.phase === phase,
-      );
-
-      return {
-        phase,
-        totalTrials,
-        correctCount,
-        errorCount,
-        responseAvg,
-        averageDigitsCorrectPercent,
-        errorTrend: getErrorTrendLabel(phaseTrials),
-      };
-    });
-  }, [allLevelMetrics, trialHistory]);
-
-  return (
-    <div className="mt-4 space-y-4">
-      {/* Janela única de explicação e instrução antes do treino */}
-      {status === "instructions" && currentTrial && currentTrialIndex === 0 && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
+  sequence: { voice: VozAlvo; digit: number }[];
+  targetSequence: number[];
           <div>
             <h2 className="text-lg font-bold mb-2">Como funciona o treino?</h2>
             <p className="mb-2">
