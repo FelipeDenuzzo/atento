@@ -113,11 +113,6 @@ export const EscutaSeletivaCocktailParty: React.FC = () => {
       )}
     </div>
   );
-
-  // Monta sequência alternada: [voz1, voz2, voz1, voz2, ...]
-  // Exemplo: [masc, fem, masc, fem, masc, fem] ou vice-versa
-  const alternatedSequence: { digit: number; voice: VoiceProfileId }[] = [];
-  for (let i = 0; i < 3; i++) {
     alternatedSequence.push({ digit: targetDigits[i], voice: targetVoiceProfile });
     alternatedSequence.push({ digit: nonTargetDigits[i], voice: nonTargetVoiceProfile });
   }
