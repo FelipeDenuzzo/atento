@@ -17,7 +17,7 @@ import {
   ENABLE_FIND_MISSING_ITEM,
   ENABLE_LONG_MAZES,
   ENABLE_SYMBOL_MAP,
-} from "@/config/features";
+} from "../config/features";
 
 const typeLabel: Record<AttentionType, string> = {
   seletiva: "Atenção seletiva",

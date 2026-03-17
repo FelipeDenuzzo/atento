@@ -5,9 +5,9 @@ import {
   attentionTypeDescriptions,
   formatAttentionType,
   trainingPlans,
-} from "@/data/trainingPlans";
-import { AttentionType, TrainingPlan } from "@/types/game";
-import { buildTxtReportFileName } from "@/utils/reportFileName";
+} from "../../data/trainingPlans";
+import { AttentionType, TrainingPlan } from "../../types/game";
+import { buildTxtReportFileName } from "../../utils/reportFileName";
 
 type GameStage = "intro" | "instructions" | "exercise" | "result";
 type TrainingMode = "sequence" | "single" | null;

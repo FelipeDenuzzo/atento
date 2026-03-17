@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ReportContext } from "@/components/AttentionTrainingGame";
-import { buildTxtReportFileName } from "@/utils/reportFileName";
+import { buildTxtReportFileName } from "../utils/reportFileName";
 
 type Shape = "circle" | "square" | "triangle";
 type Color = "red" | "blue" | "green" | "yellow";

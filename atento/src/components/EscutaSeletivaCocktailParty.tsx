@@ -1,6 +1,4 @@
-"use client";
-
-import React from "react";
+import React, { useState } from "react";
 
 type Voice = "masc" | "femi";
 
@@ -17,59 +15,74 @@ type RoundData = {
   targetSequence: number[];
 };
 
+
 type EscutaSeletivaCocktailPartyProps = {
   onComplete?: (result?: unknown) => void;
   mobile?: boolean;
 };
 
-  const targetVoice: Voice = Math.random() < 0.5 ? "masc" : "femi";
-  const mascNumbers = Array.from({ length: 3 }, () => Math.floor(Math.random() * 10));
-  const femiNumbers = Array.from({ length: 3 }, () => Math.floor(Math.random() * 10));
-  // Alterna as vozes: masc, femi, masc, femi, masc, femi
-  const sequence: SequenceItem[] = Array.from({ length: 6 }, (_, i) => {
-    const voice: Voice = i % 2 === 0 ? "masc" : "femi";
-    return {
-      digit: voice === "masc" ? mascNumbers[Math.floor(i / 2)] : femiNumbers[Math.floor(i / 2)],
-  // Estrutura dos dados de cada rodada
-  type RoundData = {
-    targetVoice: Voice;
-    mascNumbers: number[];
-    femiNumbers: number[];
-    sequence: SequenceItem[];
-    targetSequence: number[];
-  };
+
   const [step, setStep] = useState<"instrucoes" | "teste-audio" | "rodada" | "resposta" | "feedback" | "finalizado">("instrucoes");
-  const [trial, setTrial] = useState<Trial | null>(null);
+  const [trial, setTrial] = useState<RoundData | null>(null);
   const [userInput, setUserInput] = useState("");
   const [feedback, setFeedback] = useState<string | null>(null);
   const [report, setReport] = useState<any[]>([]);
 
   // Placeholder para tocar áudio (substituir por lógica real)
   function playAudio(sequence: { digit: number; voice: "masc" | "femi" }[], cb: () => void) {
-    // Aqui você implementaria a lógica de tocar os arquivos de áudio corretos
-    // e chamar cb() ao final. Por enquanto, simula com timeout.
     setTimeout(cb, 2000 + sequence.length * 500);
   }
 
   function iniciarRodada() {
-    return { targetVoice, mascNumbers, femiNumbers, sequence, targetSequence } as Trial;
+    const t = buildRoundData();
     setTrial(t);
     setStep("rodada");
     playAudio(t.sequence, () => setStep("resposta"));
   }
-    const [trial, setTrial] = useState<RoundData | null>(null);
+
+
+
+
+function buildRoundData(): RoundData {
+  const targetVoice: Voice = Math.random() < 0.5 ? "masc" : "femi";
+  const mascNumbers = Array.from({ length: 3 }, () => Math.floor(Math.random() * 10));
+  const femiNumbers = Array.from({ length: 3 }, () => Math.floor(Math.random() * 10));
+  const sequence: SequenceItem[] = Array.from({ length: 6 }, (_, i) => {
+    const voice: Voice = i % 2 === 0 ? "masc" : "femi";
+    return {
+      digit: voice === "masc" ? mascNumbers[Math.floor(i / 2)] : femiNumbers[Math.floor(i / 2)],
+      voice,
+    };
+  });
+  const targetSequence = targetVoice === "masc" ? mascNumbers : femiNumbers;
+  return { targetVoice, mascNumbers, femiNumbers, sequence, targetSequence };
+}
+
+export const EscutaSeletivaCocktailParty: React.FC<EscutaSeletivaCocktailPartyProps> = ({ onComplete, mobile }) => {
+  const [step, setStep] = useState<"instrucoes" | "teste-audio" | "rodada" | "resposta" | "feedback" | "finalizado">("instrucoes");
+  const [trial, setTrial] = useState<RoundData | null>(null);
+  const [userInput, setUserInput] = useState("");
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [report, setReport] = useState<any[]>([]);
+
+  // Placeholder para tocar áudio (substituir por lógica real)
+  function playAudio(sequence: { digit: number; voice: "masc" | "femi" }[], cb: () => void) {
+    setTimeout(cb, 2000 + sequence.length * 500);
+  }
+
+  function iniciarRodada() {
+    const t = buildRoundData();
+    setTrial(t);
+    setStep("rodada");
+    playAudio(t.sequence, () => setStep("resposta"));
+  }
   function handleResponder() {
     if (!trial) return;
-    const resposta = userInput.split("").map(Number).filter(n => !isNaN(n));
-    const correta = resposta.length === 3 && resposta.every((n, i) => n === trial.targetSequence[i]);
-    setFeedback(correta ? "Acertou!" : `Errou. Resposta correta: ${trial.targetSequence.join("")}`);
-    setReport(r => [...r, {
-      trial,
-      resposta,
-    function iniciarRodada() {
-      const t = buildRoundData();
-    }]);
-    setStep("feedback");
+      const resposta = userInput.split("").map((v: string) => Number(v)).filter((n: number) => !isNaN(n));
+      const correta = resposta.length === 3 && resposta.every((n: number, i: number) => n === trial.targetSequence[i]);
+      setFeedback(correta ? "Acertou!" : `Errou. Resposta correta: ${trial.targetSequence.join("")}`);
+      setReport((r: any[]) => [...r, { trial, resposta }]);
+      setStep("feedback");
   }
 
   function proximaRodada() {
