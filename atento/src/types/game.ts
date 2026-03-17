@@ -28,7 +28,8 @@ export type ExerciseKind =
   | "color-shape-switch"
   | "top-bottom-position-rule-switch"
   | "reversal-go-nogo-switch"
-  | "trilha-alternada-tmtb";
+  | "trilha-alternada-tmtb"
+  | "escutaseletiva-cocktail-party";
 
 type BaseExercise = {
   id: string;
@@ -185,6 +186,10 @@ export type TrilhaAlternadaTmtbExercise = BaseExercise & {
   maxLevelHint: number;
 };
 
+export type EscutaSeletivaCocktailPartyExercise = BaseExercise & {
+  kind: "escutaseletiva-cocktail-party";
+};
+
 export type AttentionExercise =
   | QuizExercise
   | VisualSearchExercise
@@ -209,7 +214,8 @@ export type AttentionExercise =
   | ColorShapeSwitchExercise
   | TopBottomPositionRuleSwitchExercise
   | ReversalGoNoGoSwitchExercise
-  | TrilhaAlternadaTmtbExercise;
+  | TrilhaAlternadaTmtbExercise
+  | EscutaSeletivaCocktailPartyExercise;
 
 export type TrainingPlan = {
   id: string;

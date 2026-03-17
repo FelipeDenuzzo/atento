@@ -1340,27 +1340,7 @@ export function AttentionTrainingGame() {
                 }}
               />
             ) : (
-              <StroopInvertido
-                basePoints={currentExercise.points}
-                startingLevel={currentExercise.startingLevel}
-                maxLevelHint={currentExercise.maxLevelHint}
-                reportContext={reportContext}
-                onComplete={({ success, pointsEarned }) => {
-                  setScore((value) => value + pointsEarned);
-                  if (success) {
-                    setHits((value) => value + 1);
-                  }
-                  const nextIndex = currentIndex + 1;
-                  if (nextIndex >= activeExercises.length) {
-                    setStage("result");
-                  } else {
-                    setCurrentIndex(nextIndex);
-                    setSelectedOption(null);
-                    setSubmitted(false);
-                    setStage(getStageForExercise(activeExercises[nextIndex]));
-                  }
-                }}
-              />
+              <EscutaSeletivaCocktailParty />
             )}
           </div>
         )}

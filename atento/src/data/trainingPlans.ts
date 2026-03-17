@@ -290,6 +290,16 @@ export const trainingPlans: TrainingPlan[] = [
             },
           ]
         : []),
+      // Treino Escuta Seletiva (Cocktail Party)
+      {
+        id: "sel-escutaseletiva",
+        title: "Escuta Seletiva (Cocktail Party)",
+        attentionType: "seletiva",
+        kind: "escutaseletiva-cocktail-party",
+        instructions:
+          "Ouça a sequência de 6 números alternando entre voz masculina e feminina. Foque apenas na voz-alvo indicada e digite os 3 números falados por essa voz.",
+        points: 30,
+      },
       ...(ENABLE_SYMBOL_MAP
         ? [
             {
