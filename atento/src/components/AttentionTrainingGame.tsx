@@ -1291,7 +1291,7 @@ export function AttentionTrainingGame() {
                 }}
               />
             ) : currentExercise.kind === "escutaseletiva-cocktail-party" ? (
-              {typeof window !== "undefined" && window.innerWidth < 768 ? (
+              typeof window !== "undefined" && window.innerWidth < 768 ? (
                 <EscutaSeletivaCocktailPartyMobileGame
                   onComplete={({ success, pointsEarned }: any) => {
                     setScore((value) => value + (pointsEarned || 0));
@@ -1327,7 +1327,7 @@ export function AttentionTrainingGame() {
                     }
                   }}
                 />
-              )}
+              )
             ) : currentExercise.kind === "flanker" ? (
               <FlankerSetas
                 basePoints={currentExercise.points}
