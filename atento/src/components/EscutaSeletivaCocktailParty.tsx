@@ -113,31 +113,6 @@ export const EscutaSeletivaCocktailParty: React.FC = () => {
       )}
     </div>
   );
-    alternatedSequence.push({ digit: targetDigits[i], voice: targetVoiceProfile });
-    alternatedSequence.push({ digit: nonTargetDigits[i], voice: nonTargetVoiceProfile });
-  }
-
-  // Para exibir na interface, cada canal "finge" ser um lado, mas a sequência é alternada
-  // Para manter compatibilidade, criamos dois canais, cada um com os dígitos da respectiva voz
-  const channels: ChannelTrial[] = [
-    {
-      side: targetSide,
-      voiceProfile: targetVoiceProfile,
-      sequence: targetDigits,
-      pan: targetSide === "left" ? -0.75 : 0.75,
-    },
-    {
-      side: targetSide === "left" ? "right" : "left",
-      voiceProfile: nonTargetVoiceProfile,
-      sequence: nonTargetDigits,
-      pan: targetSide === "left" ? 0.75 : -0.75,
-    },
-  ];
-
-  // O targetSequence deve conter apenas os dígitos da voz-alvo, na ordem em que foram ditos
-  // Como a sequência alterna, basta pegar os dígitos da voz-alvo na ordem da alternância
-  const targetSequence = alternatedSequence
-    .filter((item) => item.voice === targetVoiceProfile)
     .map((item) => item.digit);
 
   // Instrução personalizada
