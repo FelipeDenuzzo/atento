@@ -9,35 +9,6 @@ export interface Trial {
   femNumbers: number[];
   sequence: { voice: VozAlvo; digit: number }[];
   targetSequence: number[];
-            className="h-11 w-full rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
-          >
-            Iniciar treino
-          </button>
-
-          {audioError && (
-            <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
-              {audioError}
-            </p>
-          )}
-        </div>
-      )}
-
-      {status === "listening" && currentTrial && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
-          <p className="text-center text-sm text-zinc-600">
-            Reproduzindo áudio...
-          </p>
-          <p
-            className="text-center font-extrabold text-zinc-900 tracking-wide"
-            style={{ textTransform: "uppercase" }}
-          >
-            {currentTrial.instruction}
-          </p>
-          <p className="text-center text-xs text-zinc-500">
-            Aguarde o fim da reprodução para digitar a sequência.
-          </p>
-        </div>
-      )}
 
       {status === "countdown" && currentTrial && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
