@@ -105,6 +105,8 @@ export function MobileAttentionTrainingGame() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    const raw = window.localStorage.getItem(ATENTO_USER_KEY);
+
     const parseAtentoUser = (): string | undefined => {
       if (!raw) return undefined;
 
