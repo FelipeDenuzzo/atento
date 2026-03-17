@@ -237,7 +237,7 @@ export function GoNoGoExpandidoGame({
   return (
     <div className="space-y-5">
       {phase === "intro" && (
-        <div className="space-y-6 rounded-lg border border-black/10 bg-white p-6">
+        <div className="space-y-6 min-h-[350px] md:min-h-[500px] rounded-lg border border-black/10 bg-white p-6">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-zinc-900">Go / No-Go</h2>
             <p className="mt-2 text-lg text-zinc-700">{level.name}</p>
@@ -318,7 +318,7 @@ export function GoNoGoExpandidoGame({
       )}
 
       {phase === "level-summary" && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-6">
+        <div className="space-y-4 min-h-[350px] md:min-h-[500px] rounded-lg border border-black/10 bg-white p-6">
           <h3 className="text-xl font-semibold text-zinc-900">Resumo do Nível</h3>
           {lastLevelSummary && (
             <div className="space-y-2 text-zinc-700">
@@ -352,7 +352,7 @@ export function GoNoGoExpandidoGame({
       )}
 
       {phase === "session-summary" && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-6">
+        <div className="space-y-4 min-h-[350px] md:min-h-[500px] rounded-lg border border-black/10 bg-white p-6">
           <h3 className="text-xl font-semibold text-zinc-900">Sessão Concluída!</h3>
           <div className="space-y-2 text-zinc-700">
             <p>
