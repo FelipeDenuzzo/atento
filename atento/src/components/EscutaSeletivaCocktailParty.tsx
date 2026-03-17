@@ -114,19 +114,6 @@ export const EscutaSeletivaCocktailParty: React.FC = () => {
     </div>
   );
 };
-  const withErrorSegment = trials.filter(
-    (trial): trial is Trial & { errorSegment: "start" | "middle" | "end" } =>
-      trial.errorSegment !== null,
-  );
-
-  if (withErrorSegment.length === 0) {
-    return "Sem padrão de erro relevante";
-  }
-
-  const count = { start: 0, middle: 0, end: 0 };
-  withErrorSegment.forEach((trial) => {
-    count[trial.errorSegment] += 1;
-  });
 
   const total = withErrorSegment.length;
   const dominant = Object.entries(count).sort((a, b) => b[1] - a[1])[0];
