@@ -1,18 +1,18 @@
 "use client";
 
-import { EscutaSeletivaCocktailParty } from "@/components/EscutaSeletivaCocktailParty";
 import type { ReportContext } from "@/components/mobile/MobileAttentionTrainingGame";
 
 type Props = {
-  basePoints: number;
-  startingLevel: number;
-  maxLevelHint: number;
-  reportContext?: ReportContext;
-  onComplete: (result: { success: boolean; pointsEarned: number }) => void;
+  onBack?: () => void;
+  onComplete?: (report?: ReportContext) => void;
 };
 
-// Componente mobile: pode ser customizado para UI/UX touch-friendly no futuro
-export function EscutaSeletivaCocktailPartyMobileGame(props: Props) {
-  // Aqui pode-se adicionar hooks ou wrappers específicos para mobile (ex: scroll, feedback tátil, etc)
-  return <EscutaSeletivaCocktailParty {...props} hideInGameInfo />;
+export function EscutaSeletivaCocktailPartyMobileGame(_: Props) {
+  return (
+    <div className="rounded-lg border border-zinc-200 bg-white p-4">
+      <p className="text-sm text-zinc-700">
+        Este treino foi removido temporariamente da versão mobile.
+      </p>
+    </div>
+  );
 }
