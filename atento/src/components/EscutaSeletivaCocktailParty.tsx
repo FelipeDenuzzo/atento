@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 type Voice = "masc" | "femi";
 
-interface SequenceItem {
+type SequenceItem = {
   digit: number;
   voice: Voice;
 }
@@ -28,14 +28,14 @@ interface EscutaSeletivaCocktailPartyProps {
     const voice: Voice = i % 2 === 0 ? "masc" : "femi";
     return {
       digit: voice === "masc" ? mascNumbers[Math.floor(i / 2)] : femiNumbers[Math.floor(i / 2)],
-      voice,
-    };
-  });
-  const targetSequence = targetVoice === "masc" ? mascNumbers : femiNumbers;
-  return { targetVoice, mascNumbers, femiNumbers, sequence, targetSequence };
-}
-
-export const EscutaSeletivaCocktailParty: React.FC<EscutaSeletivaCocktailPartyProps> = ({ onComplete, mobile }) => {
+  // Estrutura dos dados de cada rodada
+  type RoundData = {
+    targetVoice: Voice;
+    mascNumbers: number[];
+    femiNumbers: number[];
+    sequence: SequenceItem[];
+    targetSequence: number[];
+  };
   const [step, setStep] = useState<"instrucoes" | "teste-audio" | "rodada" | "resposta" | "feedback" | "finalizado">("instrucoes");
   const [trial, setTrial] = useState<Trial | null>(null);
   const [userInput, setUserInput] = useState("");
@@ -50,12 +50,12 @@ export const EscutaSeletivaCocktailParty: React.FC<EscutaSeletivaCocktailPartyPr
   }
 
   function iniciarRodada() {
-    const t = gerarTrial();
+    return { targetVoice, mascNumbers, femiNumbers, sequence, targetSequence } as Trial;
     setTrial(t);
     setStep("rodada");
     playAudio(t.sequence, () => setStep("resposta"));
   }
-
+    const [trial, setTrial] = useState<RoundData | null>(null);
   function handleResponder() {
     if (!trial) return;
     const resposta = userInput.split("").map(Number).filter(n => !isNaN(n));
@@ -64,8 +64,8 @@ export const EscutaSeletivaCocktailParty: React.FC<EscutaSeletivaCocktailPartyPr
     setReport(r => [...r, {
       trial,
       resposta,
-      correta,
-      tempo: 0 // TODO: medir tempo
+    function iniciarRodada() {
+      const t = buildRoundData();
     }]);
     setStep("feedback");
   }
