@@ -298,38 +298,51 @@ function getErrorTrendLabel(trials: Trial[]): string {
   return "Erros mais frequentes no final das sequências";
 }
 
+// Novo buildTrial: sequência alternada de vozes, 3 dígitos cada
 function buildTrial(id: number, config: LevelConfig): Trial {
+  // Define aleatoriamente qual será a voz-alvo
+  const targetVoiceProfile: VoiceProfileId = randomItem(config.voiceProfiles);
+  const nonTargetVoiceProfile: VoiceProfileId = config.voiceProfiles.find(v => v !== targetVoiceProfile)!;
+  // Lados continuam aleatórios
   const targetSide = randomItem<Side>(["left", "right"]);
-  const leftVoice = config.voiceProfiles[0];
-  const rightVoice = config.voiceProfiles[1];
-  const sequenceLength = randomInt(config.digitsMin, config.digitsMax);
 
-  const leftSequence = Array.from(
-    { length: sequenceLength },
-    () => randomInt(0, 9),
-  );
-  const rightSequence = Array.from(
-    { length: sequenceLength },
-    () => randomInt(0, 9),
-  );
+  // Gera 3 dígitos para cada voz
+  const targetDigits = Array.from({ length: 3 }, () => randomInt(0, 9));
+  const nonTargetDigits = Array.from({ length: 3 }, () => randomInt(0, 9));
 
+  // Monta sequência alternada: [voz1, voz2, voz1, voz2, ...]
+  // Exemplo: [masc, fem, masc, fem, masc, fem] ou vice-versa
+  const alternatedSequence: { digit: number; voice: VoiceProfileId }[] = [];
+  for (let i = 0; i < 3; i++) {
+    alternatedSequence.push({ digit: targetDigits[i], voice: targetVoiceProfile });
+    alternatedSequence.push({ digit: nonTargetDigits[i], voice: nonTargetVoiceProfile });
+  }
+
+  // Para exibir na interface, cada canal "finge" ser um lado, mas a sequência é alternada
+  // Para manter compatibilidade, criamos dois canais, cada um com os dígitos da respectiva voz
   const channels: ChannelTrial[] = [
     {
-      side: "left",
-      voiceProfile: leftVoice,
-      sequence: leftSequence,
-      pan: -0.75,
+      side: targetSide,
+      voiceProfile: targetVoiceProfile,
+      sequence: targetDigits,
+      pan: targetSide === "left" ? -0.75 : 0.75,
     },
     {
-      side: "right",
-      voiceProfile: rightVoice,
-      sequence: rightSequence,
-      pan: 0.75,
+      side: targetSide === "left" ? "right" : "left",
+      voiceProfile: nonTargetVoiceProfile,
+      sequence: nonTargetDigits,
+      pan: targetSide === "left" ? 0.75 : -0.75,
     },
   ];
 
-  const targetChannel =
-    channels.find((channel) => channel.side === targetSide) ?? channels[0];
+  // O targetSequence deve conter apenas os dígitos da voz-alvo, na ordem em que foram ditos
+  // Como a sequência alterna, basta pegar os dígitos da voz-alvo na ordem da alternância
+  const targetSequence = alternatedSequence
+    .filter((item) => item.voice === targetVoiceProfile)
+    .map((item) => item.digit);
+
+  // Instrução personalizada
+  const instruction = `Preste atenção APENAS na ${VOICE_LABEL[targetVoiceProfile]}. Digite os 3 números falados por essa voz, ignorando os outros.`;
 
   return {
     id,
@@ -337,9 +350,9 @@ function buildTrial(id: number, config: LevelConfig): Trial {
     phase: config.phase,
     channels,
     targetSide,
-    targetVoiceProfile: targetChannel.voiceProfile,
-    targetSequence: targetChannel.sequence,
-    instruction: buildInstruction(targetSide, targetChannel.voiceProfile),
+    targetVoiceProfile,
+    targetSequence,
+    instruction,
     playerInput: "",
     correct: null,
     responseTimeMs: null,
@@ -520,6 +533,7 @@ export function EscutaSeletivaCocktailParty({
     [loadBuffer],
   );
 
+  // Nova função playTrialAudio: toca dígitos alternando vozes
   const playTrialAudio = useCallback(
     async (trial: Trial, levelConfig: LevelConfig) => {
       const audioContext = audioContextRef.current;
@@ -528,54 +542,58 @@ export function EscutaSeletivaCocktailParty({
       }
 
       await audioContext.resume();
-      await ensureTrialAudioLoaded(trial, levelConfig);
+
+      // Reconstrói a sequência alternada de dígitos/vozes
+      // Assumimos sempre 3 dígitos por voz, alternando
+      const alternatedSequence: { digit: number; voice: VoiceProfileId }[] = [];
+      for (let i = 0; i < 3; i++) {
+        alternatedSequence.push({ digit: trial.channels[0].sequence[i], voice: trial.channels[0].voiceProfile });
+        alternatedSequence.push({ digit: trial.channels[1].sequence[i], voice: trial.channels[1].voiceProfile });
+      }
+
+      // Pré-carrega buffers
+      for (const item of alternatedSequence) {
+        await loadBuffer(VOICE_SAMPLE_PATHS[item.voice][item.digit]);
+      }
+      if (levelConfig.addNoise) {
+        for (const noise of NOISE_TRACKS) {
+          await loadBuffer(noise);
+        }
+      }
 
       const startAt = audioContext.currentTime + 0.12;
+      let cursor = startAt;
       let latestEnd = startAt;
 
-      trial.channels.forEach((channel) => {
-        let cursor = startAt;
-
-        channel.sequence.forEach((digit) => {
-          const buffer = bufferCacheRef.current.get(
-            VOICE_SAMPLE_PATHS[channel.voiceProfile][digit],
-          );
-          if (!buffer) {
-            throw new Error(
-              `Áudio não encontrado para o dígito ${digit} (${channel.voiceProfile})`,
-            );
-          }
-          const source = audioContext.createBufferSource();
-          const gainNode = audioContext.createGain();
-          const panner = audioContext.createStereoPanner();
-
-          source.buffer = buffer;
-          gainNode.gain.value = 0.95;
-          panner.pan.value = channel.pan;
-
-          source.connect(gainNode);
-          gainNode.connect(panner);
-          panner.connect(audioContext.destination);
-
-          source.start(cursor);
-          cursor += buffer.duration + levelConfig.digitGapSeconds;
-        });
-
-        latestEnd = Math.max(latestEnd, cursor);
-      });
+      // Toca cada dígito em sequência, alternando a voz
+      for (const item of alternatedSequence) {
+        const buffer = bufferCacheRef.current.get(VOICE_SAMPLE_PATHS[item.voice][item.digit]);
+        if (!buffer) continue;
+        const source = audioContext.createBufferSource();
+        const gainNode = audioContext.createGain();
+        const panner = audioContext.createStereoPanner();
+        // Pan de acordo com o canal (voz-alvo ou não)
+        const pan = trial.channels.find(c => c.voiceProfile === item.voice)?.pan ?? 0;
+        source.buffer = buffer;
+        gainNode.gain.value = 0.95;
+        panner.pan.value = pan;
+        source.connect(gainNode);
+        gainNode.connect(panner);
+        panner.connect(audioContext.destination);
+        source.start(cursor);
+        cursor += buffer.duration + levelConfig.digitGapSeconds;
+        latestEnd = cursor;
+      }
 
       if (levelConfig.addNoise) {
         const noiseTrack = randomItem([...NOISE_TRACKS]);
         const noiseBuffer = bufferCacheRef.current.get(noiseTrack);
-
         if (noiseBuffer) {
           const noiseSource = audioContext.createBufferSource();
           const noiseGain = audioContext.createGain();
-
           noiseSource.buffer = noiseBuffer;
           noiseSource.loop = true;
           noiseGain.gain.value = 0.16;
-
           noiseSource.connect(noiseGain);
           noiseGain.connect(audioContext.destination);
           noiseSource.start(startAt);
@@ -585,7 +603,7 @@ export function EscutaSeletivaCocktailParty({
 
       return Math.max(0, (latestEnd - audioContext.currentTime) * 1000);
     },
-    [ensureTrialAudioLoaded],
+    [loadBuffer],
   );
 
   const startLevel = useCallback(
@@ -946,15 +964,16 @@ export function EscutaSeletivaCocktailParty({
       {status === "instructions" && currentTrial && currentTrialIndex === 0 && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
           <div>
-            <h3 className="text-xl font-semibold text-zinc-900">
-              Escuta Seletiva (Cocktail Party)
-            </h3>
-            <p className="mt-2 text-sm font-medium text-zinc-700">
-              Neste treino, você vai ouvir duas vozes ao mesmo tempo, cada uma falando uma sequência diferente de números. Seu objetivo é focar apenas na voz indicada na instrução da rodada e, ao final, digitar exatamente a sequência que ela falou.
+            <h2 className="text-lg font-bold mb-2">Como funciona o treino?</h2>
+            <p className="mb-2">
+              Neste treino, você ouvirá uma sequência de <b>6 números</b>, alternando entre uma voz masculina e uma feminina. Sua tarefa é prestar atenção <b>apenas na voz-alvo indicada</b> (masculina ou feminina) e, ao final, digitar os <b>3 números</b> falados por essa voz, ignorando os números da outra voz.
             </p>
-            <p className="mt-3 rounded bg-amber-100 px-3 py-2 text-sm text-amber-800 border border-amber-300">
-              <strong>Atenção:</strong> habilite o som do seu celular, use fones de ouvido se possível e verifique se o volume está alto o suficiente para ouvir claramente as vozes do treino.
-            </p>
+            <ul className="list-disc pl-5 text-sm text-zinc-700 mb-2">
+              <li>A cada rodada, a voz-alvo será informada antes do início.</li>
+              <li>Os números são apresentados um de cada vez, alternando as vozes.</li>
+              <li>Digite apenas os números da voz-alvo, na ordem em que foram falados.</li>
+            </ul>
+            <p className="text-sm text-zinc-600">Use fones de ouvido para melhor desempenho.</p>
           </div>
 
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
