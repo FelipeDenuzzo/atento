@@ -781,6 +781,11 @@ export function AttentionTrainingGame() {
     }
     setStage(getStageForExercise(activeExercises[currentIndex]));
   };
+
+  const updateStageForCurrentExercise = () => {
+    setStage(getStageForExercise(activeExercises[currentIndex]));
+  };
+
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl items-center px-6 py-10">
       <section className="w-full rounded-2xl border border-black/10 bg-white p-6 shadow-sm sm:p-8">
