@@ -1,5 +1,8 @@
-import { EscutaSeletivaCocktailParty } from "@/components/EscutaSeletivaCocktailParty";
-
+// Desktop
 export function EscutaSeletivaCocktailPartyDesktopGame(props: { onComplete?: (report: any) => void }) {
-  return <EscutaSeletivaCocktailParty {...props} mobile={false} />;
+  console.warn("EscutaSeletivaCocktailPartyDesktopGame: treino temporariamente desativado na migração.");
+  if (props.onComplete) {
+    props.onComplete(null);
+  }
+  return null;
 }

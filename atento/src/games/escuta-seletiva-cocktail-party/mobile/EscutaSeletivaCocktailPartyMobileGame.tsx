@@ -1,5 +1,8 @@
-import { EscutaSeletivaCocktailParty } from "@/components/EscutaSeletivaCocktailParty";
-
+// Mobile
 export function EscutaSeletivaCocktailPartyMobileGame(props: { onComplete?: (report: any) => void }) {
-  return <EscutaSeletivaCocktailParty {...props} mobile />;
+  console.warn("EscutaSeletivaCocktailPartyMobileGame: treino temporariamente desativado na migração.");
+  if (props.onComplete) {
+    props.onComplete(null);
+  }
+  return null;
 }

@@ -1,34 +1,23 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+
 import "./globals.css";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "ATENTO - Treino de Atenção",
-  description:
-    "Jogo web para treino de atenção seletiva, sustentada, dividida e alternada.",
+  title: "ATENTO",
+  description: "Programa de Treino de Atenção",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        style={{ margin: 0, padding: 0 }}
-      >
+    <html lang="pt-BR">
+      <body className={inter.className} style={{ margin: 0, padding: 0 }}>
         <div
           style={{
             position: "fixed",
