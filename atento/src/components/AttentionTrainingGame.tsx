@@ -1269,6 +1269,28 @@ export function AttentionTrainingGame() {
                 </div>
               </>
             ) : currentExercise.kind === "visual-search" ? (
+                          ) : currentExercise.kind === "stroop" ? (
+                            <StroopInvertido
+                              basePoints={currentExercise.points}
+                              startingLevel={"startingLevel" in currentExercise ? currentExercise.startingLevel : 1}
+                              maxLevelHint={"maxLevelHint" in currentExercise ? currentExercise.maxLevelHint : 0}
+                              reportContext={reportContext}
+                              onComplete={({ success, pointsEarned }) => {
+                                setScore((value) => value + pointsEarned);
+                                if (success) {
+                                  setHits((value) => value + 1);
+                                }
+                                const nextIndex = currentIndex + 1;
+                                if (nextIndex >= activeExercises.length) {
+                                  setStage("result");
+                                } else {
+                                  setCurrentIndex(nextIndex);
+                                  setSelectedOption(null);
+                                  setSubmitted(false);
+                                  setStage(getStageForExercise(activeExercises[nextIndex]));
+                                }
+                              }}
+                            />
               <VisualSearchHunt
                 basePoints={currentExercise.points}
                 startingLevel={"startingLevel" in currentExercise ? currentExercise.startingLevel : 1}
