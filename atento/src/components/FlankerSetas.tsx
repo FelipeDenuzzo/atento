@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ReportContext } from "@/components/AttentionTrainingGame";
+
+type TrainingMode = "sequence" | "single";
 import { buildTxtReportFileName } from "@/utils/reportFileName";
 
 type Direction = "left" | "right";
