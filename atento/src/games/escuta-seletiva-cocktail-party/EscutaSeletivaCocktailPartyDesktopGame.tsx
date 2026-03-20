@@ -235,7 +235,12 @@ export function EscutaSeletivaCocktailPartyDesktopGame({
     <div className="w-full max-w-3xl mx-auto rounded-2xl border border-white/10 bg-neutral-900 p-6 text-white">
       {phase === "intro" && (
         <div className="space-y-4">
-          <h2 className="text-2xl font-semibold">Escuta seletiva</h2>
+          <h2 className="text-2xl font-semibold text-red-500">
+            ESCUTA SELETIVA NOVA - TESTE VISUAL
+          </h2>
+          <p className="text-yellow-300 font-bold">
+            COMPONENTE NOVO EXECUTANDO
+          </p>
           <p className="text-sm text-neutral-300">{instructions}</p>
           <button
             onClick={startTrial}
