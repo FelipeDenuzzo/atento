@@ -81,6 +81,8 @@ export function EscutaSeletivaCocktailPartyDesktopGame({
   onComplete,
   totalTrials = TOTAL_TRIALS_DEFAULT,
 }: Props) {
+  console.error("### ESCUTA SELETIVA DESKTOP NOVO COMPONENTE EXECUTANDO ###");
+
   const [phase, setPhase] = useState<"intro" | "ready" | "playing" | "answering" | "feedback" | "finished">("intro");
   const [trialIndex, setTrialIndex] = useState(0);
   const [currentTrial, setCurrentTrial] = useState(buildTrial);
@@ -91,6 +93,9 @@ export function EscutaSeletivaCocktailPartyDesktopGame({
 
   const answerStartRef = useRef<number | null>(null);
   const isLastTrial = trialIndex >= totalTrials - 1;
+  // ... resto do código exatamente como você colou ...
+}
+
 
   const instructions = useMemo(
     () =>
