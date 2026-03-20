@@ -91,13 +91,15 @@ export function EscutaSeletivaCocktailPartyDesktopGame({
 }: Props) {
   // Confirma execução do componente
   console.error("[ATENTO] EscutaSeletivaCocktailPartyDesktopGame EXECUTADO", { basePoints, totalTrials, reportContext });
-  const [phase, setPhase] = useState<"intro" | "ready" | "playing" | "answering" | "feedback" | "finished">("intro");
+  const [phase, setPhase] = useState<"intro" | "countdown" | "playing" | "answering" | "feedback" | "finished">("intro");
   const [trialIndex, setTrialIndex] = useState(0);
   const [currentTrial, setCurrentTrial] = useState(buildTrial);
   const [answer, setAnswer] = useState(["", "", ""]);
   const [feedback, setFeedback] = useState<null | { correct: boolean; expected: number[] }>(null);
   const [results, setResults] = useState<TrialResult[]>([]);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const [countdown, setCountdown] = useState(3);
+  const countdownRef = useRef<NodeJS.Timeout | null>(null);
 
   const answerStartRef = useRef<number | null>(null);
   const isLastTrial = trialIndex >= totalTrials - 1;
@@ -152,16 +154,32 @@ export function EscutaSeletivaCocktailPartyDesktopGame({
     answerStartRef.current = performance.now();
   }, [currentTrial.fullSequence, playSingle]);
 
-  const startTrial = useCallback(async () => {
-    setAnswer(["", "", ""]);
-    setFeedback(null);
-    setPhase("ready");
-  }, []);
 
+  // Função para iniciar a reprodução após a contagem
   const beginPlayback = useCallback(async () => {
     await unlockAudio();
     await playSequence();
   }, [playSequence, unlockAudio]);
+
+  // Inicia a contagem regressiva ao clicar em "Iniciar treino"
+  const startCountdown = useCallback(() => {
+    setCountdown(3);
+    setPhase("countdown");
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    let current = 3;
+    countdownRef.current = setInterval(() => {
+      current -= 1;
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(countdownRef.current!);
+          setPhase("playing");
+          beginPlayback();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, [beginPlayback]);
 
   const updateAnswer = (index: number, value: string) => {
     const sanitized = value.replace(/\D/g, "").slice(0, 1);
@@ -228,42 +246,18 @@ export function EscutaSeletivaCocktailPartyDesktopGame({
     setCurrentTrial(buildTrial());
     setAnswer(["", "", ""]);
     setFeedback(null);
-    setPhase("ready");
+    setCountdown(3);
+    setPhase("countdown");
   }, [totalTrials, trialIndex]);
+
 
   return (
     <div className="w-full max-w-3xl mx-auto rounded-2xl border border-white/10 bg-neutral-900 p-6 text-white">
       {phase === "intro" && (
         <div className="space-y-4">
-          <h2 className="text-2xl font-semibold text-red-500">
-            ESCUTA SELETIVA NOVA - TESTE VISUAL
-          </h2>
-          <p className="text-yellow-300 font-bold">
-            COMPONENTE NOVO EXECUTANDO
+          <p className="text-sm text-neutral-300">
+            Neste treino, você ouvirá uma sequência de 6 números, alternando entre uma voz masculina e uma feminina. Sua tarefa é prestar atenção apenas na voz-alvo indicada e, ao final, digitar os 3 números falados por essa voz, ignorando os números da outra voz. Recomendamos o uso de fones de ouvido.
           </p>
-          <p className="text-sm text-neutral-300">{instructions}</p>
-          <button
-            onClick={startTrial}
-            className="rounded-xl bg-blue-600 px-4 py-2 font-medium hover:bg-blue-500"
-          >
-            Iniciar treino
-          </button>
-        </div>
-      )}
-
-      {phase === "ready" && (
-        <div className="space-y-4">
-          <h2 className="text-2xl font-semibold">Rodada {trialIndex + 1}</h2>
-          <p className="text-lg">
-            Voz-alvo: <strong>{voiceLabel(currentTrial.targetVoice)}</strong>
-          </p>
-          <p className="text-sm text-neutral-300">Use fones de ouvido e memorize apenas os 3 números da voz-alvo.</p>
-          <button
-            onClick={beginPlayback}
-            className="rounded-xl bg-green-600 px-4 py-2 font-medium hover:bg-green-500"
-          >
-            Ouvir sequência
-          </button>
           <button
             onClick={() => playSingle('/audio/0_masc.mp3')}
             className="rounded-xl bg-yellow-600 px-4 py-2 font-medium hover:bg-yellow-500"
@@ -273,6 +267,19 @@ export function EscutaSeletivaCocktailPartyDesktopGame({
           {!audioUnlocked && (
             <p className="text-xs text-neutral-400">O áudio será liberado ao clicar no botão.</p>
           )}
+          <button
+            onClick={startCountdown}
+            className="rounded-xl bg-blue-600 px-4 py-2 font-medium hover:bg-blue-500"
+          >
+            Iniciar treino
+          </button>
+        </div>
+      )}
+
+      {phase === "countdown" && (
+        <div className="flex flex-col items-center justify-center space-y-4 min-h-[180px]">
+          <p className="text-3xl font-bold">{countdown}</p>
+          <p className="text-sm text-neutral-300">Prepare-se! O treino começará em instantes.</p>
         </div>
       )}
 
