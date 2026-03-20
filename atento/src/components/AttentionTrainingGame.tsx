@@ -822,7 +822,7 @@ export function AttentionTrainingGame() {
               )}
               {currentExercise.kind === "escutaseletiva-cocktail-party" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
-                  Escuta Seletiva (Cocktail Party)
+                  Escuta Seletiva
                 </h2>
               )}
               {currentExercise.kind === "flanker" && (
