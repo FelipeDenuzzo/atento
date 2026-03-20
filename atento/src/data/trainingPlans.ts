@@ -293,7 +293,7 @@ export const trainingPlans: TrainingPlan[] = [
       // Treino Escuta Seletiva (Cocktail Party)
       {
         id: "sel-escutaseletiva",
-        title: "Escuta Seletiva (Cocktail Party)",
+        title: "Escuta Seletiva",
         attentionType: "seletiva",
         kind: "escutaseletiva-cocktail-party",
         instructions:
