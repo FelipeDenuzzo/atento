@@ -21,8 +21,14 @@ type TrialResult = {
 };
 
 type Props = {
-  onComplete?: (report: any) => void;
-  totalTrials?: number;
+  onComplete: (report: {
+    success: boolean;
+    pointsEarned: number;
+    report: any;
+  }) => void;
+  totalTrials: number;
+  basePoints: number;
+  reportContext: any;
 };
 
 const TOTAL_DIGITS_PER_VOICE = 3;
@@ -79,10 +85,12 @@ function buildTrial() {
 
 export function EscutaSeletivaCocktailPartyDesktopGame({
   onComplete,
-  totalTrials = TOTAL_TRIALS_DEFAULT,
+  totalTrials,
+  basePoints,
+  reportContext,
 }: Props) {
-  console.error("### ESCUTA SELETIVA DESKTOP NOVO COMPONENTE EXECUTANDO ###");
-
+  // Confirma execução do componente
+  console.error("[ATENTO] EscutaSeletivaCocktailPartyDesktopGame EXECUTADO", { basePoints, totalTrials, reportContext });
   const [phase, setPhase] = useState<"intro" | "ready" | "playing" | "answering" | "feedback" | "finished">("intro");
   const [trialIndex, setTrialIndex] = useState(0);
   const [currentTrial, setCurrentTrial] = useState(buildTrial);
@@ -93,9 +101,6 @@ export function EscutaSeletivaCocktailPartyDesktopGame({
 
   const answerStartRef = useRef<number | null>(null);
   const isLastTrial = trialIndex >= totalTrials - 1;
-  // ... resto do código exatamente como você colou ...
-}
-
 
   const instructions = useMemo(
     () =>
@@ -201,8 +206,14 @@ export function EscutaSeletivaCocktailPartyDesktopGame({
         accuracy: totalTrials ? hits / totalTrials : 0,
         trials: updated,
         finishedAt: new Date().toISOString(),
+        ...reportContext,
       };
-      onComplete?.(report);
+      const pointsEarned = hits * basePoints;
+      onComplete({
+        success: hits === totalTrials,
+        pointsEarned,
+        report,
+      });
       setPhase("finished");
     }
   }, [answer, currentTrial, isLastTrial, onComplete, results, totalTrials, trialIndex]);

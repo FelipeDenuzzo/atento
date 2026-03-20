@@ -9,6 +9,7 @@ import {
 import { AttentionType, TrainingPlan } from "@/types/game";
 import { VisualSearchHunt } from "@/components/VisualSearchHunt";
 import { SelectiveAttentionContainer } from "./containers/SelectiveAttentionContainer";
+import { EscutaSeletivaCocktailPartyDesktopGame } from "@/games/escuta-seletiva-cocktail-party/EscutaSeletivaCocktailPartyDesktopGame";
 import { SustainedAttentionContainer } from "./containers/SustainedAttentionContainer";
 import { FlankerSetas } from "@/components/FlankerSetas";
 import { GoNoGoQuickClick } from "@/components/GoNoGoQuickClick";
@@ -1048,14 +1049,16 @@ export function AttentionTrainingGame() {
                 }}
               />
             ) : currentExercise.kind === "escutaseletiva-cocktail-party" ? (
-              <SelectiveAttentionContainer
-                mode={resolvedSessionMode}
+              <EscutaSeletivaCocktailPartyDesktopGame
+                totalTrials={6} // Valor fixo, ajuste se necessário
+                basePoints={currentExercise.points || 1}
                 reportContext={reportContext}
-                onComplete={({ success, pointsEarned }) => {
+                onComplete={({ success, pointsEarned, report }) => {
                   setScore((value) => value + (pointsEarned || 0));
                   if (success) {
                     setHits((value) => value + 1);
                   }
+                  // Aqui você pode salvar o relatório, se necessário
                   const nextIndex = currentIndex + 1;
                   if (nextIndex >= activeExercises.length) {
                     setStage("result");
