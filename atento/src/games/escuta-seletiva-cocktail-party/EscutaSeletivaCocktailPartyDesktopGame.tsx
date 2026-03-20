@@ -135,31 +135,37 @@ export function EscutaSeletivaCocktailPartyDesktopGame({
         resolve();
       };
 
-      audio.onerror = () => {
-        cleanup();
-        reject(new Error(`Falha ao tocar áudio: ${src}`));
-      };
-
-      audio.play().catch(reject);
+    audio.onerror = (e) => {
+  console.error('[ATENTO][AUDIO ERROR] Erro ao tocar áudio:', src, e);
+  cleanup();
+  reject(new Error(`Falha ao tocar áudio: ${src}`));
+};
+audio.play().catch((err) => {
+  console.error('[ATENTO][AUDIO PLAY CATCH] Falha ao iniciar áudio:', src, err);
+  reject(err);
+});
     });
   }, []);
 
   const playSequence = useCallback(async () => {
     setPhase("playing");
     for (const item of currentTrial.fullSequence) {
+      console.log('[ATENTO][PLAY SEQUENCE] Tocando áudio:', item.src);
       await playSingle(item.src);
       await new Promise((r) => setTimeout(r, 350));
     }
+    console.log('[ATENTO][PLAY SEQUENCE] Fim da sequência, indo para answering');
     setPhase("answering");
     answerStartRef.current = performance.now();
   }, [currentTrial.fullSequence, playSingle]);
 
 
   // Função para iniciar a reprodução após a contagem
-  const beginPlayback = useCallback(async () => {
-    await unlockAudio();
-    await playSequence();
-  }, [playSequence, unlockAudio]);
+const beginPlayback = useCallback(async () => {
+  console.log('[ATENTO][BEGIN PLAYBACK] Iniciando beginPlayback');
+  await unlockAudio();
+  await playSequence();
+}, [playSequence, unlockAudio]);
 
   // Inicia a contagem regressiva ao clicar em "Iniciar treino"
   const startCountdown = useCallback(() => {
@@ -259,7 +265,10 @@ export function EscutaSeletivaCocktailPartyDesktopGame({
             Neste treino, você ouvirá uma sequência de 6 números, alternando entre uma voz masculina e uma feminina. Sua tarefa é prestar atenção apenas na voz-alvo indicada e, ao final, digitar os 3 números falados por essa voz, ignorando os números da outra voz. Recomendamos o uso de fones de ouvido.
           </p>
           <button
-            onClick={() => playSingle('/audio/0_masc.mp3')}
+            onClick={() => {
+            console.log('[ATENTO][TESTE AUDIO] Botão de teste de áudio clicado');
+            playSingle('/audio/0_masc.mp3');
+          }}
             className="rounded-xl bg-yellow-600 px-4 py-2 font-medium hover:bg-yellow-500"
           >
             Testar áudio
