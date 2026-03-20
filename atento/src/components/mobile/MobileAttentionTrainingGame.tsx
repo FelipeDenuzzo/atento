@@ -1,5 +1,8 @@
 "use client";
 
+import { SelectiveAttentionMobileContainer } from "../containers/mobile/SelectiveAttentionMobileContainer";
+import { SustainedAttentionMobileContainer } from "../containers/mobile/SustainedAttentionMobileContainer";
+
 import { useEffect, useMemo, useState } from "react";
 import {
   attentionTypeDescriptions,
@@ -397,10 +400,59 @@ export function MobileAttentionTrainingGame() {
     <main className="mx-auto w-full flex min-h-screen max-w-3xl items-center px-6 py-10">
       <section className="w-full border border-black/10 bg-white shadow-sm rounded-2xl p-6 sm:p-8">
         <div className="flex flex-col items-center justify-center py-12">
-          <p className="text-lg font-semibold text-gray-700 text-center">
-            Este exercício não está disponível na versão mobile.<br />
-            Por favor, acesse pelo computador para jogar.
-          </p>
+            {/* ...outros estágios e lógica... */}
+            {stage === "exercise" && currentExercise && (
+              <>
+                {currentExercise.kind === "stroop" ? (
+                  <SustainedAttentionMobileContainer
+                    mode={resolvedSessionMode}
+                    reportContext={reportContext}
+                    onComplete={({ success, pointsEarned }) => {
+                      setScore((value) => value + pointsEarned);
+                      if (success) {
+                        setHits((value) => value + 1);
+                      }
+                      const nextIndex = currentIndex + 1;
+                      if (nextIndex >= activeExercises.length) {
+                        setStage("result");
+                      } else {
+                        setCurrentIndex(nextIndex);
+                        setSelectedOption(null);
+                        setSubmitted(false);
+                        setStage(getStageForExercise(activeExercises[nextIndex]));
+                      }
+                    }}
+                  />
+                ) : currentExercise.kind === "escutaseletiva-cocktail-party" ? (
+                  <SelectiveAttentionMobileContainer
+                    mode={resolvedSessionMode}
+                    reportContext={reportContext}
+                    onComplete={({ success, pointsEarned }) => {
+                      setScore((value) => value + (pointsEarned || 0));
+                      if (success) {
+                        setHits((value) => value + 1);
+                      }
+                      const nextIndex = currentIndex + 1;
+                      if (nextIndex >= activeExercises.length) {
+                        setStage("result");
+                      } else {
+                        setCurrentIndex(nextIndex);
+                        setSelectedOption(null);
+                        setSubmitted(false);
+                        setStage(getStageForExercise(activeExercises[nextIndex]));
+                      }
+                    }}
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <p className="text-lg font-semibold text-gray-700 text-center">
+                      Este exercício não está disponível na versão mobile.<br />
+                      Por favor, acesse pelo computador para jogar.
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
         </div>
       </section>
     </main>

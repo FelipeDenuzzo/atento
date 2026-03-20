@@ -1,13 +1,19 @@
-import React from "react";
+"use client";
 
-export type SelectiveAttentionContainerProps = {
-  mode: "sequence" | "single";
-  reportContext?: import("@/components/AttentionTrainingGame").ReportContext;
-  onComplete: (result: { success: boolean; pointsEarned: number }) => void;
+import type { AttentionContainerProps } from "./types";
+import { EscutaSeletivaCocktailParty } from "@/games/escutaseletiva/EscutaSeletivaCocktailParty";
+
+export type SelectiveAttentionContainerProps = AttentionContainerProps & {
+  variant?: "simples" | "cocktail-party";
 };
 
-export function SelectiveAttentionContainer(
-  props: SelectiveAttentionContainerProps
-): JSX.Element {
-  return <div>Container de Atenção Seletiva</div>;
+export function SelectiveAttentionContainer({
+  mode,
+  reportContext,
+  onComplete,
+  variant = "simples",
+}: SelectiveAttentionContainerProps) {
+  return (
+    <EscutaSeletivaCocktailParty />
+  );
 }

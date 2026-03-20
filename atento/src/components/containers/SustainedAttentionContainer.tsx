@@ -1,13 +1,27 @@
-import React from "react";
+"use client";
 
-export type SustainedAttentionContainerProps = {
-  mode: "sequence" | "single";
-  reportContext?: import("@/components/AttentionTrainingGame").ReportContext;
-  onComplete: (result: { success: boolean; pointsEarned: number }) => void;
+import type { AttentionContainerProps } from "./types";
+import { StroopInvertido } from "@/components/StroopInvertido";
+
+export type SustainedAttentionContainerProps = AttentionContainerProps & {
+  variant?: "stroop";
 };
 
 export function SustainedAttentionContainer(
-  props: SustainedAttentionContainerProps
+  { onComplete }: SustainedAttentionContainerProps
 ): JSX.Element {
-  return <div>Container de Atenção Sustentada</div>;
+  return (
+    <StroopInvertido
+      basePoints={0}
+      startingLevel={0}
+      maxLevelHint={0}
+      onComplete={(result) => {
+        // adapta para o formato esperado pelo container
+        onComplete({
+          success: result.success ?? true,
+          pointsEarned: result.pointsEarned ?? 0,
+        });
+      }}
+    />
+  );
 }

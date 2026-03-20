@@ -1,13 +1,27 @@
-import React from "react";
+"use client";
 
-export type DividedAttentionContainerProps = {
-  mode: "sequence" | "single";
-  reportContext?: import("@/components/AttentionTrainingGame").ReportContext;
-  onComplete: (result: { success: boolean; pointsEarned: number }) => void;
+import type { AttentionContainerProps } from "./types";
+import { MapaSimbolosMonitorSomGame } from "@/games/mapa-simbolos-monitor-som/MapaSimbolosMonitorSomGame";
+
+export type DividedAttentionContainerProps = AttentionContainerProps & {
+  variant?: "default";
 };
 
 export function DividedAttentionContainer(
   props: DividedAttentionContainerProps
 ): JSX.Element {
-  return <div>Container de Atenção Dividida</div>;
+  return (
+    <MapaSimbolosMonitorSomGame
+      basePoints={100}
+      startingLevel={1}
+      maxLevelHint={3}
+      reportContext={props.reportContext}
+      onComplete={(result) => {
+        props.onComplete({
+          success: result.success ?? true,
+          pointsEarned: result.pointsEarned ?? 0,
+        });
+      }}
+    />
+  );
 }
