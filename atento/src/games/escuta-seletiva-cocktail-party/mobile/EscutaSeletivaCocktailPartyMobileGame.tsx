@@ -184,6 +184,7 @@ export function EscutaSeletivaCocktailPartyMobileGame({
     setPhase("ready");
   }, [trialIndex]);
 
+
   return (
     <div className="w-full max-w-md mx-auto rounded-2xl border border-white/10 bg-neutral-900 p-4 text-white">
       {phase === "intro" && (
@@ -212,6 +213,12 @@ export function EscutaSeletivaCocktailPartyMobileGame({
             className="w-full rounded-xl bg-green-600 px-4 py-3 font-medium"
           >
             Ouvir sequência
+          </button>
+          <button
+            onClick={() => playSingle('/audio/0_masc.mp3')}
+            className="w-full rounded-xl bg-yellow-600 px-4 py-3 font-medium"
+          >
+            Testar áudio
           </button>
         </div>
       )}

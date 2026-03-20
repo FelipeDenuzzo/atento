@@ -243,6 +243,12 @@ export function EscutaSeletivaCocktailPartyDesktopGame({
           >
             Ouvir sequência
           </button>
+          <button
+            onClick={() => playSingle('/audio/0_masc.mp3')}
+            className="rounded-xl bg-yellow-600 px-4 py-2 font-medium hover:bg-yellow-500"
+          >
+            Testar áudio
+          </button>
           {!audioUnlocked && (
             <p className="text-xs text-neutral-400">O áudio será liberado ao clicar no botão.</p>
           )}
