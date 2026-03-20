@@ -931,6 +931,7 @@ export function AttentionTrainingGame() {
                 "top-bottom-position-rule-switch",
                 "reversal-go-nogo-switch",
                 "trilha-alternada-tmtb",
+                "escutaseletiva-cocktail-party",
               ].includes(currentExercise.kind) && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Stroop Invertido
