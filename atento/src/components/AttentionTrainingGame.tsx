@@ -808,7 +808,7 @@ export function AttentionTrainingGame() {
                   onClick={() => playSingle("/audio/0_masc.mp3")}
                   className="rounded-lg bg-yellow-600 px-4 py-2 font-medium text-white hover:bg-yellow-500"
                 >
-                  Testar áudio
+                  Testar áudio 1
                 </button>
                 <button
                   type="button"
