@@ -805,6 +805,13 @@ export function AttentionTrainingGame() {
               <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
+                  onClick={() => playSingle("/audio/0_masc.mp3")}
+                  className="rounded-lg bg-yellow-600 px-4 py-2 font-medium text-white hover:bg-yellow-500"
+                >
+                  Testar áudio 1
+                </button>
+                <button
+                  type="button"
                   onClick={() => setStage("exercise")}
                   className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-500"
                 >
