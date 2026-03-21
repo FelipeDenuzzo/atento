@@ -1,3 +1,6 @@
+
+"use client";
+
 function getSuggestion({
   status,
   accuracy,
@@ -25,7 +28,6 @@ function getSuggestion({
   };
 }
 "use client";
-
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ReportContext } from "@/components/AttentionTrainingGame";
 import { buildTxtReportFileName } from "../../utils/reportFileName";
