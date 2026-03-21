@@ -7,5 +7,4 @@ describe("StroopInvertido", () => {
     render(<StroopInvertido />);
     expect(screen.getByText(/stroop invertido/i)).toBeInTheDocument();
   });
-  // Arquivo movido para src/games/stroop-invertido/StroopInvertido.test.tsx
-  });
+});

@@ -1,7 +1,7 @@
 "use client";
 
 import type { AttentionContainerProps } from "./types";
-import { StroopInvertido } from "@/components/StroopInvertido";
+import { StroopInvertido } from "@/games/stroop-invertido/StroopInvertido";
 
 export type SustainedAttentionContainerProps = AttentionContainerProps & {
   variant?: "stroop";

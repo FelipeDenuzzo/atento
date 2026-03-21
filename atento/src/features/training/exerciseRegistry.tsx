@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { FlankerSetas } from "@/components/FlankerSetas";
-import { StroopInvertido } from "@/components/StroopInvertido";
+import { StroopInvertido } from "@/games/stroop-invertido/StroopInvertido";
 import { GoNoGoQuickClick } from "@/components/GoNoGoQuickClick";
 import { VisualSearchHunt } from "@/games/visual-search-hunt/VisualSearchHunt";
 import { SelectiveAttentionContainer } from "@/components/containers/SelectiveAttentionContainer";
