@@ -451,6 +451,10 @@ export function AttentionTrainingGame() {
     setStage(getStageForExercise(activeExercises[currentIndex]));
   };
 
+  function playSingle(arg0: string): void {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-3xl items-center px-6 py-10">
       <section className="w-full rounded-2xl border border-black/10 bg-white p-6 shadow-sm sm:p-8">
@@ -797,13 +801,32 @@ export function AttentionTrainingGame() {
                 />
               </div>
             )}
-            <button
-              type="button"
-              onClick={() => setStage("exercise")}
-              className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
-            >
-              Começar exercício
-            </button>
+            {currentExercise.kind === "escutaseletiva-cocktail-party" ? (
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => playSingle("/audio/0_masc.mp3")}
+                  className="rounded-lg bg-yellow-600 px-4 py-2 font-medium text-white hover:bg-yellow-500"
+                >
+                  Testar áudio
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStage("exercise")}
+                  className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-500"
+                >
+                  Iniciar treino
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setStage("exercise")}
+                className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
+              >
+                Começar exercício
+              </button>
+            )}
           </div>
         )}
 

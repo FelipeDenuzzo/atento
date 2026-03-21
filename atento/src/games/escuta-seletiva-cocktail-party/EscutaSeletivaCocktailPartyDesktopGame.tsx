@@ -264,18 +264,14 @@ const beginPlayback = useCallback(async () => {
           <p className="text-sm text-neutral-300">
             Neste treino, você ouvirá uma sequência de 6 números, alternando entre uma voz masculina e uma feminina. Sua tarefa é prestar atenção apenas na voz-alvo indicada e, ao final, digitar os 3 números falados por essa voz, ignorando os números da outra voz. Recomendamos o uso de fones de ouvido.
           </p>
-          <button
-            onClick={() => {
-            console.log('[ATENTO][TESTE AUDIO] Botão de teste de áudio clicado');
-            playSingle('/audio/0_masc.mp3');
-          }}
-            className="rounded-xl bg-yellow-600 px-4 py-2 font-medium hover:bg-yellow-500"
-          >
-            Testar áudio
-          </button>
-          {!audioUnlocked && (
-            <p className="text-xs text-neutral-400">O áudio será liberado ao clicar no botão.</p>
-          )}
+
+          <p className="text-base text-neutral-200 mt-2">
+            Voz-alvo desta rodada: {" "}
+            <span className="font-semibold">
+              {voiceLabel(currentTrial.targetVoice)}
+            </span>
+          </p>
+
           <button
             onClick={startCountdown}
             className="rounded-xl bg-blue-600 px-4 py-2 font-medium hover:bg-blue-500"
@@ -288,6 +284,18 @@ const beginPlayback = useCallback(async () => {
       {phase === "countdown" && (
         <div className="flex flex-col items-center justify-center space-y-4 min-h-[180px]">
           <p className="text-3xl font-bold">{countdown}</p>
+          <p className="text-base text-neutral-200 mt-2">
+            Voz-alvo desta rodada: <span className="font-semibold">{voiceLabel(currentTrial.targetVoice).toUpperCase()}</span>
+          </p>
+          <button
+            onClick={() => {
+              console.log('[ATENTO][TESTE AUDIO] Botão de teste de áudio clicado');
+              playSingle('/audio/0_masc.mp3');
+            }}
+            className="rounded-xl bg-yellow-600 px-4 py-2 font-medium hover:bg-yellow-500"
+          >
+            Testar áudio
+          </button>
           <p className="text-sm text-neutral-300">Prepare-se! O treino começará em instantes.</p>
         </div>
       )}
@@ -303,7 +311,7 @@ const beginPlayback = useCallback(async () => {
         <div className="space-y-4">
           <h2 className="text-2xl font-semibold">Digite a sequência</h2>
           <p className="text-neutral-300">
-            Digite os 3 números da voz <strong>{voiceLabel(currentTrial.targetVoice)}</strong>.
+            Digite os 3 números da voz alvo <strong>{voiceLabel(currentTrial.targetVoice)}</strong>.
           </p>
           <div className="flex gap-3">
             {answer.map((value, index) => (
