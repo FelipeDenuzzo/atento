@@ -135,15 +135,12 @@ export function EscutaSeletivaCocktailPartyDesktopGame({
         resolve();
       };
 
-    audio.onerror = (e) => {
-  console.error('[ATENTO][AUDIO ERROR] Erro ao tocar áudio:', src, e);
-  cleanup();
-  reject(new Error(`Falha ao tocar áudio: ${src}`));
-};
-audio.play().catch((err) => {
-  console.error('[ATENTO][AUDIO PLAY CATCH] Falha ao iniciar áudio:', src, err);
-  reject(err);
-});
+      audio.onerror = () => {
+        cleanup();
+        reject(new Error(`Falha ao tocar áudio: ${src}`));
+      };
+
+      audio.play().catch(reject);
     });
   }, []);
 
