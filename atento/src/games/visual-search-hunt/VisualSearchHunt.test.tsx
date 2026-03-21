@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
-// Arquivo movido para src/games/visual-search-hunt/VisualSearchHunt.test.tsx
-// (removido do diretório components)
+import React from "react";
+import { VisualSearchHunt } from "./VisualSearchHunt";
 
 describe("VisualSearchHunt", () => {
   it("deve renderizar sem erros", () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { VisualSearchHunt } from "@/components/VisualSearchHunt";
+import { VisualSearchHunt } from "../VisualSearchHunt";
 import type { ReportContext } from "@/components/mobile/MobileAttentionTrainingGame";
 
 type Props = {

@@ -7,7 +7,7 @@ import {
   trainingPlans,
 } from "@/data/trainingPlans";
 import { AttentionType, TrainingPlan } from "@/types/game";
-import { VisualSearchHunt } from "@/components/VisualSearchHunt";
+import { VisualSearchHunt } from "@/games/visual-search-hunt/VisualSearchHunt";
 import { SelectiveAttentionContainer } from "./containers/SelectiveAttentionContainer";
 import { EscutaSeletivaCocktailPartyDesktopGame } from "@/games/escuta-seletiva-cocktail-party/EscutaSeletivaCocktailPartyDesktopGame";
 import { SustainedAttentionContainer } from "./containers/SustainedAttentionContainer";

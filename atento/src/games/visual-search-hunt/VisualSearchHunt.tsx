@@ -1,8 +1,34 @@
+function getSuggestion({
+  status,
+  accuracy,
+  timeRatio,
+}: {
+  status: RoundMetrics["status"];
+  accuracy: number;
+  timeRatio: number;
+}): { nextLevelDelta: -1 | 0 | 1; text: string } {
+  if (status === "won" && accuracy >= 0.85 && timeRatio >= 0.25) {
+    return {
+      nextLevelDelta: 1,
+      text: "Desempenho forte. Dificuldade aumentada na próxima rodada.",
+    };
+  }
+  if (status === "lost" || accuracy < 0.5) {
+    return {
+      nextLevelDelta: -1,
+      text: "Rodada exigente. Dificuldade reduzida para estabilizar precisão.",
+    };
+  }
+  return {
+    nextLevelDelta: 0,
+    text: "Desempenho consistente. Dificuldade mantida para consolidar busca visual.",
+  };
+}
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ReportContext } from "@/components/AttentionTrainingGame";
-import { buildTxtReportFileName } from "../utils/reportFileName";
+import { buildTxtReportFileName } from "../../utils/reportFileName";
 
 type Shape = "circle" | "square" | "triangle";
 type Color = "red" | "blue" | "green" | "yellow";
@@ -118,64 +144,31 @@ function getShapeClass(shape: Shape): string {
   if (shape === "square") {
     return "rounded-none";
   }
-  return "triangle-shape";
+  return "";
 }
 
-function getSuggestion({
-  status,
-  accuracy,
-  timeRatio,
-}: {
-  status: RoundMetrics["status"];
-  accuracy: number;
-  timeRatio: number;
-}): { nextLevelDelta: -1 | 0 | 1; text: string } {
-  if (status === "won" && accuracy >= 0.85 && timeRatio >= 0.25) {
-    return {
-      nextLevelDelta: 1,
-      text: "Desempenho forte. Dificuldade aumentada na próxima rodada.",
-    };
-  }
 
-  if (status === "lost" || accuracy < 0.5) {
-    return {
-      nextLevelDelta: -1,
-      text: "Rodada exigente. Dificuldade reduzida para estabilizar precisão.",
-    };
-  }
+import React from "react";
 
-  return {
-    nextLevelDelta: 0,
-    text: "Desempenho consistente. Dificuldade mantida para consolidar busca visual.",
-  };
-}
+export const VisualSearchHunt: React.FC<Props> = (props) => {
+  // --- INÍCIO DO COMPONENTE COPIADO ---
+  const [level, setLevel] = React.useState(props.startingLevel);
+  const [status, setStatus] = React.useState<RoundStatus>("preview");
+  const [targetShape, setTargetShape] = React.useState<Shape>("triangle");
+  const [targetColor, setTargetColor] = React.useState<Color>("red");
+  const [tiles, setTiles] = React.useState<Tile[]>([]);
+  const [remainingTime, setRemainingTime] = React.useState(0);
+  const [hits, setHits] = React.useState(0);
+  const [errors, setErrors] = React.useState(0);
+  const [targetsRemaining, setTargetsRemaining] = React.useState(0);
+  const [feedback, setFeedback] = React.useState<"success" | "error" | null>(null);
+  const [lastMetrics, setLastMetrics] = React.useState<RoundMetrics | null>(null);
+  const [allLevelMetrics, setAllLevelMetrics] = React.useState<RoundMetrics[]>([]);
 
-// Arquivo movido para src/games/visual-search-hunt/VisualSearchHunt.tsx
-// (removido do diretório components)
-  basePoints,
-  startingLevel,
-  maxLevelHint,
-  reportContext,
-  onComplete,
-}: Props) {
-  const [level, setLevel] = useState(startingLevel);
-  const [status, setStatus] = useState<RoundStatus>("preview");
-  const [targetShape, setTargetShape] = useState<Shape>("triangle");
-  const [targetColor, setTargetColor] = useState<Color>("red");
-  const [tiles, setTiles] = useState<Tile[]>([]);
-  const [remainingTime, setRemainingTime] = useState(0);
-  const [hits, setHits] = useState(0);
-  const [errors, setErrors] = useState(0);
-  const [targetsRemaining, setTargetsRemaining] = useState(0);
-  const [feedback, setFeedback] = useState<"success" | "error" | null>(null);
-  const [lastMetrics, setLastMetrics] = useState<RoundMetrics | null>(null);
-  const [allLevelMetrics, setAllLevelMetrics] = useState<RoundMetrics[]>([]);
+  const reactionTimesRef = React.useRef<number[]>([]);
+  const lastHitAtRef = React.useRef<number>(0);
 
-  const reactionTimesRef = useRef<number[]>([]);
-  const lastHitAtRef = useRef<number>(0);
-
-  const config = useMemo(() => getLevelConfig(level), [level]);
-
+  const config = React.useMemo(() => getLevelConfig(level), [level]);
   const gridColumns = `repeat(${config.gridSize}, minmax(0, 1fr))`;
 
   const playFeedback = (kind: "success" | "error") => {
@@ -183,7 +176,7 @@ function getSuggestion({
     window.setTimeout(() => setFeedback(null), 180);
   };
 
-  const finishRound = useCallback(
+  const finishRound = React.useCallback(
     (roundStatus: RoundMetrics["status"], timeValue: number) => {
       const averageReactionMs =
         reactionTimesRef.current.length > 0
@@ -208,7 +201,7 @@ function getSuggestion({
     [errors, hits, level],
   );
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (status !== "playing") {
       return;
     }
@@ -353,9 +346,9 @@ function getSuggestion({
   const completeExercise = () => {
     const allMetrics = lastMetrics ? [...allLevelMetrics, lastMetrics] : allLevelMetrics;
     const wonLevels = allMetrics.filter(m => m.status === "won").length;
-    const success = wonLevels >= maxLevelHint * 0.6;
-    const pointsEarned = success ? basePoints : Math.round(basePoints * 0.35);
-    onComplete({ success, pointsEarned });
+    const success = wonLevels >= props.maxLevelHint * 0.6;
+    const pointsEarned = success ? props.basePoints : Math.round(props.basePoints * 0.35);
+    props.onComplete({ success, pointsEarned });
   };
 
   const downloadResults = () => {
@@ -365,17 +358,16 @@ function getSuggestion({
     lines.push("RESULTADO - CAÇA AO ALVO (Atenção Seletiva)");
     lines.push("=" + "=".repeat(60));
     lines.push("");
-    if (reportContext) {
+    if (props.reportContext) {
       lines.push(
         `Escopo: ${
-          reportContext.mode === "sequence"
-            ? `Trilha completa (${reportContext.scopeLabel})`
-            : `Jogo individual (${reportContext.scopeLabel})`
+          props.reportContext.mode === "sequence"
+            ? `Trilha completa (${props.reportContext.scopeLabel})`
+            : `Jogo individual (${props.reportContext.scopeLabel})`
         }`,
       );
       lines.push("");
     }
-    
     allMetrics.forEach((m, idx) => {
       lines.push(`Fase ${idx + 1} (Nível ${m.level}):`);
       lines.push(`  Status: ${m.status === "won" ? "Completada" : "Tempo esgotado"}`);
@@ -388,12 +380,10 @@ function getSuggestion({
       lines.push(`  Acurácia: ${accuracy}%`);
       lines.push("");
     });
-
     const wonCount = allMetrics.filter(m => m.status === "won").length;
     const totalHits = allMetrics.reduce((sum, m) => sum + m.hits, 0);
     const totalErrors = allMetrics.reduce((sum, m) => sum + m.errors, 0);
     const totalAccuracy = totalHits + totalErrors > 0 ? Math.round((totalHits / (totalHits + totalErrors)) * 100) : 0;
-
     lines.push("=" + "=".repeat(60));
     lines.push("RESUMO TOTAL:");
     lines.push(`Fases completadas: ${wonCount}/${allMetrics.length}`);
@@ -401,15 +391,14 @@ function getSuggestion({
     lines.push(`Erros totais: ${totalErrors}`);
     lines.push(`Acurácia geral: ${totalAccuracy}%`);
     lines.push("=" + "=".repeat(60));
-
     const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     a.download = buildTxtReportFileName({
-      mode: reportContext?.mode ?? "single",
-      attentionTypeLabel: reportContext?.attentionTypeLabel,
-      participantName: reportContext?.participantName,
+      mode: props.reportContext?.mode ?? "single",
+      attentionTypeLabel: props.reportContext?.attentionTypeLabel,
+      participantName: props.reportContext?.participantName,
     });
     a.click();
     URL.revokeObjectURL(url);
@@ -417,53 +406,44 @@ function getSuggestion({
 
   const advanceToNextLevel = () => {
     if (!lastMetrics) return;
-
     setAllLevelMetrics(prev => [...prev, lastMetrics]);
-
-    if (level >= maxLevelHint) {
+    if (level >= props.maxLevelHint) {
       setStatus("completed");
       return;
     }
-
     const totalClicks = lastMetrics.hits + lastMetrics.errors;
     const accuracy = totalClicks > 0 ? lastMetrics.hits / totalClicks : 0;
     const timeRatio = config.timeSeconds > 0 ? lastMetrics.timeRemaining / config.timeSeconds : 0;
-
     const suggestion = getSuggestion({
       status: lastMetrics.status,
       accuracy,
       timeRatio,
     });
-
-    const adjusted = Math.max(1, Math.min(maxLevelHint, level + suggestion.nextLevelDelta));
+    const adjusted = Math.max(1, Math.min(props.maxLevelHint, level + suggestion.nextLevelDelta));
     setLevel(adjusted);
     generateRound();
     setStatus("preview");
   };
 
-  const summary = useMemo(() => {
+  const summary = React.useMemo(() => {
     if (!lastMetrics) {
       return null;
     }
-
     const totalClicks = lastMetrics.hits + lastMetrics.errors;
     const accuracy = totalClicks > 0 ? lastMetrics.hits / totalClicks : 0;
-    const timeRatio =
-      config.timeSeconds > 0 ? lastMetrics.timeRemaining / config.timeSeconds : 0;
-
+    const timeRatio = config.timeSeconds > 0 ? lastMetrics.timeRemaining / config.timeSeconds : 0;
     const suggestion = getSuggestion({
       status: lastMetrics.status,
       accuracy,
       timeRatio,
     });
-
     return {
       accuracyPercent: Math.round(accuracy * 100),
       suggestion,
     };
   }, [lastMetrics, config.timeSeconds]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (status === "preview") {
       generateRound();
     }
@@ -508,7 +488,7 @@ function getSuggestion({
       {status === "playing" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between rounded-lg border border-black/10 bg-blue-50 p-4">
-            <p className="text-sm font-semibold text-blue-900">Fase {level} de {maxLevelHint}</p>
+            <p className="text-sm font-semibold text-blue-900">Fase {level} de {props.maxLevelHint}</p>
             <p className="text-center text-lg font-bold text-zinc-900">
               Encontre: <span style={{ color: colorClass[targetColor].includes("red") ? "#ef4444" : colorClass[targetColor].includes("blue") ? "#3b82f6" : colorClass[targetColor].includes("green") ? "#16a34a" : "#eab308" }} className="font-black">{shapeLabel[targetShape]} {colorLabel[targetColor]}</span>
             </p>
@@ -554,8 +534,6 @@ function getSuggestion({
           ))}
         </div>
       )}
-
-
 
       {(status === "won" || status === "lost") && lastMetrics && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-4">
@@ -624,4 +602,4 @@ function getSuggestion({
       )}
     </div>
   );
-}
+};
