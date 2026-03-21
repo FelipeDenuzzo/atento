@@ -218,7 +218,7 @@ export function EscutaSeletivaCocktailPartyMobileGame({
             onClick={() => playSingle('/audio/0_masc.MP3')}
             className="w-full rounded-xl bg-yellow-600 px-4 py-3 font-medium"
           >
-            Testar áudio ?
+            Testar áudio
           </button>
         </div>
       )}
@@ -236,36 +236,19 @@ export function EscutaSeletivaCocktailPartyMobileGame({
           <p className="text-sm text-neutral-300">
             Digite os 3 números da voz <strong>{voiceLabel(currentTrial.targetVoice)}</strong>.
           </p>
-          <div className="grid grid-cols-3 gap-3" id="escuta-seletiva">
+          <div className="grid grid-cols-3 gap-3">
             {answer.map((value, index) => (
               <input
                 key={index}
-                ref={el => inputRefs.current[index] = el}
                 value={value}
-                onChange={e => {
-                  const sanitized = e.target.value.replace(/\D/g, '').slice(0, 1);
-                  updateAnswer(index, sanitized);
-                  if (sanitized && index < answer.length - 1) {
-                    inputRefs.current[index + 1]?.focus();
-                    inputRefs.current[index + 1]?.select?.();
-                  }
-                }}
-                onKeyDown={e => {
-                  if (e.key === 'Backspace' && !answer[index] && index > 0) {
-                    inputRefs.current[index - 1]?.focus();
-                    inputRefs.current[index - 1]?.select?.();
-                  }
-                }}
+                onChange={(e) => updateAnswer(index, e.target.value)}
                 inputMode="numeric"
-                maxLength={1}
                 pattern="[0-9]*"
-                className="h-14 w-full rounded-xl border border-white/15 bg-neutral-800 text-center text-2xl outline-none digito-sequencia"
-                autoComplete="one-time-code"
+                maxLength={1}
+                className="h-14 w-full rounded-xl border border-white/15 bg-neutral-800 text-center text-2xl outline-none"
               />
             ))}
           </div>
-          // refs para inputs segmentados
-          const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
           <button
             onClick={submitAnswer}
             disabled={answer.some((v) => v === "")}
