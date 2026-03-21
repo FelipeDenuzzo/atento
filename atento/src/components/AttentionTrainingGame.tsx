@@ -480,12 +480,7 @@ export function AttentionTrainingGame() {
                     ATENTO – Programa de Treino de Atenção
                   </h1>
                   <p className="text-zinc-600">
-                    No ATENTO, você treina os 4 tipos de atenção (seletiva,
-                    sustentada, alternada e dividida) por meio de exercícios
-                    pensados para o dia a dia. Você pode seguir uma trilha de
-                    exercícios organizada para avançar passo a passo ou
-                    escolher treinar um exercício específico, focando no aspecto
-                    da atenção que quiser trabalhar mais.
+                    Um treino para deixar sua atenção mais firme, flexível e presente no dia a dia.
                   </p>
                 </div>
 
@@ -521,7 +516,7 @@ export function AttentionTrainingGame() {
                       </li>
                       <li>
                         <strong>Atenção Dividida:</strong> lidar com mais de
-                        uma demanda ao mesmo tempo, quando possível.
+                        uma demanda ao mesmo tempo.
                       </li>
                     </ul>
                   </section>
@@ -531,12 +526,10 @@ export function AttentionTrainingGame() {
                       Atenção e Envelhecimento
                     </h2>
                     <p>
-                      Com o envelhecimento, é comum haver mais lentidão mental,
-                      maior cansaço cognitivo e dificuldade de concentração em
-                      algumas situações. Ainda assim, o cérebro mantém
-                      capacidade de adaptação ao longo da vida. Com treino
-                      adequado, é possível fortalecer atenção, memória e
-                      velocidade de processamento.
+                      Com o passar do tempo, o cérebro pode ficar 
+                      mais lento e cansado, mas continua capaz de mudar; 
+                      com treino, ainda é possível fortalecer atenção, 
+                      memória e agilidade mental.
                     </p>
                   </section>
 
@@ -545,7 +538,7 @@ export function AttentionTrainingGame() {
                       Como funciona este Treino
                     </h2>
                     <p>
-                      Neste programa, você treina os 4 tipos de atenção com
+                      Você treina os 4 tipos de atenção com
                       exercícios curtos, progressivos e objetivos.
                     </p>
                     <ul className="list-disc space-y-1 pl-5">
@@ -567,10 +560,11 @@ export function AttentionTrainingGame() {
                       Acompanhe sua Evolução
                     </h2>
                     <p>
-                      Ao final de cada sessão, você vê seus resultados na tela e
-                      pode acompanhar seu histórico no site. Assim, fica fácil
-                      comparar seu desempenho ao longo do tempo, identificar
-                      avanços e direcionar melhor seus próximos treinos.
+                      No fim de cada sessão, você vê 
+                      seus resultados e acompanha sua 
+                      evolução direto no site, facilitando 
+                      comparar o que já melhorou e planejar 
+                      os próximos treinos.
                     </p>
                   </section>
                 </div>
@@ -589,7 +583,7 @@ export function AttentionTrainingGame() {
               <div className="space-y-4">
                 <div className="space-y-1">
                   <h1 className="text-2xl font-semibold text-zinc-900">
-                    Como você quer treinar hoje?
+                    Como você quer treinar?
                   </h1>
                 </div>
 
