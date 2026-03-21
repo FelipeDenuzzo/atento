@@ -1,6 +1,6 @@
 "use client";
 
-import { FlankerSetas } from "@/components/FlankerSetas";
+import { FlankerSetas } from "../FlankerSetasGame";
 import type { ReportContext } from "@/components/mobile/MobileAttentionTrainingGame";
 
 type Props = {

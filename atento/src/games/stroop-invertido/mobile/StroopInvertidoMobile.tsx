@@ -24,9 +24,9 @@ const PROGRESSION = [
   { activeColors: 6, time: 2000 }, // mais difícil
 ];
 
-type StroopInvertidoProps = {
-  onCorrectSound?: () => void; // callback para som de acerto
-  onErrorSound?: () => void;   // callback para som de erro
+type StroopInvertidoMobileProps = {
+  onCorrectSound?: () => void;
+  onErrorSound?: () => void;
   onEnd?: (result: {
     totalTrials: number;
     correct: number;
@@ -42,7 +42,7 @@ type Trial = {
   congruent: boolean;
 };
 
-export const StroopInvertido: React.FC<StroopInvertidoProps> = ({
+export const StroopInvertidoMobile: React.FC<StroopInvertidoMobileProps> = ({
   onCorrectSound,
   onErrorSound,
   onEnd,
@@ -116,10 +116,8 @@ export const StroopInvertido: React.FC<StroopInvertidoProps> = ({
     const rt = Date.now() - startTime;
     setAnswers((prev) => [...prev, { correct, rt }]);
     setFeedback(correct ? "correct" : "wrong");
-    // --- Chame o som de acerto/erro aqui ---
     if (correct && onCorrectSound) onCorrectSound();
     if (!correct && onErrorSound) onErrorSound();
-    // Avança após breve delay
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(nextTrial, PROGRESSION[Math.min(PROGRESSION.length - 1, Math.floor(current / (TOTAL_TRIALS / PROGRESSION.length)))].time * 0.5);
   };
@@ -130,7 +128,7 @@ export const StroopInvertido: React.FC<StroopInvertidoProps> = ({
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     const progIdx = Math.min(PROGRESSION.length - 1, Math.floor(current / (TOTAL_TRIALS / PROGRESSION.length)));
     timeoutRef.current = setTimeout(() => {
-      handleAnswer("" as ColorName); // resposta vazia = erro
+      handleAnswer("" as ColorName);
     }, PROGRESSION[progIdx].time);
     return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -138,39 +136,39 @@ export const StroopInvertido: React.FC<StroopInvertidoProps> = ({
 
   // Layout mobile-friendly
   return (
-    <div className="stroop-invertido-root" style={{ maxWidth: 400, margin: "0 auto", padding: 16, display: "flex", flexDirection: "column", alignItems: "center" }}>
+    <div className="stroop-invertido-mobile-root" style={{ maxWidth: 420, margin: "0 auto", padding: 12, display: "flex", flexDirection: "column", alignItems: "center" }}>
       {step === "instructions" && (
         <>
-          <h2 style={{ fontSize: 24, marginBottom: 8 }}>Stroop Invertido</h2>
-          <p style={{ fontSize: 16, marginBottom: 24, textAlign: "center" }}>
+          <h2 style={{ fontSize: 22, marginBottom: 8 }}>Stroop Invertido</h2>
+          <p style={{ fontSize: 15, marginBottom: 20, textAlign: "center" }}>
             Clique na <b>cor da palavra</b>, não no que está escrito.
           </p>
-          <button style={{ fontSize: 20, padding: "12px 32px", borderRadius: 8 }} onClick={() => setStep("playing")}>Começar</button>
+          <button style={{ fontSize: 18, padding: "12px 32px", borderRadius: 8 }} onClick={() => setStep("playing")}>Começar</button>
         </>
       )}
 
       {step === "playing" && trials.length > 0 && (
         <>
-          <div style={{ margin: "24px 0 16px 0", minHeight: 60, textAlign: "center" }}>
+          <div style={{ margin: "20px 0 12px 0", minHeight: 54, textAlign: "center" }}>
             <span
               style={{
                 color: COLORS.find(c => c.name === trials[current].ink)?.hex,
-                fontSize: 40,
+                fontSize: 34,
                 fontWeight: "bold",
                 letterSpacing: 2,
                 textTransform: "uppercase",
                 background: feedback === "correct" ? "#d1fae5" : feedback === "wrong" ? "#fee2e2" : undefined,
                 borderRadius: 8,
-                padding: "8px 16px",
+                padding: "8px 12px",
                 transition: "background 0.2s",
                 display: "inline-block",
-                minWidth: 120,
+                minWidth: 90,
               }}
             >
               {COLORS.find(c => c.name === trials[current].word)?.label}
             </span>
           </div>
-          <div style={{ width: "100%", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+          <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10, marginBottom: 12 }}>
             {COLORS.slice(0, PROGRESSION[Math.min(PROGRESSION.length - 1, Math.floor(current / (TOTAL_TRIALS / PROGRESSION.length)))].activeColors).map((color) => (
               <button
                 key={color.name}
@@ -178,13 +176,13 @@ export const StroopInvertido: React.FC<StroopInvertidoProps> = ({
                   background: color.hex,
                   color: "#fff",
                   fontWeight: "bold",
-                  fontSize: 20,
+                  fontSize: 18,
                   border: "none",
                   borderRadius: 10,
-                  padding: "18px 0",
+                  padding: "16px 0",
                   margin: 0,
                   width: "100%",
-                  minHeight: 56,
+                  minHeight: 48,
                   opacity: feedback && color.name !== trials[current].ink ? 0.5 : 1,
                   boxShadow: feedback && color.name === trials[current].ink ? "0 0 0 3px #22d3ee" : undefined,
                   transition: "opacity 0.2s, box-shadow 0.2s",
@@ -197,7 +195,7 @@ export const StroopInvertido: React.FC<StroopInvertidoProps> = ({
               </button>
             ))}
           </div>
-          <div style={{ fontSize: 16, marginBottom: 8 }}>
+          <div style={{ fontSize: 15, marginBottom: 6 }}>
             {current + 1} / {trials.length}
           </div>
         </>
@@ -207,7 +205,7 @@ export const StroopInvertido: React.FC<StroopInvertidoProps> = ({
         <div style={{ textAlign: "center" }}>
           <h3>Fim da sessão</h3>
           <p>Resumo (debug):</p>
-          <ul style={{ listStyle: "none", padding: 0, fontSize: 16 }}>
+          <ul style={{ listStyle: "none", padding: 0, fontSize: 15 }}>
             <li>Total de tentativas: {answers.length}</li>
             <li>Acertos: {answers.filter(a => a.correct).length}</li>
             <li>Erros: {answers.filter(a => !a.correct).length}</li>
