@@ -18,11 +18,13 @@ export function SustainedAttentionMobileContainer({
 
   return (
     <StroopInvertido
-      basePoints={100}
-      startingLevel={1}
-      maxLevelHint={8}
-      reportContext={reportContext}
-      onComplete={onComplete}
+      onEnd={(result) => {
+        onComplete?.({
+          success: true,
+          pointsEarned: 0,
+          ...result,
+        });
+      }}
     />
   );
 }
