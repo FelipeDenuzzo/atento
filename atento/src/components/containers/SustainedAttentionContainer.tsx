@@ -12,12 +12,21 @@ export function SustainedAttentionContainer(
 ): JSX.Element {
   return (
     <StroopInvertido
-      onEnd={(result) => {
-        // adapte aqui se necessário para o container
-        onComplete?.({
-          success: true,
-          pointsEarned: 0,
-          ...result,
+      basePoints={0}
+      startingLevel={0}
+      maxLevelHint={0}
+      onComplete={(result) => {
+        const { correct, totalTrials, accuracy } = result;
+
+        // critério simples de sucesso (ajuste se tiver regra específica)
+        const success = accuracy >= 0.5;
+
+        // pontuação baseada em acertos; ajuste se quiser outra fórmula
+        const pointsEarned = correct;
+
+        onComplete({
+          success,
+          pointsEarned,
         });
       }}
     />

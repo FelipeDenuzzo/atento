@@ -7,24 +7,26 @@ export type SustainedAttentionMobileContainerProps = AttentionContainerProps & {
   variant?: "stroop";
 };
 
-export function SustainedAttentionMobileContainer({
-  mode,
-  reportContext,
-  onComplete,
-  variant = "stroop",
-}: SustainedAttentionMobileContainerProps) {
-  // Versão inicial: reutiliza StroopInvertido até existir um componente mobile dedicado.
-  // Mesmo padrão: não inventar props, usar apenas as aceitas pelo componente.
-
+export function SustainedAttentionMobileContainer(
+  { onComplete, reportContext }: SustainedAttentionMobileContainerProps
+): JSX.Element {
   return (
     <StroopInvertido
-      onEnd={(result) => {
-        onComplete?.({
-          success: true,
-          pointsEarned: 0,
-          ...result,
+      basePoints={0}
+      startingLevel={0}
+      maxLevelHint={0}
+      onComplete={(result) => {
+        const { correct, totalTrials, accuracy } = result;
+
+        const success = accuracy >= 0.5; // mesmo critério do desktop
+        const pointsEarned = correct;    // mesma lógica de pontos
+
+        onComplete({
+          success,
+          pointsEarned,
         });
       }}
+      // se tiver outras props específicas do mobile, mantenha
     />
   );
 }
