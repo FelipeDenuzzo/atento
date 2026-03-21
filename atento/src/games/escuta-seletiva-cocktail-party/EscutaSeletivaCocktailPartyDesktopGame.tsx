@@ -47,7 +47,7 @@ function voiceLabel(voice: Voice) {
 }
 
 function fileForDigit(digit: number, voice: Voice) {
-  return `/audio/${digit}_${voice === "male" ? "masc" : "femi"}.mp3`;
+  return `/audio/${digit}_${voice === "male" ? "masc" : "femi"}.MP3`;
 }
 
 function buildTrial() {
@@ -287,7 +287,7 @@ const beginPlayback = useCallback(async () => {
           <button
             onClick={() => {
               console.log('[ATENTO][TESTE AUDIO] Botão de teste de áudio clicado');
-              playSingle('/audio/0_masc.mp3');
+              playSingle('/audio/0_masc.MP3');
             }}
             className="rounded-xl bg-yellow-600 px-4 py-2 font-medium hover:bg-yellow-500"
           >
