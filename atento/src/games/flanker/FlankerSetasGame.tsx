@@ -655,7 +655,7 @@ export function FlankerSetas({
       {status === "instructions" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
           <div>
-            <h3 className="text-xl font-semibold text-zinc-900">Flanker de Setas</h3>
+            <h3 className="text-xl font-semibold text-zinc-900">Foque na Seta</h3>
             <p className="mt-2 text-sm text-zinc-700">
               Você deve indicar a direção apenas da seta destacada (alvo), ignorando as setas ao lado
             </p>
@@ -770,7 +770,7 @@ export function FlankerSetas({
       {status === "transition" && (
         <div className="rounded-lg border border-black/10 bg-zinc-50 p-6">
           <p className="mb-2 text-center text-xl font-semibold text-zinc-900">
-            {transitionContext === "initial" ? "Flanker de Setas" : "Fase concluída!"}
+            {transitionContext === "initial" ? "Foque na Seta" : "Fase concluída!"}
           </p>
           <p className="text-center text-sm text-zinc-700">
             {transitionContext === "initial"
@@ -785,7 +785,7 @@ export function FlankerSetas({
 
       {status === "completed" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
-          <h3 className="text-xl font-semibold text-zinc-900">Flanker Seta Central concluído!</h3>
+          <h3 className="text-xl font-semibold text-zinc-900">Foque na Seta concluído!</h3>
 
           <div className="space-y-3">
             {allLevelMetrics.map((metric, index) => {
