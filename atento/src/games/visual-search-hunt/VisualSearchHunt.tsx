@@ -81,6 +81,10 @@ const colorLabel: Record<Color, string> = {
 
 // Caminho do asset: /images/visual-search/${forma}_${cor}.png
 function getAssetPath(shape: Shape, color: Color): string {
+  // Corrige referência para quadrado_verde.png (não quadrado1_verde.png)
+  if (shape === "quadrado" && color === "verde") {
+    return "/images/visual-search/quadrado_verde.png";
+  }
   return `/images/visual-search/${shape}_${color}.png`;
 }
 
