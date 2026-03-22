@@ -367,7 +367,8 @@ export const VisualSearchHunt: React.FC<Props> = (props) => {
   };
 
   const downloadResults = () => {
-    const allMetrics = lastMetrics ? [...allLevelMetrics, lastMetrics] : allLevelMetrics;
+    // Usa apenas os dados já apresentados na tela final (allLevelMetrics)
+    const allMetrics = allLevelMetrics;
     const lines: string[] = [];
     lines.push("=" + "=".repeat(60));
     lines.push("RESULTADO - CAÇA AO ALVO (Atenção Seletiva)");
@@ -401,7 +402,6 @@ export const VisualSearchHunt: React.FC<Props> = (props) => {
     const totalAccuracy = totalHits + totalErrors > 0 ? Math.round((totalHits / (totalHits + totalErrors)) * 100) : 0;
     lines.push("=" + "=".repeat(60));
     lines.push("RESUMO TOTAL:");
-    lines.push(`Fases completadas: ${wonCount}/${allMetrics.length}`);
     lines.push(`Acertos totais: ${totalHits}`);
     lines.push(`Erros totais: ${totalErrors}`);
     lines.push(`Acurácia geral: ${totalAccuracy}%`);
