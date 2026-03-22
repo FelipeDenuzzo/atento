@@ -277,29 +277,30 @@ export function FlankerSetas({
     setTargetPositions(Array.from({ length: config.arrowCount }, (_, i) => i));
   }, [config.arrowCount]);
 
-  // Atualiza currentTargetIndex ao trocar de fase
-  useEffect(() => {
-    if (phase <= 3) {
-      setCurrentTargetIndex(Math.floor(config.arrowCount / 2));
-    } else {
-      setCurrentTargetIndex(prev => {
-        let newIndex = prev;
-        // Garante que muda para uma posição diferente
-        while (newIndex === prev && targetPositions.length > 1) {
-          newIndex = targetPositions[Math.floor(Math.random() * targetPositions.length)];
-        }
-        return newIndex;
-      });
-    }
-  }, [phase, config.arrowCount, targetPositions]);
+
 
   const startLevel = useCallback(
     (levelToStart: number = level) => {
       const configToStart = getLevelConfig(levelToStart);
-      // Gera os trials usando sempre o currentTargetIndex
+      let newTargetIndex = currentTargetIndex;
+      // Atualiza o índice do alvo conforme a fase
+      if (configToStart.phase <= 3) {
+        newTargetIndex = Math.floor(configToStart.arrowCount / 2);
+      } else {
+        // Garante que muda para uma posição diferente
+        if (targetPositions.length > 1) {
+          let candidate = currentTargetIndex;
+          while (candidate === currentTargetIndex) {
+            candidate = targetPositions[Math.floor(Math.random() * targetPositions.length)];
+          }
+          newTargetIndex = candidate;
+        }
+      }
+      setCurrentTargetIndex(newTargetIndex);
+      // Gera os trials usando o novo currentTargetIndex
       const generatedTrials = Array.from(
         { length: configToStart.trialsPerLevel },
-        (_, index) => generateTrial(index, configToStart, currentTargetIndex),
+        (_, index) => generateTrial(index, configToStart, newTargetIndex),
       );
 
       setLevel(levelToStart);
@@ -315,7 +316,7 @@ export function FlankerSetas({
       trialStartTimeRef.current = performance.now();
       setStatus("playing");
     },
-    [level, currentTargetIndex],
+    [level, currentTargetIndex, targetPositions],
   );
 
   const moveToNextTrial = useCallback(() => {
