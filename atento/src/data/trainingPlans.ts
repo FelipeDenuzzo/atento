@@ -248,7 +248,7 @@ export const trainingPlans: TrainingPlan[] = [
         attentionType: "seletiva",
         kind: "flanker",
         instructions:
-          "Indique a direcao da seta central ignorando as laterais.",
+          "Indique a direção da seta alvo ignorando as laterais.",
         startingLevel: 1,
         maxLevelHint: 6,
         points: 30,

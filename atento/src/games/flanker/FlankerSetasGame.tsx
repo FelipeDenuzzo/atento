@@ -626,35 +626,17 @@ export function FlankerSetas({
           <div>
             <h3 className="text-xl font-semibold text-zinc-900">Flanker de Setas</h3>
             <p className="mt-2 text-sm text-zinc-700">
-              Você deve responder somente a direção da <strong>seta alvo</strong>,
-              ignorando as setas laterais. O treino mede foco seletivo diante de
-              informações conflitantes.
+              Você deve indicar a direção apenas da seta destacada (alvo), ignorando as setas ao lado
             </p>
           </div>
 
           <div className="space-y-3 text-sm text-zinc-700">
-            <p><strong>Como jogar (passo a passo):</strong></p>
-            <ul className="ml-4 list-disc space-y-1">
-              <li>Observe a fileira e identifique a seta com destaque (alvo).</li>
-              <li>Se o alvo apontar para a esquerda, pressione a tecla ←.</li>
-              <li>Se o alvo apontar para a direita, pressione a tecla →.</li>
-              <li>Ignore as setas ao redor, mesmo quando apontarem para o lado oposto.</li>
-              <li>Responda rápido antes do tempo acabar.</li>
-            </ul>
-
-            <div className="rounded-lg border border-black/10 bg-white p-3 text-xs text-zinc-700">
-              <p><strong>Exemplo:</strong> em <span className="font-semibold">← ← → ← ←</span>, o alvo é a seta do meio (<span className="font-semibold">→</span>), então a resposta correta é <span className="font-semibold">→</span>.</p>
-              <p className="mt-1">Quando o alvo muda de posição nas fases avançadas, ele continua marcado com destaque visual.</p>
-            </div>
-
-            <div className="rounded-lg border border-black/10 bg-white p-3 text-xs text-zinc-700">
-              <p><strong>Progressão:</strong></p>
-              <ul className="ml-4 list-disc space-y-1">
-                <li>Fase 1: 5 setas, alvo central, tempo mais alto.</li>
-                <li>Fase 2: mais setas e mais trials incongruentes.</li>
-                <li>Fase 3: alvo pode variar de posição e tempo mais curto.</li>
-              </ul>
-            </div>
+            <p><strong>Como jogar:</strong></p>
+            <p>Veja a fileira de setas e encontre a seta em destaque (alvo).</p>
+            <p>Se o alvo apontar para a esquerda, pressione ←.</p>
+            <p>Se o alvo apontar para a direita, pressione →.</p>
+            <p>Ignore as setas ao redor, mesmo que apontem para o lado contrário.</p>
+            <p>Responda o mais rápido que conseguir, antes do tempo acabar.</p>
           </div>
 
           <button
@@ -674,12 +656,6 @@ export function FlankerSetas({
 
       {status === "playing" && currentTrial && (
         <div className="space-y-5">
-          <div className="rounded-lg border border-black/10 bg-blue-50 p-3">
-            <p className="text-sm font-semibold text-blue-900">
-              Nível {level} de {maxLevelHint}
-            </p>
-          </div>
-
           {/* Nenhuma info extra, apenas barra de progresso e setas */}
 
           <div className="h-2 overflow-hidden rounded-full bg-zinc-200">
