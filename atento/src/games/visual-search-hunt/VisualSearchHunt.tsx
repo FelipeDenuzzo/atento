@@ -587,8 +587,7 @@ export const VisualSearchHunt: React.FC<Props> = (props) => {
 
           <div className="rounded-lg border-2 border-zinc-900 bg-white p-4">
             <p className="font-semibold text-zinc-900">Resumo Total</p>
-            <div className="mt-2 grid gap-2 text-sm">
-              <p>Fases completadas: {allLevelMetrics.filter(m => m.status === "won").length}/{allLevelMetrics.length}</p>
+            <div className="mt-2 grid gap-2 text-sm text-black">
               <p>Acertos totais: {allLevelMetrics.reduce((sum, m) => sum + m.hits, 0)}</p>
               <p>Erros totais: {allLevelMetrics.reduce((sum, m) => sum + m.errors, 0)}</p>
             </div>
