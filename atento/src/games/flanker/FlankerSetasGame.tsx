@@ -289,15 +289,21 @@ export function FlankerSetas({
       } else {
         // Garante que muda para uma posição diferente
         if (targetPositions.length > 1) {
-          let candidate = currentTargetIndex;
-          while (candidate === currentTargetIndex) {
-            candidate = targetPositions[Math.floor(Math.random() * targetPositions.length)];
-          }
-          newTargetIndex = candidate;
+          // Usa o valor anterior do estado, não o do render
+          setCurrentTargetIndex(prev => {
+            let candidate = prev;
+            while (candidate === prev) {
+              candidate = targetPositions[Math.floor(Math.random() * targetPositions.length)];
+            }
+            newTargetIndex = candidate;
+            return candidate;
+          });
+        } else {
+          newTargetIndex = currentTargetIndex;
         }
       }
-      setCurrentTargetIndex(newTargetIndex);
       // Gera os trials usando o novo currentTargetIndex
+      // Se mudou acima via setState, newTargetIndex já foi atualizado
       const generatedTrials = Array.from(
         { length: configToStart.trialsPerLevel },
         (_, index) => generateTrial(index, configToStart, newTargetIndex),
