@@ -464,21 +464,18 @@ export const VisualSearchHunt: React.FC<Props> = (props) => {
   // ...
   // Agora, apenas imagens PNG são usadas para exibir as formas.
   return (
+
     <div className="mt-4 space-y-4">
       {status === "preview" && (
         <div className="space-y-6 rounded-lg border border-black/10 bg-zinc-50 p-6">
           <div className="space-y-3 text-center">
-            <p className="text-sm text-zinc-600">Procure por:</p>
             <div className="mx-auto flex w-fit flex-col items-center gap-4 rounded-2xl border-4 border-black bg-white p-8">
               <img
                 src={getAssetPath(targetShape, targetColor)}
-                alt={`${shapeLabel[targetShape]} ${colorLabel[targetColor]}`}
+                alt="Alvo"
                 className="inline-block h-20 w-20"
                 draggable={false}
               />
-              <p className="text-xl font-semibold text-zinc-900">
-                {shapeLabel[targetShape]} {colorLabel[targetColor]}
-              </p>
             </div>
           </div>
 
@@ -504,13 +501,6 @@ export const VisualSearchHunt: React.FC<Props> = (props) => {
 
       {status === "playing" && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between rounded-lg border border-black/10 bg-blue-50 p-4">
-            <p className="text-sm font-semibold text-blue-900">Fase {level} de {props.maxLevelHint}</p>
-            <p className="text-center text-lg font-bold text-zinc-900">
-              Encontre: <span className="font-black">{shapeLabel[targetShape]} {colorLabel[targetColor]}</span>
-            </p>
-          </div>
-
           <div className="h-2 overflow-hidden rounded-full bg-zinc-200">
             <div
               className="h-full bg-zinc-900 transition-all"
