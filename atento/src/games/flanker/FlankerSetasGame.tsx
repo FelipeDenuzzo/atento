@@ -778,40 +778,32 @@ export function FlankerSetas({
 
       {status === "completed" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
-          <h3 className="text-xl font-semibold text-zinc-900">Jogo concluído!</h3>
+          <h3 className="text-xl font-semibold text-zinc-900">Flanker Seta Central concluído!</h3>
 
           <div className="space-y-3">
-            {allLevelMetrics.map((metric, index) => (
-              <div key={index} className="rounded-lg border border-black/10 bg-white p-3">
-                <p className="text-sm font-medium text-zinc-900">
-                  Nível {index + 1} • Fase {metric.phase}
-                </p>
-                <div className="mt-1 grid grid-cols-2 gap-2 text-xs text-zinc-600">
-                  <p>Pontuação: {metric.score}</p>
-                  <p>Acurácia: {Math.round(metric.accuracy * 100)}%</p>
-                  <p>Congruentes: {Math.round(metric.congruentAccuracy * 100)}%</p>
-                  <p>Incongruentes: {Math.round(metric.incongruentAccuracy * 100)}%</p>
+            {allLevelMetrics.map((metric, index) => {
+              const totalClicks = metric.totalTrials;
+              const accuracy = totalClicks > 0 ? Math.round((metric.correctCount / totalClicks) * 100) : 0;
+              return (
+                <div key={index} className="rounded-lg border border-black/10 bg-white p-3">
+                  <p className="text-sm font-medium text-zinc-900">Fase {index + 1}</p>
+                  <div className="mt-1 grid grid-cols-2 gap-2 text-xs text-zinc-600">
+                    <p>Status: {metric.accuracy >= MIN_ACCURACY_TO_ADVANCE ? "✓ Completada" : "✗ Não atingiu precisão"}</p>
+                    <p>Acurácia: {accuracy}%</p>
+                    <p>Acertos: {metric.correctCount}</p>
+                    <p>Erros: {metric.errorCount}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           <div className="rounded-lg border-2 border-zinc-900 bg-white p-4">
             <p className="font-semibold text-zinc-900">Resumo Total</p>
-            <div className="mt-2 grid gap-2 text-sm">
-              <p>Tentativas totais: {sessionSummary.totalTrials}</p>
+            <div className="mt-2 grid gap-2 text-sm text-black">
+              <p>Acertos totais: {sessionSummary.totalCorrect}</p>
+              <p>Erros totais: {sessionSummary.totalErrors}</p>
               <p>Acurácia geral: {sessionSummary.overallAccuracy}%</p>
-              <p>Acertos: {sessionSummary.totalCorrect}</p>
-              <p>Erros: {sessionSummary.totalErrors}</p>
-              <p>Acurácia em congruentes: {sessionSummary.averageCongruentAccuracy}%</p>
-              <p>Acurácia em incongruentes: {sessionSummary.averageIncongruentAccuracy}%</p>
-              <p>Tempo médio de reação: {sessionSummary.avgReaction}ms</p>
-              <p>Pontuação total: {sessionSummary.totalScore}</p>
-              {sessionSummary.byPhase.map((phaseData) => (
-                <p key={`phase-summary-${phaseData.phase}`}>
-                  Fase {phaseData.phase}: {phaseData.correct} acertos, {phaseData.errors} erros, TR médio {phaseData.averageReactionMs}ms
-                </p>
-              ))}
             </div>
           </div>
 
