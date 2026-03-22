@@ -168,8 +168,8 @@ export const VisualSearchHunt: React.FC<Props> = (props) => {
   // --- INÍCIO DO COMPONENTE COPIADO ---
   const [level, setLevel] = React.useState(props.startingLevel);
   const [status, setStatus] = React.useState<RoundStatus>("preview");
-  const [targetShape, setTargetShape] = React.useState<Shape>("triangle");
-  const [targetColor, setTargetColor] = React.useState<Color>("red");
+  const [targetShape, setTargetShape] = React.useState<Shape>("triangulo");
+  const [targetColor, setTargetColor] = React.useState<Color>("vermelho");
   const [tiles, setTiles] = React.useState<Tile[]>([]);
   const [remainingTime, setRemainingTime] = React.useState(0);
   const [hits, setHits] = React.useState(0);
