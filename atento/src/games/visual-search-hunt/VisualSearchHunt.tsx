@@ -31,8 +31,8 @@ function getSuggestion({
     text: "Desempenho consistente. Dificuldade mantida para consolidar busca visual.",
   };
 }
-type Shape = "circle" | "square" | "triangle";
-type Color = "red" | "blue" | "green" | "yellow";
+type Shape = "circulo" | "quadrado" | "triangulo";
+type Color = "azul" | "vermelho" | "verde" | "amarelo";
 type SearchMode = "feature" | "mixed" | "conjunction";
 type RoundStatus = "preview" | "playing" | "won" | "lost" | "completed";
 
@@ -62,28 +62,27 @@ type Props = {
   hideInGameInfo?: boolean;
 };
 
-const SHAPES: Shape[] = ["circle", "square", "triangle"];
-const COLORS: Color[] = ["red", "blue", "green", "yellow"];
+const SHAPES: Shape[] = ["circulo", "quadrado", "triangulo"];
+const COLORS: Color[] = ["azul", "vermelho", "verde", "amarelo"];
 
 const shapeLabel: Record<Shape, string> = {
-  circle: "círculos",
-  square: "quadrados",
-  triangle: "triângulos",
+  circulo: "círculo",
+  quadrado: "quadrado",
+  triangulo: "triângulo",
 };
 
 const colorLabel: Record<Color, string> = {
-  red: "vermelhos",
-  blue: "azuis",
-  green: "verdes",
-  yellow: "amarelos",
+  azul: "azul",
+  vermelho: "vermelho",
+  verde: "verde",
+  amarelo: "amarelo",
 };
 
-const colorClass: Record<Color, string> = {
-  red: "bg-red-500",
-  blue: "bg-blue-500",
-  green: "bg-green-500",
-  yellow: "bg-yellow-400",
-};
+
+// Caminho do asset: /images/visual-search/${forma}_${cor}.png
+function getAssetPath(shape: Shape, color: Color): string {
+  return `/images/visual-search/${shape}_${color}.png`;
+}
 
 function randomItem<T>(items: T[]): T {
   return items[Math.floor(Math.random() * items.length)];
@@ -138,15 +137,8 @@ function getLevelConfig(level: number): {
   };
 }
 
-function getShapeClass(shape: Shape): string {
-  if (shape === "circle") {
-    return "rounded-full";
-  }
-  if (shape === "square") {
-    return "rounded-none";
-  }
-  return "";
-}
+
+// Não é mais necessário getShapeClass para imagens
 
 
 
@@ -466,8 +458,11 @@ export const VisualSearchHunt: React.FC<Props> = (props) => {
           <div className="space-y-3 text-center">
             <p className="text-sm text-zinc-600">Procure por:</p>
             <div className="mx-auto flex w-fit flex-col items-center gap-4 rounded-2xl border-4 border-black bg-white p-8">
-              <span className={`inline-block h-20 w-20 ${getShapeClass(targetShape)} ${colorClass[targetColor]}`}
-                style={{ backgroundColor: colorClass[targetColor].includes("red") ? "#ef4444" : colorClass[targetColor].includes("blue") ? "#3b82f6" : colorClass[targetColor].includes("green") ? "#16a34a" : "#eab308" }}
+              <img
+                src={getAssetPath(targetShape, targetColor)}
+                alt={`${shapeLabel[targetShape]} ${colorLabel[targetColor]}`}
+                className="inline-block h-20 w-20"
+                draggable={false}
               />
               <p className="text-xl font-semibold text-zinc-900">
                 {shapeLabel[targetShape]} {colorLabel[targetColor]}
@@ -534,10 +529,11 @@ export const VisualSearchHunt: React.FC<Props> = (props) => {
               disabled={status !== "playing" || tile.found}
               className="flex aspect-square items-center justify-center rounded-md border border-black/10 bg-white"
             >
-              <span
-                className={`block h-[65%] w-[65%] ${getShapeClass(tile.shape)} ${
-                  tile.found ? "bg-zinc-300" : colorClass[tile.color]
-                }`}
+              <img
+                src={getAssetPath(tile.shape, tile.color)}
+                alt={`${shapeLabel[tile.shape]} ${colorLabel[tile.color]}`}
+                className={`block h-[65%] w-[65%] ${tile.found ? "opacity-40" : ""}`}
+                draggable={false}
                 aria-hidden="true"
               />
             </button>
