@@ -450,11 +450,7 @@ export const VisualSearchHunt: React.FC<Props> = (props) => {
     };
   }, [lastMetrics, config.timeSeconds]);
 
-  React.useEffect(() => {
-    if (status === "preview") {
-      generateRound();
-    }
-  }, [status]);
+  // Removido o useEffect que gerava novo alvo ao entrar em 'preview'.
 
   // ...existing code...
   // ...
