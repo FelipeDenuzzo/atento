@@ -29,7 +29,7 @@ export function CacaAoAlvoMobileGame({
       {/* Implementação da grade e lógica mobile aqui */}
       <div style={{ minHeight: 400, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <span style={{ color: "#888" }}>
-          [Caça ao Alvo Mobile em desenvolvimento]
+          [Caça às Figuras — versão mobile em desenvolvimento]
         </span>
       </div>
     </div>

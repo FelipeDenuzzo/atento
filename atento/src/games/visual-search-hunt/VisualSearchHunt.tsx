@@ -165,8 +165,8 @@ export const VisualSearchHunt: React.FC<Props> = (props) => {
       />
     );
   }
+
   // --- INÍCIO DO COMPONENTE COPIADO ---
-  // ...
   const [level, setLevel] = React.useState(props.startingLevel);
   const [status, setStatus] = React.useState<RoundStatus>("preview");
   const [targetShape, setTargetShape] = React.useState<Shape>("triangulo");
@@ -185,6 +185,14 @@ export const VisualSearchHunt: React.FC<Props> = (props) => {
 
   const config = React.useMemo(() => getLevelConfig(level), [level]);
   const gridColumns = `repeat(${config.gridSize}, minmax(0, 1fr))`;
+
+  // Corrige: sempre gera um novo round ao entrar em 'preview'
+  React.useEffect(() => {
+    if (status === "preview") {
+      generateRound();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, level]);
 
   const playFeedback = (kind: "success" | "error") => {
     setFeedback(kind);

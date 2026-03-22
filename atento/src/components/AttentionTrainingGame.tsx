@@ -834,7 +834,7 @@ export function AttentionTrainingGame() {
               )}
               {currentExercise.kind === "visual-search" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
-                  Caça ao Alvo (Visual Search)
+                  Caça às Figuras
                 </h2>
               )}
               {currentExercise.kind === "escutaseletiva-cocktail-party" && (

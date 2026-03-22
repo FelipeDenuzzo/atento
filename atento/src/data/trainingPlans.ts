@@ -233,11 +233,11 @@ export const trainingPlans: TrainingPlan[] = [
       },
       {
         id: "sel-13",
-        title: "Caça ao Alvo (Visual Search)",
+        title: "Caça às Figuras",
         attentionType: "seletiva",
         kind: "visual-search",
         instructions:
-          "Encontre todos os alvos combinando forma e cor em meio a distratores.",
+          "Encontre todas as figuras iguais ao modelo mostrado, prestando atenção na forma e na cor. Cuidado: clicar em objetos errados reduz seu tempo. Complete a busca antes que o tempo acabe.",
         startingLevel: 1,
         maxLevelHint: 12,
         points: 30,
