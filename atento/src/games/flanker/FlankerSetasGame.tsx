@@ -726,11 +726,11 @@ export function FlankerSetas({
                 );
               })}
             </div>
-            <p className="mt-4 text-center text-xs text-zinc-500">
-              {phase > 3
-                ? "Alvo destacado por borda escura (posição variável)."
-                : "Alvo no centro (destacado por borda escura)."}
-            </p>
+            {phase > 3 && (
+              <p className="mt-4 text-center text-xs text-zinc-500">
+                Alvo destacado por borda escura (posição variável).
+              </p>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
