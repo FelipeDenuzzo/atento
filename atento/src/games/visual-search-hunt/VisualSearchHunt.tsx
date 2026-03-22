@@ -429,16 +429,8 @@ export const VisualSearchHunt: React.FC<Props> = (props) => {
       setStatus("completed");
       return;
     }
-    const totalClicks = lastMetrics.hits + lastMetrics.errors;
-    const accuracy = totalClicks > 0 ? lastMetrics.hits / totalClicks : 0;
-    const timeRatio = config.timeSeconds > 0 ? lastMetrics.timeRemaining / config.timeSeconds : 0;
-    const suggestion = getSuggestion({
-      status: lastMetrics.status,
-      accuracy,
-      timeRatio,
-    });
-    const adjusted = Math.max(1, Math.min(props.maxLevelHint, level + suggestion.nextLevelDelta));
-    setLevel(adjusted);
+    // Sempre avança para o próximo nível sequencial, sem retrocesso
+    setLevel(level + 1);
     generateRound();
     setStatus("preview");
   };
