@@ -142,7 +142,7 @@ function getLevelConfig(level: number): {
 }
 
 
-// Não é mais necessário getShapeClass para imagens
+// ...
 
 
 
@@ -166,6 +166,7 @@ export const VisualSearchHunt: React.FC<Props> = (props) => {
     );
   }
   // --- INÍCIO DO COMPONENTE COPIADO ---
+  // ...
   const [level, setLevel] = React.useState(props.startingLevel);
   const [status, setStatus] = React.useState<RoundStatus>("preview");
   const [targetShape, setTargetShape] = React.useState<Shape>("triangulo");
@@ -455,161 +456,10 @@ export const VisualSearchHunt: React.FC<Props> = (props) => {
     }
   }, [status]);
 
+  // ...existing code...
+  // ...
+  // Agora, apenas imagens PNG são usadas para exibir as formas.
   return (
-    <div className="mt-4 space-y-4">
-      {status === "preview" && (
-        <div className="space-y-6 rounded-lg border border-black/10 bg-zinc-50 p-6">
-          <div className="space-y-3 text-center">
-            <p className="text-sm text-zinc-600">Procure por:</p>
-            <div className="mx-auto flex w-fit flex-col items-center gap-4 rounded-2xl border-4 border-black bg-white p-8">
-              <img
-                src={getAssetPath(targetShape, targetColor)}
-                alt={`${shapeLabel[targetShape]} ${colorLabel[targetColor]}`}
-                className="inline-block h-20 w-20"
-                draggable={false}
-              />
-              <p className="text-xl font-semibold text-zinc-900">
-                {shapeLabel[targetShape]} {colorLabel[targetColor]}
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-2 text-sm text-zinc-700">
-            <p><strong>Instruções:</strong></p>
-            <ul className="ml-4 list-disc space-y-1">
-              <li>Você verá uma grade com diferentes formas e cores</li>
-              <li>Clique em todos os objetos que correspondem ao alvo mostrado</li>
-              <li>Cuidado: clicar em objetos errados reduz seu tempo</li>
-              <li>Complete a busca antes que o tempo acabe</li>
-            </ul>
-          </div>
-
-          <button
-            type="button"
-            onClick={startRound}
-            className="w-full rounded-lg bg-zinc-900 px-4 py-3 font-medium text-white hover:bg-zinc-700"
-          >
-            Começar Fase
-          </button>
-        </div>
-      )}
-
-      {status === "playing" && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between rounded-lg border border-black/10 bg-blue-50 p-4">
-            <p className="text-sm font-semibold text-blue-900">Fase {level} de {props.maxLevelHint}</p>
-            <p className="text-center text-lg font-bold text-zinc-900">
-              Encontre: <span style={{ color: colorClass[targetColor].includes("red") ? "#ef4444" : colorClass[targetColor].includes("blue") ? "#3b82f6" : colorClass[targetColor].includes("green") ? "#16a34a" : "#eab308" }} className="font-black">{shapeLabel[targetShape]} {colorLabel[targetColor]}</span>
-            </p>
-          </div>
-
-          {/* Nenhuma info extra, apenas barra de progresso e grid */}
-
-          <div className="h-2 overflow-hidden rounded-full bg-zinc-200">
-            <div
-              className="h-full bg-zinc-900 transition-all"
-              style={{ width: `${Math.max(0, (remainingTime / config.timeSeconds) * 100)}%` }}
-            />
-          </div>
-        </div>
-      )}
-
-      {status === "playing" && (
-        <div
-          className={`grid gap-2 rounded-xl border p-2 ${
-            feedback === "success"
-              ? "border-emerald-300"
-              : feedback === "error"
-                ? "border-rose-300"
-                : "border-black/10"
-          }`}
-          style={{ gridTemplateColumns: gridColumns }}
-        >
-          {tiles.map((tile, index) => (
-            <button
-              key={tile.id}
-              type="button"
-              onClick={(event) => handleTileClick(tile, index, event.timeStamp)}
-              disabled={status !== "playing" || tile.found}
-              className="flex aspect-square items-center justify-center rounded-md border border-black/10 bg-white"
-            >
-              <img
-                src={getAssetPath(tile.shape, tile.color)}
-                alt={`${shapeLabel[tile.shape]} ${colorLabel[tile.color]}`}
-                className={`block h-[65%] w-[65%] ${tile.found ? "opacity-40" : ""}`}
-                draggable={false}
-                aria-hidden="true"
-              />
-            </button>
-          ))}
-        </div>
-      )}
-
-      {(status === "won" || status === "lost") && lastMetrics && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-4">
-          <p className="text-center font-semibold text-zinc-900">
-            {status === "won" ? "Fase concluída!" : "Tempo esgotado"}
-          </p>
-
-          <button
-            type="button"
-            onClick={advanceToNextLevel}
-            className="w-full rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
-          >
-            Avançar
-          </button>
-        </div>
-      )}
-
-      {status === "completed" && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
-          <h3 className="text-xl font-semibold text-zinc-900">Jogo concluído!</h3>
-
-          <div className="space-y-3">
-            {allLevelMetrics.map((m, idx) => {
-              const totalClicks = m.hits + m.errors;
-              const accuracy = totalClicks > 0 ? Math.round((m.hits / totalClicks) * 100) : 0;
-              return (
-                <div key={idx} className="rounded-lg border border-black/10 bg-white p-3">
-                  <p className="text-sm font-medium text-zinc-900">Fase {idx + 1}</p>
-                  <div className="mt-1 grid grid-cols-2 gap-2 text-xs text-zinc-600">
-                    <p>Status: {m.status === "won" ? "✓ Completada" : "✗ Tempo esgotado"}</p>
-                    <p>Acurácia: {accuracy}%</p>
-                    <p>Acertos: {m.hits}</p>
-                    <p>Erros: {m.errors}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="rounded-lg border-2 border-zinc-900 bg-white p-4">
-            <p className="font-semibold text-zinc-900">Resumo Total</p>
-            <div className="mt-2 grid gap-2 text-sm">
-              <p>Fases completadas: {allLevelMetrics.filter(m => m.status === "won").length}/{allLevelMetrics.length}</p>
-              <p>Acertos totais: {allLevelMetrics.reduce((sum, m) => sum + m.hits, 0)}</p>
-              <p>Erros totais: {allLevelMetrics.reduce((sum, m) => sum + m.errors, 0)}</p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={downloadResults}
-              className="flex-1 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
-            >
-              Baixar Resultados
-            </button>
-            <button
-              type="button"
-              onClick={completeExercise}
-              className="flex-1 rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
-            >
-              Continuar
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+    // ...existing code...
   );
 };
