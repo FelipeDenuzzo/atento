@@ -128,18 +128,20 @@ function getLevelConfig(level: number): LevelConfig {
   };
 }
 
-function generateTrial(id: number, config: LevelConfig): Trial {
+function generateTrial(id: number, config: LevelConfig, forcedTargetIndex?: number): Trial {
   const targetDirection = randomItem<Direction>(["left", "right"]);
   const isIncongruent = Math.random() < config.incongruentRatio;
   const flankerDirection = isIncongruent
     ? oppositeDirection(targetDirection)
     : targetDirection;
 
-  // Na fase 3 (targetMode variable), o alvo é sorteado em qualquer posição da fileira.
+  // Usa o targetIndex fixo da fase, se fornecido
   const targetIndex =
-    config.targetMode === "fixed"
-      ? Math.floor(config.arrowCount / 2)
-      : Math.floor(Math.random() * config.arrowCount);
+    forcedTargetIndex !== undefined
+      ? forcedTargetIndex
+      : config.targetMode === "fixed"
+        ? Math.floor(config.arrowCount / 2)
+        : Math.floor(Math.random() * config.arrowCount);
 
   const stimulus = Array.from({ length: config.arrowCount }, () => flankerDirection);
   stimulus[targetIndex] = targetDirection;
@@ -258,6 +260,8 @@ export function FlankerSetas({
   const [transitionCountdown, setTransitionCountdown] = useState(3);
   const [nextLevel, setNextLevel] = useState<number | null>(null);
   const [transitionContext, setTransitionContext] = useState<TransitionContext>("next-phase");
+  // Novo estado para guardar o targetIndex fixo da fase
+  const [currentTargetIndex, setCurrentTargetIndex] = useState<number | null>(null);
 
   const trialStartTimeRef = useRef<number>(0);
   const trialResolvedRef = useRef(false);
@@ -268,9 +272,18 @@ export function FlankerSetas({
   const startLevel = useCallback(
     (levelToStart: number = level) => {
       const configToStart = getLevelConfig(levelToStart);
+      // Sorteia o targetIndex da fase (fixo para todos os trials)
+      let targetIndexForPhase: number;
+      if (configToStart.targetMode === "fixed") {
+        targetIndexForPhase = Math.floor(configToStart.arrowCount / 2);
+      } else {
+        targetIndexForPhase = Math.floor(Math.random() * configToStart.arrowCount);
+      }
+      setCurrentTargetIndex(targetIndexForPhase);
+      // Gera os trials usando sempre o mesmo targetIndex
       const generatedTrials = Array.from(
         { length: configToStart.trialsPerLevel },
-        (_, index) => generateTrial(index, configToStart),
+        (_, index) => generateTrial(index, configToStart, targetIndexForPhase),
       );
 
       setLevel(levelToStart);
