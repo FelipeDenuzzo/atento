@@ -478,7 +478,7 @@ export const VisualSearchHunt: React.FC<Props> = (props) => {
             <p><strong>Instruções:</strong></p>
             <ul className="ml-4 list-disc space-y-1">
               <li>Você verá uma grade com diferentes formas e cores</li>
-              <li>Clique em todos os objetos que correspondem ao alvo mostrado</li>
+              <li>Encontre na tela todas as figuras iguais ao alvo mostrado, prestando atenção na forma e na cor.</li>
               <li>Cuidado: clicar em objetos errados reduz seu tempo</li>
               <li>Complete a busca antes que o tempo acabe</li>
             </ul>
