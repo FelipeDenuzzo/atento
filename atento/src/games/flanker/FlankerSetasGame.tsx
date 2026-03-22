@@ -247,6 +247,7 @@ export function FlankerSetas({
   hideInGameInfo,
 }: Props) {
   const [level, setLevel] = useState(startingLevel);
+  const [phase, setPhase] = useState(1); // Estado de fase explícito
   const [status, setStatus] = useState<GameStatus>("instructions");
   const [trials, setTrials] = useState<Trial[]>([]);
   const [currentTrialIndex, setCurrentTrialIndex] = useState(0);
@@ -260,8 +261,10 @@ export function FlankerSetas({
   const [transitionCountdown, setTransitionCountdown] = useState(3);
   const [nextLevel, setNextLevel] = useState<number | null>(null);
   const [transitionContext, setTransitionContext] = useState<TransitionContext>("next-phase");
-  // Novo estado para guardar o targetIndex fixo da fase
-  const [currentTargetIndex, setCurrentTargetIndex] = useState<number | null>(null);
+  // Estado do índice do alvo
+  const [currentTargetIndex, setCurrentTargetIndex] = useState(2);
+  // Array de posições possíveis do alvo (ajustado dinamicamente)
+  const [targetPositions, setTargetPositions] = useState([0, 1, 2, 3, 4]);
 
   const trialStartTimeRef = useRef<number>(0);
   const trialResolvedRef = useRef(false);
@@ -269,24 +272,38 @@ export function FlankerSetas({
   const config = useMemo(() => getLevelConfig(level), [level]);
   const currentTrial = trials[currentTrialIndex];
 
+  // Atualiza targetPositions conforme a fase (arrowCount)
+  useEffect(() => {
+    setTargetPositions(Array.from({ length: config.arrowCount }, (_, i) => i));
+  }, [config.arrowCount]);
+
+  // Atualiza currentTargetIndex ao trocar de fase
+  useEffect(() => {
+    if (phase <= 3) {
+      setCurrentTargetIndex(Math.floor(config.arrowCount / 2));
+    } else {
+      setCurrentTargetIndex(prev => {
+        let newIndex = prev;
+        // Garante que muda para uma posição diferente
+        while (newIndex === prev && targetPositions.length > 1) {
+          newIndex = targetPositions[Math.floor(Math.random() * targetPositions.length)];
+        }
+        return newIndex;
+      });
+    }
+  }, [phase, config.arrowCount, targetPositions]);
+
   const startLevel = useCallback(
     (levelToStart: number = level) => {
       const configToStart = getLevelConfig(levelToStart);
-      // Sorteia o targetIndex da fase (fixo para todos os trials)
-      let targetIndexForPhase: number;
-      if (configToStart.targetMode === "fixed") {
-        targetIndexForPhase = Math.floor(configToStart.arrowCount / 2);
-      } else {
-        targetIndexForPhase = Math.floor(Math.random() * configToStart.arrowCount);
-      }
-      setCurrentTargetIndex(targetIndexForPhase);
-      // Gera os trials usando sempre o mesmo targetIndex
+      // Gera os trials usando sempre o currentTargetIndex
       const generatedTrials = Array.from(
         { length: configToStart.trialsPerLevel },
-        (_, index) => generateTrial(index, configToStart, targetIndexForPhase),
+        (_, index) => generateTrial(index, configToStart, currentTargetIndex),
       );
 
       setLevel(levelToStart);
+      setPhase(configToStart.phase); // Atualiza fase
       setTrials(generatedTrials);
       setCurrentTrialIndex(0);
       setTimeRemaining(configToStart.timePerTrialSeconds);
@@ -298,7 +315,7 @@ export function FlankerSetas({
       trialStartTimeRef.current = performance.now();
       setStatus("playing");
     },
-    [level],
+    [level, currentTargetIndex],
   );
 
   const moveToNextTrial = useCallback(() => {
@@ -432,6 +449,7 @@ export function FlankerSetas({
     setTransitionContext("next-phase");
     setNextLevel(upcomingLevel);
     setTransitionCountdown(3);
+    setPhase((prev) => prev + 1); // Avança a fase explicitamente
     setStatus("transition");
   };
 
@@ -691,7 +709,7 @@ export function FlankerSetas({
           >
             <div className="flex flex-wrap items-center justify-center gap-3">
               {currentTrial.stimulus.map((direction, index) => {
-                const isTarget = index === currentTrial.targetIndex;
+                const isTarget = index === currentTargetIndex;
                 return (
                   <span
                     key={`${currentTrial.id}-${index}`}
@@ -708,7 +726,7 @@ export function FlankerSetas({
               })}
             </div>
             <p className="mt-4 text-center text-xs text-zinc-500">
-              {config.targetMode === "variable"
+              {phase > 3
                 ? "Alvo destacado por borda escura (posição variável)."
                 : "Alvo no centro (destacado por borda escura)."}
             </p>
