@@ -371,7 +371,7 @@ export const VisualSearchHunt: React.FC<Props> = (props) => {
     const allMetrics = allLevelMetrics;
     const lines: string[] = [];
     lines.push("=" + "=".repeat(60));
-    lines.push("RESULTADO - CAÇA AO ALVO (Atenção Seletiva)");
+    lines.push("RESULTADO - CAÇA ÀS FIGURAS (Atenção Seletiva)");
     lines.push("=" + "=".repeat(60));
     lines.push("");
     if (props.reportContext) {
