@@ -149,9 +149,26 @@ function getShapeClass(shape: Shape): string {
 }
 
 
+
 import React from "react";
+import { useIsMobileViewport } from "@/hooks/mobile/useIsMobileViewport";
+import { CacaAoAlvoMobileGame } from "./mobile/CacaAoAlvoMobileGame";
 
 export const VisualSearchHunt: React.FC<Props> = (props) => {
+  const isMobile = useIsMobileViewport(768);
+  if (isMobile) {
+    // Adaptação: repassa apenas as props padrão mobile
+    return (
+      <CacaAoAlvoMobileGame
+        onCorrectSound={undefined}
+        onErrorSound={undefined}
+        onEnd={props.onComplete}
+        basePoints={props.basePoints}
+        startingLevel={props.startingLevel}
+        maxLevelHint={props.maxLevelHint}
+      />
+    );
+  }
   // --- INÍCIO DO COMPONENTE COPIADO ---
   const [level, setLevel] = React.useState(props.startingLevel);
   const [status, setStatus] = React.useState<RoundStatus>("preview");
