@@ -30,8 +30,6 @@ const BLOCKS: BlockConfig[] = [
   { index: 2, activeZone: "top" },
   { index: 3, activeZone: "bottom" },
 ];
-// Adiciona zona ao tipo de estímulo
-type StimulusWithZone = FallingShape & { zone: Zone };
 
 type Phase = "intro" | "running" | "level-summary" | "session-summary";
 
@@ -406,27 +404,103 @@ export function FiltroCoresComSomGame({
   }, [phase, resetLevelState]);
 
 
-  // Função para sortear zona de cada estímulo
-  function assignZoneToShape(shape: FallingShape): StimulusWithZone {
-    // Distribui aleatoriamente entre as zonas
-    const zones: Zone[] = ["top", "center", "bottom"];
-    const zone = zones[Math.floor(Math.random() * zones.length)];
-    return { ...shape, zone };
+
+  // Função para calcular a zona de um Y relativo ao container
+  function getZoneFromY(y: number, containerHeight: number): Zone {
+    const zoneHeight = containerHeight / 3;
+    if (y < zoneHeight) return "top";
+    if (y < zoneHeight * 2) return "center";
+    return "bottom";
   }
 
-  // Adapta shapes para incluir zona
-  const shapesWithZone: StimulusWithZone[] = useMemo(() => {
-    return shapes.map(assignZoneToShape);
-  }, [shapes]);
-
-  // Renderização das zonas
-  function ZoneRow({ zone, children }: { zone: Zone; children: React.ReactNode }) {
-    const isActive = zone === activeZone;
-    const base =
-      "flex-1 flex flex-row flex-wrap items-center justify-center py-2 sm:py-3 gap-2 sm:gap-3 rounded-lg";
-    const style = isActive ? "bg-white border-2 border-emerald-400" : "bg-zinc-200";
-    return <div className={`${base} ${style}`}>{children}</div>;
+  // Função para obter a zona de um estímulo pela posição Y do centro
+  function getZoneOfShape(shape: FallingShape, containerHeight: number): Zone {
+    const y = shape.y;
+    return getZoneFromY(y, containerHeight);
   }
+
+  // Handler de clique no container
+  const handleContainerClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    if (phase !== "running") return;
+    const container = containerRef.current;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const clickY = event.clientY - rect.top;
+    const clickZone = getZoneFromY(clickY, rect.height);
+
+    // Verifica se algum shape foi clicado (de cima para baixo)
+    const clickX = event.clientX - rect.left;
+    let clickedShape: FallingShape | null = null;
+    for (let i = shapes.length - 1; i >= 0; i--) {
+      const shape = shapes[i];
+      if (shape.isCaptured) continue;
+      const dx = clickX - shape.x;
+      const dy = clickY - shape.y;
+      if (shape.kind === "círculo") {
+        if (dx * dx + dy * dy <= shape.size * shape.size) {
+          clickedShape = shape;
+          break;
+        }
+      } else if (shape.kind === "quadrado" || shape.kind === "triângulo") {
+        if (Math.abs(dx) <= shape.size && Math.abs(dy) <= shape.size) {
+          clickedShape = shape;
+          break;
+        }
+      }
+    }
+
+    // Avaliação
+    let isTarget = false;
+    let targetZone: Zone | null = null;
+    let hasTarget = false;
+    let isCorrectTarget = false;
+    let reactionMs: number | null = null;
+    const now = performance.now();
+    if (clickedShape) {
+      if (targetMode === "color") {
+        isTarget = clickedShape.colorId === currentTarget;
+      } else {
+        isTarget = clickedShape.kind === currentTarget;
+      }
+      targetZone = getZoneOfShape(clickedShape, rect.height);
+      hasTarget = isTarget;
+      isCorrectTarget = hasTarget && targetZone === activeZone && clickZone === activeZone;
+      reactionMs = isCorrectTarget ? Math.max(0, Math.round(now - clickedShape.spawnedAt)) : null;
+    }
+
+    registerAttempt({
+      targetMode,
+      targetValue: currentTarget,
+      clickedItemId: clickedShape ? clickedShape.id : null,
+      clickedZone: clickZone,
+      isCorrectItem: isTarget,
+      isCentralHit: isCorrectTarget,
+      reactionTimeMs: reactionMs,
+      targetZone,
+      activeZone,
+      clickZone,
+      hasTarget,
+      isClick: true,
+      isCorrectTarget,
+    });
+
+    if (isCorrectTarget) {
+      setReactionTimes((prev) => [...prev, reactionMs!]);
+      setHits((value) => value + 1);
+      setFeedback("correct");
+      playTone("correct");
+    } else {
+      setErrors((value) => value + 1);
+      setFeedback("wrong");
+      playTone("wrong");
+    }
+    if (clickedShape) {
+      const nextShapes = shapesRef.current.map((s) =>
+        s.id === clickedShape!.id ? { ...s, isCaptured: true, capturedAt: now } : s
+      );
+      syncShapes(nextShapes);
+    }
+  }, [phase, shapes, targetMode, currentTarget, activeZone, registerAttempt, syncShapes]);
 
   return (
     <div className="space-y-5">
@@ -474,86 +548,39 @@ export function FiltroCoresComSomGame({
           </div>
           <div
             ref={containerRef}
-            className="relative h-[520px] w-full overflow-hidden rounded-2xl border border-zinc-200 bg-gradient-to-b from-zinc-50 to-white flex flex-col gap-2"
+            className="relative h-[520px] w-full overflow-hidden rounded-2xl border border-zinc-200 bg-gradient-to-b from-zinc-50 to-white"
+            onClick={handleContainerClick}
+            style={{ cursor: "pointer" }}
           >
-            <ZoneRow zone="top">
-              {shapesWithZone.filter(s => s.zone === "top").map((shape) => {
-                const imgSrc = `/images/visual-search/${SHAPE_IMG[shape.kind]}_${COLOR_LABEL[shape.colorId].toLowerCase()}.png`;
-                return (
-                  <button
-                    key={shape.id}
-                    type="button"
-                    onClick={(e) => handleShapeClick(shape, e)}
-                    className={`transition-opacity focus:outline-none ${shape.isCaptured ? "opacity-20" : "opacity-100"}`}
-                    style={{
-                      width: shape.size * 2,
-                      height: shape.size * 2,
-                      zIndex: 2,
-                    }}
-                    tabIndex={0}
-                  >
-                    <img
-                      src={imgSrc}
-                      alt={`${COLOR_LABEL[shape.colorId]} ${shape.kind}`}
-                      style={{ width: "100%", height: "100%", pointerEvents: "none", userSelect: "none", position: "relative", zIndex: 4 }}
-                      draggable={false}
-                    />
-                  </button>
-                );
-              })}
-            </ZoneRow>
-            <ZoneRow zone="center">
-              {shapesWithZone.filter(s => s.zone === "center").map((shape) => {
-                const imgSrc = `/images/visual-search/${SHAPE_IMG[shape.kind]}_${COLOR_LABEL[shape.colorId].toLowerCase()}.png`;
-                return (
-                  <button
-                    key={shape.id}
-                    type="button"
-                    onClick={(e) => handleShapeClick(shape, e)}
-                    className={`transition-opacity focus:outline-none ${shape.isCaptured ? "opacity-20" : "opacity-100"}`}
-                    style={{
-                      width: shape.size * 2,
-                      height: shape.size * 2,
-                      zIndex: 2,
-                    }}
-                    tabIndex={0}
-                  >
-                    <img
-                      src={imgSrc}
-                      alt={`${COLOR_LABEL[shape.colorId]} ${shape.kind}`}
-                      style={{ width: "100%", height: "100%", pointerEvents: "none", userSelect: "none", position: "relative", zIndex: 4 }}
-                      draggable={false}
-                    />
-                  </button>
-                );
-              })}
-            </ZoneRow>
-            <ZoneRow zone="bottom">
-              {shapesWithZone.filter(s => s.zone === "bottom").map((shape) => {
-                const imgSrc = `/images/visual-search/${SHAPE_IMG[shape.kind]}_${COLOR_LABEL[shape.colorId].toLowerCase()}.png`;
-                return (
-                  <button
-                    key={shape.id}
-                    type="button"
-                    onClick={(e) => handleShapeClick(shape, e)}
-                    className={`transition-opacity focus:outline-none ${shape.isCaptured ? "opacity-20" : "opacity-100"}`}
-                    style={{
-                      width: shape.size * 2,
-                      height: shape.size * 2,
-                      zIndex: 2,
-                    }}
-                    tabIndex={0}
-                  >
-                    <img
-                      src={imgSrc}
-                      alt={`${COLOR_LABEL[shape.colorId]} ${shape.kind}`}
-                      style={{ width: "100%", height: "100%", pointerEvents: "none", userSelect: "none", position: "relative", zIndex: 4 }}
-                      draggable={false}
-                    />
-                  </button>
-                );
-              })}
-            </ZoneRow>
+            {/* Camada visual das zonas */}
+            <div className="absolute inset-0 pointer-events-none -z-10">
+              <div className={activeZone === "top" ? "h-1/3 w-full bg-zinc-100" : "h-1/3 w-full bg-transparent"} />
+              <div className={activeZone === "center" ? "h-1/3 w-full bg-zinc-100" : "h-1/3 w-full bg-transparent"} />
+              <div className={activeZone === "bottom" ? "h-1/3 w-full bg-zinc-100" : "h-1/3 w-full bg-transparent"} />
+            </div>
+            {/* Estímulos renderizados normalmente */}
+            {shapes.map((shape) => {
+              const imgSrc = `/images/visual-search/${SHAPE_IMG[shape.kind]}_${COLOR_LABEL[shape.colorId].toLowerCase()}.png`;
+              return (
+                <img
+                  key={shape.id}
+                  src={imgSrc}
+                  alt={`${COLOR_LABEL[shape.colorId]} ${shape.kind}`}
+                  style={{
+                    position: "absolute",
+                    left: shape.x - shape.size,
+                    top: shape.y - shape.size,
+                    width: shape.size * 2,
+                    height: shape.size * 2,
+                    opacity: shape.isCaptured ? 0.2 : 1,
+                    pointerEvents: "none",
+                    userSelect: "none",
+                    zIndex: 4,
+                  }}
+                  draggable={false}
+                />
+              );
+            })}
           </div>
           {feedback !== "none" && (
             <p className={`text-sm ${feedback === "correct" ? "text-emerald-600" : "text-rose-600"}`}>
