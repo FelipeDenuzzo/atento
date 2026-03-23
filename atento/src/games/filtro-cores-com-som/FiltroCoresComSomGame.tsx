@@ -113,6 +113,7 @@ export function FiltroCoresComSomGame({
 
   const [levelIndex, setLevelIndex] = useState(firstLevelIndex);
   const [phase, setPhase] = useState<Phase>("intro");
+  // currentTarget: para shape-color, formato "forma-cor" (ex: "círculo-azul")
   const [currentTarget, setCurrentTarget] = useState<string>(levels[firstLevelIndex]?.initialTarget ?? "green");
   const [flashTarget, setFlashTarget] = useState(false);
   const [timeRemainingMs, setTimeRemainingMs] = useState(levels[firstLevelIndex]?.durationMs ?? 0);
@@ -184,12 +185,26 @@ export function FiltroCoresComSomGame({
     setActiveZone(block?.activeZone ?? "center");
   }, [level, syncShapes, levelIndex]);
 
+  // Função para sortear alvo shape-color
+  function getRandomShapeColorTarget(): string {
+    const color = randomItem(level.availableColors);
+    const shape = randomItem(level.availableShapes);
+    return `${shape}-${color}`;
+  }
+
   const startLevel = useCallback(() => {
     resetLevelState();
     setPhase("running");
     levelStartRef.current = performance.now();
-    speakTarget(targetMode, level.initialTarget);
-  }, [level.initialTarget, resetLevelState, targetMode]);
+    if (targetMode === "shape-color") {
+      const newTarget = getRandomShapeColorTarget();
+      setCurrentTarget(newTarget);
+      speakTarget(targetMode, newTarget);
+    } else {
+      setCurrentTarget(level.initialTarget);
+      speakTarget(targetMode, level.initialTarget);
+    }
+  }, [level.initialTarget, resetLevelState, targetMode, level.availableColors, level.availableShapes]);
 
   useEffect(() => {
     if (phase !== "running") return;
@@ -207,9 +222,11 @@ export function FiltroCoresComSomGame({
         if (targetMode === "color") {
           const arr = level.availableColors;
           next = arr[(arr.indexOf(current as ColorId) + 1) % arr.length];
-        } else {
+        } else if (targetMode === "shape") {
           const arr = level.availableShapes;
           next = arr[(arr.indexOf(current as ShapeKind) + 1) % arr.length];
+        } else if (targetMode === "shape-color") {
+          next = getRandomShapeColorTarget();
         }
         if (next !== current) {
           speakTarget(targetMode, next);
@@ -329,8 +346,11 @@ export function FiltroCoresComSomGame({
       let isTarget = false;
       if (targetMode === "color") {
         isTarget = shape.colorId === currentTarget;
-      } else {
+      } else if (targetMode === "shape") {
         isTarget = shape.kind === currentTarget;
+      } else if (targetMode === "shape-color") {
+        const [targetShape, targetColor] = currentTarget.split("-");
+        isTarget = shape.kind === targetShape && shape.colorId === targetColor;
       }
       // Determina zona do estímulo
       const shapeZone: Zone = shape.zone ?? "center";
@@ -523,7 +543,13 @@ export function FiltroCoresComSomGame({
               <p className="text-base font-semibold text-black">
                 {targetMode === "color"
                   ? (COLOR_LABEL[currentTarget as ColorId]?.toUpperCase() || String(currentTarget).toUpperCase())
-                  : (typeof currentTarget === "string" ? currentTarget.charAt(0).toUpperCase() + currentTarget.slice(1) : String(currentTarget))}
+                  : targetMode === "shape"
+                    ? (typeof currentTarget === "string" ? currentTarget.charAt(0).toUpperCase() + currentTarget.slice(1) : String(currentTarget))
+                    : (() => {
+                        const [shape, color] = currentTarget.split("-");
+                        return `${shape.charAt(0).toUpperCase() + shape.slice(1)} ${COLOR_LABEL[color as ColorId]}`;
+                      })()
+                }
               </p>
             </div>
           </div>
