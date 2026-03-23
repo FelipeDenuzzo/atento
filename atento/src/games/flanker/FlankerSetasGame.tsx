@@ -18,10 +18,10 @@ type Trial = {
   phase: Phase;
   arrowCount: number;
   targetIndex: number;
-  targetDirection: Direction;
+  stimulus: { direction: Direction }[];
+  correctDirection: Direction;
   flankerDirection: Direction;
   type: TrialType;
-  stimulus: Direction[];
   playerDirection: Direction | null;
   correct: boolean | null;
   reactionTimeMs: number | null;
@@ -128,23 +128,17 @@ function getLevelConfig(level: number): LevelConfig {
   };
 }
 
-function generateTrial(id: number, config: LevelConfig, forcedTargetIndex?: number): Trial {
+function generateTrial(id: number, config: LevelConfig, targetIndex: number): Trial {
   const targetDirection = randomItem<Direction>(["left", "right"]);
   const isIncongruent = Math.random() < config.incongruentRatio;
   const flankerDirection = isIncongruent
     ? oppositeDirection(targetDirection)
     : targetDirection;
 
-  // Usa o targetIndex fixo da fase, se fornecido
-  const targetIndex =
-    forcedTargetIndex !== undefined
-      ? forcedTargetIndex
-      : config.targetMode === "fixed"
-        ? Math.floor(config.arrowCount / 2)
-        : Math.floor(Math.random() * config.arrowCount);
-
-  const stimulus = Array.from({ length: config.arrowCount }, () => flankerDirection);
-  stimulus[targetIndex] = targetDirection;
+  // Monta o array de estímulos como objetos { direction }
+  const stimulus = Array.from({ length: config.arrowCount }, (_, i) => ({
+    direction: i === targetIndex ? targetDirection : flankerDirection,
+  }));
 
   return {
     id,
@@ -152,10 +146,10 @@ function generateTrial(id: number, config: LevelConfig, forcedTargetIndex?: numb
     phase: config.phase,
     arrowCount: config.arrowCount,
     targetIndex,
-    targetDirection,
+    stimulus,
+    correctDirection: stimulus[targetIndex]?.direction,
     flankerDirection,
     type: isIncongruent ? "incongruent" : "congruent",
-    stimulus,
     playerDirection: null,
     correct: null,
     reactionTimeMs: null,
@@ -289,21 +283,17 @@ export function FlankerSetas({
       } else {
         // Garante que muda para uma posição diferente
         if (targetPositions.length > 1) {
-          // Usa o valor anterior do estado, não o do render
-          setCurrentTargetIndex(prev => {
-            let candidate = prev;
-            while (candidate === prev) {
-              candidate = targetPositions[Math.floor(Math.random() * targetPositions.length)];
-            }
-            newTargetIndex = candidate;
-            return candidate;
-          });
+          let candidate = currentTargetIndex;
+          while (candidate === currentTargetIndex) {
+            candidate = targetPositions[Math.floor(Math.random() * targetPositions.length)];
+          }
+          newTargetIndex = candidate;
         } else {
           newTargetIndex = currentTargetIndex;
         }
       }
+      setCurrentTargetIndex(newTargetIndex);
       // Gera os trials usando o novo currentTargetIndex
-      // Se mudou acima via setState, newTargetIndex já foi atualizado
       const generatedTrials = Array.from(
         { length: configToStart.trialsPerLevel },
         (_, index) => generateTrial(index, configToStart, newTargetIndex),
@@ -349,7 +339,17 @@ export function FlankerSetas({
       const reactionTime = timedOut
         ? null
         : Math.max(0, performance.now() - trialStartTimeRef.current);
-      const isCorrect = playerDirection === currentTrial.targetDirection;
+
+      // Proteção: garantir que o estímulo e o índice existem
+      if (!currentTrial.stimulus || !currentTrial.stimulus[currentTrial.targetIndex]) {
+        setFeedback(null);
+        moveToNextTrial();
+        return;
+      }
+
+      // Usa sempre o snapshot salvo no trial
+      const correctDirection = currentTrial.correctDirection;
+      const isCorrect = playerDirection === correctDirection;
 
       playFeedbackSound(isCorrect);
       setFeedback(isCorrect ? "correct" : "incorrect");
@@ -715,8 +715,8 @@ export function FlankerSetas({
             }`}
           >
             <div className="flex flex-wrap items-center justify-center gap-3">
-              {currentTrial.stimulus.map((direction, index) => {
-                const isTarget = index === currentTargetIndex;
+              {currentTrial.stimulus.map((stim, index) => {
+                const isTarget = index === currentTrial.targetIndex;
                 return (
                   <span
                     key={`${currentTrial.id}-${index}`}
@@ -727,7 +727,7 @@ export function FlankerSetas({
                     }`}
                     aria-label={isTarget ? "Seta alvo" : "Seta flanqueadora"}
                   >
-                    {ARROW_SYMBOL[direction]}
+                    {ARROW_SYMBOL[stim.direction]}
                   </span>
                 );
               })}
