@@ -591,13 +591,7 @@ export function FiltroCoresComSomGame({
               );
             })}
           </div>
-          {feedback !== "none" && (
-            <p className={`text-sm ${feedback === "correct" ? "text-emerald-600" : "text-rose-600"}`}>
-              {feedback === "correct"
-                ? "Boa!"
-                : "Clique apenas quando o alvo estiver na faixa destacada."}
-            </p>
-          )}
+          {/* Feedback textual removido conforme solicitado */}
         </div>
       )}
 
