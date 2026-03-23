@@ -557,7 +557,7 @@ export function FlankerSetas({
     lines.push("Detalhe por tentativa:");
     trialHistory.forEach((trial, index) => {
       lines.push(
-        `#${index + 1} | fase ${trial.phase} | tipo ${trial.type} | correta ${trial.targetDirection} | resposta ${trial.playerDirection ?? "sem resposta"} | acerto ${trial.correct ? "sim" : "não"} | TR ${trial.reactionTimeMs ?? 0}ms`,
+        `#${index + 1} | fase ${trial.phase} | tipo ${trial.type} | correta ${trial.correctDirection} | resposta ${trial.playerDirection ?? "sem resposta"} | acerto ${trial.correct ? "sim" : "não"} | TR ${trial.reactionTimeMs ?? 0}ms`,
       );
     });
     lines.push("=" + "=".repeat(60));
