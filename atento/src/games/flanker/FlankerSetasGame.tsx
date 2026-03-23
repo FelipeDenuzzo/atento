@@ -677,7 +677,7 @@ export function FlankerSetas({
       {status === "playing" && currentTrial && (
         <div className="space-y-3 sm:space-y-5">
           {/* Barra de progresso */}
-          <div className="h-1.5 sm:h-2 overflow-hidden rounded-full bg-zinc-200">
+          <div className="h-2 sm:h-2.5 overflow-hidden rounded-full bg-zinc-200">
             <div
               className="h-full bg-zinc-900 transition-all"
               style={{
@@ -688,7 +688,7 @@ export function FlankerSetas({
 
           {/* Área das setas */}
           <div
-            className={`rounded-xl sm:rounded-2xl border-2 sm:border-4 p-3 sm:p-6 transition-colors ${
+            className={`rounded-xl sm:rounded-2xl border-2 sm:border-4 p-2 sm:p-5 transition-colors ${
               feedback === "correct"
                 ? "border-emerald-400 bg-emerald-50"
                 : feedback === "incorrect"
@@ -696,13 +696,13 @@ export function FlankerSetas({
                   : "border-black/10 bg-white"
             }`}
           >
-            <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-3">
+            <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-2">
               {currentTrial.stimulus.map((stim, index) => {
                 const isTarget = index === currentTrial.targetIndex;
                 return (
                   <span
                     key={`${currentTrial.id}-${index}`}
-                    className={`inline-flex h-10 w-10 sm:h-16 sm:w-16 select-none items-center justify-center rounded-lg sm:rounded-xl text-3xl sm:text-5xl font-semibold sm:font-semibold ${
+                    className={`inline-flex h-12 w-12 sm:h-16 sm:w-16 select-none items-center justify-center rounded-lg sm:rounded-xl text-3xl sm:text-5xl font-semibold ${
                       isTarget
                         ? "border-2 border-zinc-900 bg-zinc-100 text-zinc-900"
                         : "border border-black/10 bg-white text-zinc-700"
@@ -721,14 +721,16 @@ export function FlankerSetas({
             <button
               type="button"
               onClick={() => handleAnswer("left")}
-              className="rounded-lg border border-black/20 p-2 sm:p-3 font-medium text-zinc-900 hover:bg-zinc-100 text-base sm:text-lg"
+              className="rounded-lg border border-black/20 p-4 sm:p-3 font-medium text-zinc-900 hover:bg-zinc-100 text-lg sm:text-lg active:scale-95 transition-transform"
+              style={{ minHeight: 56 }}
             >
               ← Esquerda
             </button>
             <button
               type="button"
               onClick={() => handleAnswer("right")}
-              className="rounded-lg border border-black/20 p-2 sm:p-3 font-medium text-zinc-900 hover:bg-zinc-100 text-base sm:text-lg"
+              className="rounded-lg border border-black/20 p-4 sm:p-3 font-medium text-zinc-900 hover:bg-zinc-100 text-lg sm:text-lg active:scale-95 transition-transform"
+              style={{ minHeight: 56 }}
             >
               Direita →
             </button>
