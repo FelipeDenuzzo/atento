@@ -22,12 +22,14 @@ export function hitTestShape(
     const dx = point.x - shape.x;
     const dy = point.y - shape.y;
 
-    if (shape.kind === "circle") {
+    if (shape.kind === "círculo") {
       if (dx * dx + dy * dy <= shape.size * shape.size) {
         return shape;
       }
-    } else if (Math.abs(dx) <= shape.size && Math.abs(dy) <= shape.size) {
-      return shape;
+    } else if (shape.kind === "quadrado" || shape.kind === "triângulo") {
+      if (Math.abs(dx) <= shape.size && Math.abs(dy) <= shape.size) {
+        return shape;
+      }
     }
   }
 

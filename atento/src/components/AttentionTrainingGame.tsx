@@ -951,7 +951,7 @@ export function AttentionTrainingGame() {
                 "escutaseletiva-cocktail-party",
               ].includes(currentExercise.kind) && (
                 <h2 className="text-xl font-semibold text-zinc-900">
-                  Stroop Invertido
+                  Cor da palavra
                 </h2>
               )}
             </div>
