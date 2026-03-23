@@ -269,7 +269,7 @@ export function FlankerSetas({
 
 
   const startLevel = useCallback(
-    (levelToStart: number = level) => {
+    (levelToStart: number) => {
       const configToStart = getLevelConfig(levelToStart);
       const generatedTrials = Array.from(
         { length: configToStart.trialsPerLevel },
@@ -277,7 +277,6 @@ export function FlankerSetas({
       );
 
       setLevel(levelToStart);
-      // Fase agora é sempre derivada do level
       setTrials(generatedTrials);
       setCurrentTrialIndex(0);
       setTimeRemaining(configToStart.timePerTrialSeconds);
@@ -285,11 +284,11 @@ export function FlankerSetas({
       setHits(0);
       setErrors(0);
       setFeedback(null);
-        const TARGET_INDEX = 2; // Definindo TARGET_INDEX como fixo
       trialStartTimeRef.current = performance.now();
+      trialResolvedRef.current = false;
       setStatus("playing");
     },
-    [level],
+    [], // sem dependências externas
   );
 
   const moveToNextTrial = useCallback(() => {
