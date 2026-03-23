@@ -465,7 +465,7 @@ export function FlankerSetas({
   const downloadResults = () => {
     const lines: string[] = [];
     lines.push("=" + "=".repeat(60));
-    lines.push("RESULTADO - FLANKER DE SETAS (Atenção Seletiva)");
+    lines.push("RESULTADO - A seta certa");
     lines.push("=" + "=".repeat(60));
     lines.push("");
     if (reportContext) {
@@ -647,15 +647,15 @@ export function FlankerSetas({
           <div>
             <h3 className="text-lg sm:text-xl font-semibold text-zinc-900">Foque na Seta</h3>
             <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-zinc-700">
-              Você deve indicar a direção apenas da seta destacada (alvo), ignorando as setas ao lado
+              Você deve indicar a direção apenas de A seta certa, ignorando as setas ao lado
             </p>
           </div>
 
           <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm text-zinc-700">
             <p><strong>Como jogar:</strong></p>
-            <p>Veja a fileira de setas e encontre a seta em destaque (alvo).</p>
-            <p>Se o alvo apontar para a esquerda, pressione ←.</p>
-            <p>Se o alvo apontar para a direita, pressione →.</p>
+            <p>Veja a fileira de setas e encontre A seta certa (destacada).</p>
+            <p>Se A seta certa apontar para a esquerda, pressione ←.</p>
+            <p>Se A seta certa apontar para a direita, pressione →.</p>
             <p>Ignore as setas ao redor, mesmo que apontem para o lado contrário.</p>
             <p>Responda o mais rápido que conseguir, antes do tempo acabar.</p>
           </div>
@@ -708,7 +708,7 @@ export function FlankerSetas({
                         ? "border-2 border-zinc-900 bg-zinc-100 text-zinc-900"
                         : "border border-black/10 bg-white text-zinc-700"
                     }`}
-                    aria-label={isTarget ? "Seta alvo" : "Seta flanqueadora"}
+                    aria-label={isTarget ? "A seta certa" : "Seta flanqueadora"}
                   >
                     {ARROW_SYMBOL[stim.direction]}
                   </span>
