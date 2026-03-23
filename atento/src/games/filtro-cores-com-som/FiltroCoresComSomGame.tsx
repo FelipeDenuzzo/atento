@@ -338,8 +338,8 @@ export function FiltroCoresComSomGame({
               <p className="text-xs text-zinc-500">ALVO ATUAL</p>
               <p className="text-base font-semibold text-black">
                 {targetMode === "color"
-                  ? COLOR_LABEL[currentTarget as ColorId].toUpperCase()
-                  : currentTarget.charAt(0).toUpperCase() + currentTarget.slice(1)}
+                  ? (COLOR_LABEL[currentTarget as ColorId]?.toUpperCase() || String(currentTarget).toUpperCase())
+                  : (typeof currentTarget === "string" ? currentTarget.charAt(0).toUpperCase() + currentTarget.slice(1) : String(currentTarget))}
               </p>
             </div>
           </div>
