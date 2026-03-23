@@ -128,16 +128,16 @@ function getLevelConfig(level: number): LevelConfig {
   };
 }
 
-function generateTrial(id: number, config: LevelConfig, targetIndex: number): Trial {
+function generateTrial(id: number, config: LevelConfig): Trial {
+  const TARGET_INDEX = 2;
   const targetDirection = randomItem<Direction>(["left", "right"]);
   const isIncongruent = Math.random() < config.incongruentRatio;
   const flankerDirection = isIncongruent
     ? oppositeDirection(targetDirection)
     : targetDirection;
 
-  // Monta o array de estímulos como objetos { direction }
   const stimulus = Array.from({ length: config.arrowCount }, (_, i) => ({
-    direction: i === targetIndex ? targetDirection : flankerDirection,
+    direction: i === TARGET_INDEX ? targetDirection : flankerDirection,
   }));
 
   return {
@@ -145,9 +145,8 @@ function generateTrial(id: number, config: LevelConfig, targetIndex: number): Tr
     level: config.level,
     phase: config.phase,
     arrowCount: config.arrowCount,
-    targetIndex,
     stimulus,
-    correctDirection: stimulus[targetIndex]?.direction,
+    correctDirection: stimulus[TARGET_INDEX]?.direction,
     flankerDirection,
     type: isIncongruent ? "incongruent" : "congruent",
     playerDirection: null,
@@ -255,10 +254,8 @@ export function FlankerSetas({
   const [transitionCountdown, setTransitionCountdown] = useState(3);
   const [nextLevel, setNextLevel] = useState<number | null>(null);
   const [transitionContext, setTransitionContext] = useState<TransitionContext>("next-phase");
-  // Estado do índice do alvo
-  const [currentTargetIndex, setCurrentTargetIndex] = useState(2);
-  // Array de posições possíveis do alvo (ajustado dinamicamente)
-  const [targetPositions, setTargetPositions] = useState([0, 1, 2, 3, 4]);
+  // Alvo sempre fixo no centro (índice 2)
+  const TARGET_INDEX = 2;
 
   const trialStartTimeRef = useRef<number>(0);
   const trialResolvedRef = useRef(false);
@@ -266,37 +263,16 @@ export function FlankerSetas({
   const config = useMemo(() => getLevelConfig(level), [level]);
   const currentTrial = trials[currentTrialIndex];
 
-  // Atualiza targetPositions conforme a fase (arrowCount)
-  useEffect(() => {
-    setTargetPositions(Array.from({ length: config.arrowCount }, (_, i) => i));
-  }, [config.arrowCount]);
+
 
 
 
   const startLevel = useCallback(
     (levelToStart: number = level) => {
       const configToStart = getLevelConfig(levelToStart);
-      let newTargetIndex = currentTargetIndex;
-      // Atualiza o índice do alvo conforme a fase
-      if (configToStart.phase <= 3) {
-        newTargetIndex = Math.floor(configToStart.arrowCount / 2);
-      } else {
-        // Garante que muda para uma posição diferente
-        if (targetPositions.length > 1) {
-          let candidate = currentTargetIndex;
-          while (candidate === currentTargetIndex) {
-            candidate = targetPositions[Math.floor(Math.random() * targetPositions.length)];
-          }
-          newTargetIndex = candidate;
-        } else {
-          newTargetIndex = currentTargetIndex;
-        }
-      }
-      setCurrentTargetIndex(newTargetIndex);
-      // Gera os trials usando o novo currentTargetIndex
       const generatedTrials = Array.from(
         { length: configToStart.trialsPerLevel },
-        (_, index) => generateTrial(index, configToStart, newTargetIndex),
+        (_, index) => generateTrial(index, configToStart, TARGET_INDEX),
       );
 
       setLevel(levelToStart);
@@ -308,11 +284,11 @@ export function FlankerSetas({
       setHits(0);
       setErrors(0);
       setFeedback(null);
-      trialResolvedRef.current = false;
+        const TARGET_INDEX = 2; // Definindo TARGET_INDEX como fixo
       trialStartTimeRef.current = performance.now();
       setStatus("playing");
     },
-    [level, currentTargetIndex, targetPositions],
+    [level],
   );
 
   const moveToNextTrial = useCallback(() => {
@@ -366,14 +342,14 @@ export function FlankerSetas({
               }
             : trial,
         ),
-      );
+            if (!currentTrial.stimulus || !currentTrial.stimulus[TARGET_INDEX]) {
 
       if (isCorrect) {
         setHits((value) => value + 1);
         setScore((value) => value + (reactionTime !== null && reactionTime <= 1000 ? 12 : 8));
       } else {
         setErrors((value) => value + 1);
-        setScore((value) => Math.max(0, value - 4));
+            const correctDirection = currentTrial.stimulus[TARGET_INDEX].direction;
       }
 
       window.setTimeout(() => {
@@ -660,15 +636,15 @@ export function FlankerSetas({
   return (
     <div className="mt-4 space-y-4">
       {status === "instructions" && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
+        <div className="space-y-3 rounded-lg border border-black/10 bg-zinc-50 p-4 sm:p-6">
           <div>
-            <h3 className="text-xl font-semibold text-zinc-900">Foque na Seta</h3>
-            <p className="mt-2 text-sm text-zinc-700">
+            <h3 className="text-lg sm:text-xl font-semibold text-zinc-900">Foque na Seta</h3>
+            <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-zinc-700">
               Você deve indicar a direção apenas da seta destacada (alvo), ignorando as setas ao lado
             </p>
           </div>
 
-          <div className="space-y-3 text-sm text-zinc-700">
+          <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm text-zinc-700">
             <p><strong>Como jogar:</strong></p>
             <p>Veja a fileira de setas e encontre a seta em destaque (alvo).</p>
             <p>Se o alvo apontar para a esquerda, pressione ←.</p>
@@ -685,7 +661,7 @@ export function FlankerSetas({
               setTransitionCountdown(3);
               setStatus("transition");
             }}
-            className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
+            className="rounded-lg bg-zinc-900 px-3 py-2 sm:px-4 sm:py-2 font-medium text-white hover:bg-zinc-700 text-sm sm:text-base"
           >
             Começar
           </button>
@@ -693,10 +669,9 @@ export function FlankerSetas({
       )}
 
       {status === "playing" && currentTrial && (
-        <div className="space-y-5">
-          {/* Nenhuma info extra, apenas barra de progresso e setas */}
-
-          <div className="h-2 overflow-hidden rounded-full bg-zinc-200">
+        <div className="space-y-3 sm:space-y-5">
+          {/* Barra de progresso */}
+          <div className="h-1.5 sm:h-2 overflow-hidden rounded-full bg-zinc-200">
             <div
               className="h-full bg-zinc-900 transition-all"
               style={{
@@ -705,8 +680,9 @@ export function FlankerSetas({
             />
           </div>
 
+          {/* Área das setas */}
           <div
-            className={`rounded-2xl border-4 p-8 transition-colors ${
+            className={`rounded-xl sm:rounded-2xl border-2 sm:border-4 p-3 sm:p-6 transition-colors ${
               feedback === "correct"
                 ? "border-emerald-400 bg-emerald-50"
                 : feedback === "incorrect"
@@ -714,13 +690,13 @@ export function FlankerSetas({
                   : "border-black/10 bg-white"
             }`}
           >
-            <div className="flex flex-wrap items-center justify-center gap-3">
+            <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-3">
               {currentTrial.stimulus.map((stim, index) => {
                 const isTarget = index === currentTrial.targetIndex;
                 return (
                   <span
                     key={`${currentTrial.id}-${index}`}
-                    className={`inline-flex h-16 w-16 select-none items-center justify-center rounded-xl text-5xl font-semibold sm:h-20 sm:w-20 sm:text-6xl ${
+                    className={`inline-flex h-10 w-10 sm:h-16 sm:w-16 select-none items-center justify-center rounded-lg sm:rounded-xl text-3xl sm:text-5xl font-semibold sm:font-semibold ${
                       isTarget
                         ? "border-2 border-zinc-900 bg-zinc-100 text-zinc-900"
                         : "border border-black/10 bg-white text-zinc-700"
@@ -732,25 +708,21 @@ export function FlankerSetas({
                 );
               })}
             </div>
-            {phase > 3 && (
-              <p className="mt-4 text-center text-xs text-zinc-500">
-                Alvo destacado por borda escura (posição variável).
-              </p>
-            )}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          {/* Botões de resposta mais próximos */}
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 mt-1 sm:mt-3">
             <button
               type="button"
               onClick={() => handleAnswer("left")}
-              className="rounded-lg border border-black/20 p-3 font-medium text-zinc-900 hover:bg-zinc-100"
+              className="rounded-lg border border-black/20 p-2 sm:p-3 font-medium text-zinc-900 hover:bg-zinc-100 text-base sm:text-lg"
             >
               ← Esquerda
             </button>
             <button
               type="button"
               onClick={() => handleAnswer("right")}
-              className="rounded-lg border border-black/20 p-3 font-medium text-zinc-900 hover:bg-zinc-100"
+              className="rounded-lg border border-black/20 p-2 sm:p-3 font-medium text-zinc-900 hover:bg-zinc-100 text-base sm:text-lg"
             >
               Direita →
             </button>
@@ -759,15 +731,15 @@ export function FlankerSetas({
       )}
 
       {status === "finished" && levelMetrics && (
-        <div className="rounded-lg border border-black/10 bg-zinc-50 p-6">
-          <p className="mb-4 text-center font-semibold text-zinc-900">
+        <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 sm:p-6">
+          <p className="mb-3 sm:mb-4 text-center font-semibold text-zinc-900">
             Fase concluída!
           </p>
 
           <button
             type="button"
             onClick={progressToNextLevel}
-            className="h-11 w-full rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
+            className="h-10 sm:h-11 w-full rounded-lg bg-zinc-900 px-3 sm:px-4 py-2 font-medium text-white hover:bg-zinc-700 text-base sm:text-lg"
           >
             Avançar para a próxima
           </button>
@@ -775,33 +747,33 @@ export function FlankerSetas({
       )}
 
       {status === "transition" && (
-        <div className="rounded-lg border border-black/10 bg-zinc-50 p-6">
-          <p className="mb-2 text-center text-xl font-semibold text-zinc-900">
+        <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 sm:p-6">
+          <p className="mb-1 sm:mb-2 text-center text-lg sm:text-xl font-semibold text-zinc-900">
             {transitionContext === "initial" ? "Foque na Seta" : "Fase concluída!"}
           </p>
-          <p className="text-center text-sm text-zinc-700">
+          <p className="text-center text-xs sm:text-sm text-zinc-700">
             {transitionContext === "initial"
               ? "Iniciando em"
               : "Próxima fase começa em"}
           </p>
-          <p className="mt-2 text-center text-4xl font-semibold text-zinc-900">
+          <p className="mt-1 sm:mt-2 text-center text-3xl sm:text-4xl font-semibold text-zinc-900">
             {transitionCountdown}
           </p>
         </div>
       )}
 
       {status === "completed" && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-6">
-          <h3 className="text-xl font-semibold text-zinc-900">Foque na Seta concluído!</h3>
+        <div className="space-y-3 sm:space-y-4 rounded-lg border border-black/10 bg-zinc-50 p-4 sm:p-6">
+          <h3 className="text-lg sm:text-xl font-semibold text-zinc-900">Foque na Seta concluído!</h3>
 
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {allLevelMetrics.map((metric, index) => {
               const totalClicks = metric.totalTrials;
               const accuracy = totalClicks > 0 ? Math.round((metric.correctCount / totalClicks) * 100) : 0;
               return (
-                <div key={index} className="rounded-lg border border-black/10 bg-white p-3">
-                  <p className="text-sm font-medium text-zinc-900">Fase {index + 1}</p>
-                  <div className="mt-1 grid grid-cols-2 gap-2 text-xs text-zinc-600">
+                <div key={index} className="rounded-lg border border-black/10 bg-white p-2 sm:p-3">
+                  <p className="text-xs sm:text-sm font-medium text-zinc-900">Fase {index + 1}</p>
+                  <div className="mt-1 grid grid-cols-2 gap-1 sm:gap-2 text-xs text-zinc-600">
                     <p>Status: {metric.accuracy >= MIN_ACCURACY_TO_ADVANCE ? "✓ Completada" : "✗ Não atingiu precisão"}</p>
                     <p>Acurácia: {accuracy}%</p>
                     <p>Acertos: {metric.correctCount}</p>
@@ -812,27 +784,27 @@ export function FlankerSetas({
             })}
           </div>
 
-          <div className="rounded-lg border-2 border-zinc-900 bg-white p-4">
-            <p className="font-semibold text-zinc-900">Resumo Total</p>
-            <div className="mt-2 grid gap-2 text-sm text-black">
+          <div className="rounded-lg border-2 border-zinc-900 bg-white p-3 sm:p-4">
+            <p className="font-semibold text-zinc-900 text-sm sm:text-base">Resumo Total</p>
+            <div className="mt-2 grid gap-1 sm:gap-2 text-xs sm:text-sm text-black">
               <p>Acertos totais: {sessionSummary.totalCorrect}</p>
               <p>Erros totais: {sessionSummary.totalErrors}</p>
               <p>Acurácia geral: {sessionSummary.overallAccuracy}%</p>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             <button
               type="button"
               onClick={downloadResults}
-              className="flex-1 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
+              className="flex-1 rounded-lg bg-blue-600 px-3 sm:px-4 py-2 font-medium text-white hover:bg-blue-700 text-sm sm:text-base"
             >
               Baixar Resultados
             </button>
             <button
               type="button"
               onClick={finishExercise}
-              className="flex-1 rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
+              className="flex-1 rounded-lg bg-zinc-900 px-3 sm:px-4 py-2 font-medium text-white hover:bg-zinc-700 text-sm sm:text-base"
             >
               Continuar
             </button>
