@@ -1,6 +1,6 @@
 
 export type ColorId = "red" | "green" | "blue" | "yellow" | "purple";
-export type ShapeKind = "circle" | "square" | "triangle";
+export type ShapeKind = "círculo" | "quadrado" | "triângulo";
 
 export type TargetMode = "color" | "shape";
 

@@ -27,9 +27,9 @@ type Props = {
 
 
 const SHAPE_IMG: Record<ShapeKind, string> = {
-  circle: "circulo",
-  square: "quadrado",
-  triangle: "triangulo",
+  "círculo": "circulo",
+  "quadrado": "quadrado",
+  "triângulo": "triangulo",
 };
 
 type Feedback = "none" | "correct" | "wrong";
@@ -127,7 +127,8 @@ export function FiltroCoresComSomGame({
     const x = size + Math.random() * (rect.width - size * 2);
     const y = -size;
     const colorId = randomItem(level.availableColors);
-    const kind = Math.random() > 0.5 ? "circle" : "square";
+    const shapeKinds = level.availableShapes;
+    const kind = shapeKinds[Math.floor(Math.random() * shapeKinds.length)];
     const now = performance.now();
 
     return {
