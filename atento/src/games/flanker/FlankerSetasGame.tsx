@@ -241,7 +241,7 @@ export function FlankerSetas({
   hideInGameInfo,
 }: Props) {
   const [level, setLevel] = useState(startingLevel);
-  const [phase, setPhase] = useState(1); // Estado de fase explícito
+  // Removido estado de fase, sempre derivar via getLevelConfig(level)
   const [status, setStatus] = useState<GameStatus>("instructions");
   const [trials, setTrials] = useState<Trial[]>([]);
   const [currentTrialIndex, setCurrentTrialIndex] = useState(0);
@@ -277,7 +277,7 @@ export function FlankerSetas({
       );
 
       setLevel(levelToStart);
-      setPhase(configToStart.phase); // Atualiza fase
+      // Fase agora é sempre derivada do level
       setTrials(generatedTrials);
       setCurrentTrialIndex(0);
       setTimeRemaining(configToStart.timePerTrialSeconds);
