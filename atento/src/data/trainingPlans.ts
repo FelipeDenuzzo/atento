@@ -246,7 +246,7 @@ export const trainingPlans: TrainingPlan[] = [
         id: "sel-14",
         title: "A seta certa",
         attentionType: "seletiva",
-        kind: "A seta certa",
+        kind: "flanker",
         instructions:
           "Indique a direção da seta alvo ignorando as laterais.",
         startingLevel: 1,
