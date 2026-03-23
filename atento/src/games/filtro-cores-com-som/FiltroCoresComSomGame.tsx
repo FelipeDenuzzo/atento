@@ -553,10 +553,19 @@ export function FiltroCoresComSomGame({
             style={{ cursor: "pointer" }}
           >
             {/* Camada visual das zonas */}
-            <div className="absolute inset-0 pointer-events-none z-0">
-              <div className={activeZone === "top" ? "h-1/3 w-full bg-zinc-100 transition-colors" : "h-1/3 w-full bg-transparent transition-colors"} />
-              <div className={activeZone === "center" ? "h-1/3 w-full bg-zinc-100 transition-colors" : "h-1/3 w-full bg-transparent transition-colors"} />
-              <div className={activeZone === "bottom" ? "h-1/3 w-full bg-zinc-100 transition-colors" : "h-1/3 w-full bg-transparent transition-colors"} />
+            <div className="absolute inset-0 pointer-events-none z-0 flex flex-col h-full w-full">
+              <div className={
+                `h-1/3 w-full transition-colors border-b border-emerald-200 ` +
+                (activeZone === "top" ? "bg-emerald-100/60" : "bg-transparent")
+              } />
+              <div className={
+                `h-1/3 w-full transition-colors border-b border-emerald-200 ` +
+                (activeZone === "center" ? "bg-emerald-100/60" : "bg-transparent")
+              } />
+              <div className={
+                `h-1/3 w-full transition-colors ` +
+                (activeZone === "bottom" ? "bg-emerald-100/60" : "bg-transparent")
+              } />
             </div>
             {/* Estímulos renderizados normalmente */}
             {shapes.map((shape) => {
