@@ -435,9 +435,7 @@ export function FiltroCoresComSomGame({
             <p>Acertos: <strong>{summary.totalHits}</strong></p>
             <p>Erros: <strong>{summary.totalErrors}</strong></p>
             <p>Precisao geral: <strong>{Math.round(summary.accuracy * 100)}%</strong></p>
-            {summary.averageReactionMs && (
-              <p>Tempo medio: <strong>{summary.averageReactionMs}ms</strong></p>
-            )}
+            {/* Tempo médio removido da tela final conforme solicitado */}
           </div>
           <button
             type="button"
