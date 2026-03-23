@@ -602,7 +602,7 @@ export function FiltroCoresComSomGame({
             <p>Você clicou no alvo na área destacada em <strong>{hits > 0 ? Math.round((centralHits / hits) * 100) : 0}%</strong> das vezes.</p>
             <p>Você deixou de clicar quando o alvo estava na área destacada em <strong>{hits > 0 ? Math.round((omissions / hits) * 100) : 0}%</strong> das vezes.</p>
             <p>Você clicou fora da área destacada ou sem alvo em <strong>{spatialErrors + falseAlarms}</strong> ocasiões.</p>
-            <p>Tempo de resposta (acertos): <strong>{average(reactionTimes) ?? "-"}ms</strong></p>
+
           </div>
           <button
             type="button"
@@ -621,7 +621,7 @@ export function FiltroCoresComSomGame({
             <p>Você clicou no alvo na área destacada em <strong>{hits > 0 ? Math.round((centralHits / hits) * 100) : 0}%</strong> das vezes.</p>
             <p>Você deixou de clicar quando o alvo estava na área destacada em <strong>{hits > 0 ? Math.round((omissions / hits) * 100) : 0}%</strong> das vezes.</p>
             <p>Você clicou fora da área destacada ou sem alvo em <strong>{spatialErrors + falseAlarms}</strong> ocasiões.</p>
-            <p>Tempo de resposta (acertos): <strong>{average(reactionTimes) ?? "-"}ms</strong></p>
+            {/* Tempo de resposta removido conforme solicitado */}
             <p>Total de tentativas: <strong>{attemptLogs.length}</strong></p>
           </div>
           <button
