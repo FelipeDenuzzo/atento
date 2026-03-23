@@ -273,7 +273,7 @@ export function FlankerSetas({
       const configToStart = getLevelConfig(levelToStart);
       const generatedTrials = Array.from(
         { length: configToStart.trialsPerLevel },
-        (_, index) => generateTrial(index, configToStart, TARGET_INDEX),
+        (_, index) => generateTrial(index, configToStart),
       );
 
       setLevel(levelToStart);
