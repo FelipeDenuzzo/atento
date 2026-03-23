@@ -11,9 +11,10 @@ import {
   saveSessionLog,
   shouldSpawnShape,
   updateShapes,
+  getClickZone,
 } from "./logic";
 
-import { ColorId, FallingShape, LevelSummary, ShapeKind, TargetMode } from "./types";
+import { ColorId, FallingShape, LevelSummary, ShapeKind, TargetMode, ClickZone, AttemptLog } from "./types";
 
 type Phase = "intro" | "running" | "level-summary" | "session-summary";
 
@@ -106,6 +107,13 @@ export function FiltroCoresComSomGame({
   const [shapes, setShapes] = useState<FallingShape[]>([]);
   const [reactionTimes, setReactionTimes] = useState<number[]>([]);
   const [levelSummaries, setLevelSummaries] = useState<LevelSummary[]>([]);
+  // Novos estados para avaliação seletiva
+  const [attemptLogs, setAttemptLogs] = useState<AttemptLog[]>([]);
+  const [centralHits, setCentralHits] = useState(0);
+  const [nearMisses, setNearMisses] = useState(0);
+  const [selectionErrors, setSelectionErrors] = useState(0);
+  const [falseAlarms, setFalseAlarms] = useState(0);
+  const [omissions, setOmissions] = useState(0);
 
   const level = levels[levelIndex];
   const targetMode: TargetMode = level.targetMode;
@@ -268,8 +276,24 @@ export function FiltroCoresComSomGame({
     }
   }, [phase, syncShapes]);
 
+  // Função para registrar tentativa detalhada
+  const registerAttempt = useCallback((log: AttemptLog) => {
+    setAttemptLogs((prev) => [...prev, log]);
+    // Atualiza métricas agregadas
+    if (log.isCorrectItem && log.isCentralHit) setCentralHits((v) => v + 1);
+    else if (log.isCorrectItem && log.clickedZone && (log.clickedZone === "top" || log.clickedZone === "bottom")) setNearMisses((v) => v + 1);
+    else if (!log.isCorrectItem && log.clickedItemId) setSelectionErrors((v) => v + 1);
+    else if (!log.isCorrectItem && !log.clickedItemId) setFalseAlarms((v) => v + 1);
+  }, []);
+
+  // Função para detectar zona do clique
+  const getZoneForClick = (shape: FallingShape, clickY: number): ClickZone => {
+    return getClickZone(shape, clickY);
+  };
+
+  // Adaptar handleShapeClick para registrar zona e detalhes
   const handleShapeClick = useCallback(
-    (shape: FallingShape) => {
+    (shape: FallingShape, event?: React.MouseEvent) => {
       if (phase !== "running" || shape.isCaptured) return;
       const now = performance.now();
       let isCorrect = false;
@@ -278,9 +302,28 @@ export function FiltroCoresComSomGame({
       } else {
         isCorrect = shape.kind === currentTarget;
       }
+      // Calcular zona do clique
+      let clickedZone: ClickZone = "center";
+      if (event && event.nativeEvent) {
+        const btn = event.currentTarget as HTMLElement;
+        const rect = btn.getBoundingClientRect();
+        const clickY = event.nativeEvent.clientY - rect.top;
+        clickedZone = getClickZone(shape, shape.y - shape.size + clickY);
+      }
+      const isCentralHit = isCorrect && clickedZone === "center";
+      const reactionMs = isCorrect ? Math.max(0, Math.round(now - shape.spawnedAt)) : null;
+      // Registro detalhado
+      registerAttempt({
+        targetMode,
+        targetValue: currentTarget,
+        clickedItemId: shape.id,
+        clickedZone,
+        isCorrectItem: isCorrect,
+        isCentralHit,
+        reactionTimeMs: reactionMs,
+      });
       if (isCorrect) {
-        const reactionMs = Math.max(0, Math.round(now - shape.spawnedAt));
-        setReactionTimes((prev) => [...prev, reactionMs]);
+        if (isCentralHit) setReactionTimes((prev) => [...prev, reactionMs!]);
         setHits((value) => value + 1);
         setFeedback("correct");
         playTone("correct");
@@ -294,7 +337,7 @@ export function FiltroCoresComSomGame({
       );
       syncShapes(nextShapes);
     },
-    [currentTarget, phase, syncShapes, targetMode],
+    [currentTarget, phase, syncShapes, targetMode, registerAttempt],
   );
 
   // Clique/touch agora é por item
@@ -372,7 +415,7 @@ export function FiltroCoresComSomGame({
                 <button
                   key={shape.id}
                   type="button"
-                  onClick={() => handleShapeClick(shape)}
+                  onClick={(e) => handleShapeClick(shape, e)}
                   className={`absolute transition-opacity focus:outline-none ${shape.isCaptured ? "opacity-20" : "opacity-100"}`}
                   style={{
                     left: shape.x - shape.size,
@@ -409,14 +452,10 @@ export function FiltroCoresComSomGame({
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-6">
           <h3 className="text-xl font-semibold text-zinc-900">Resumo do nivel</h3>
           <div className="space-y-2 text-zinc-700">
-            <p>Acertos: <strong>{hits}</strong></p>
-            <p>Erros: <strong>{errors}</strong></p>
-            <p>
-              Precisao: <strong>{Math.round((hits + errors > 0 ? hits / (hits + errors) : 0) * 100)}%</strong>
-            </p>
-            {reactionTimes.length > 0 && (
-              <p>Tempo medio: <strong>{average(reactionTimes)}ms</strong></p>
-            )}
+            <p>Foco preciso no alvo: <strong>{hits > 0 ? Math.round((centralHits / hits) * 100) : 0}%</strong></p>
+            <p>Desvios do foco: <strong>{hits > 0 ? Math.round((nearMisses / hits) * 100) : 0}%</strong></p>
+            <p>Respostas indevidas: <strong>{selectionErrors + falseAlarms}</strong></p>
+            <p>Tempo de resposta (acertos centrais): <strong>{average(reactionTimes) ?? "-"}ms</strong></p>
           </div>
           <button
             type="button"
@@ -432,10 +471,12 @@ export function FiltroCoresComSomGame({
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-6">
           <h3 className="text-xl font-semibold text-zinc-900">Sessao concluida</h3>
           <div className="space-y-2 text-zinc-700">
-            <p>Acertos: <strong>{summary.totalHits}</strong></p>
-            <p>Erros: <strong>{summary.totalErrors}</strong></p>
-            <p>Precisao geral: <strong>{Math.round(summary.accuracy * 100)}%</strong></p>
-            {/* Tempo médio removido da tela final conforme solicitado */}
+            <p>Foco preciso no alvo: <strong>{hits > 0 ? Math.round((centralHits / hits) * 100) : 0}%</strong></p>
+            <p>Desvios do foco: <strong>{hits > 0 ? Math.round((nearMisses / hits) * 100) : 0}%</strong></p>
+            <p>Respostas indevidas: <strong>{selectionErrors + falseAlarms}</strong></p>
+            <p>Tempo de resposta (acertos centrais): <strong>{average(reactionTimes) ?? "-"}ms</strong></p>
+            <p>Omissões: <strong>{omissions}</strong></p>
+            <p>Total de tentativas: <strong>{attemptLogs.length}</strong></p>
           </div>
           <button
             type="button"

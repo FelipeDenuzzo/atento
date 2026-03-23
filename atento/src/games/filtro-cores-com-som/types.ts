@@ -1,3 +1,16 @@
+// Zona de clique para avaliação espacial
+export type ClickZone = "top" | "center" | "bottom";
+
+// Registro detalhado de cada tentativa para relatório
+export type AttemptLog = {
+  targetMode: TargetMode;
+  targetValue: string;
+  clickedItemId: string | null;
+  clickedZone: ClickZone | null;
+  isCorrectItem: boolean;
+  isCentralHit: boolean;
+  reactionTimeMs: number | null;
+};
 
 export type ColorId = "red" | "green" | "blue" | "yellow" | "purple";
 export type ShapeKind = "círculo" | "quadrado" | "triângulo";

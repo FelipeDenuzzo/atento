@@ -1,3 +1,19 @@
+import { ClickZone } from "./types";
+
+// Função para determinar a zona do clique em relação ao centro do shape
+export function getClickZone(
+  shape: { y: number; size: number },
+  clickY: number
+): ClickZone {
+  // Divide o shape em 3 zonas verticais iguais
+  const topLimit = shape.y - shape.size;
+  const bottomLimit = shape.y + shape.size;
+  const height = bottomLimit - topLimit;
+  const relY = clickY - topLimit;
+  if (relY < height / 3) return "top";
+  if (relY > (2 * height) / 3) return "bottom";
+  return "center";
+}
 import { ColorId, FallingShape, LevelSummary, SessionLog, SessionSummary } from "./types";
 
 export const COLOR_FILTER_LOG_KEY = "atento.filtroCoresComSom.logs";
