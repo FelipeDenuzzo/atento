@@ -553,10 +553,10 @@ export function FiltroCoresComSomGame({
             style={{ cursor: "pointer" }}
           >
             {/* Camada visual das zonas */}
-            <div className="absolute inset-0 pointer-events-none -z-10">
-              <div className={activeZone === "top" ? "h-1/3 w-full bg-zinc-100" : "h-1/3 w-full bg-transparent"} />
-              <div className={activeZone === "center" ? "h-1/3 w-full bg-zinc-100" : "h-1/3 w-full bg-transparent"} />
-              <div className={activeZone === "bottom" ? "h-1/3 w-full bg-zinc-100" : "h-1/3 w-full bg-transparent"} />
+            <div className="absolute inset-0 pointer-events-none z-0">
+              <div className={activeZone === "top" ? "h-1/3 w-full bg-zinc-100 transition-colors" : "h-1/3 w-full bg-transparent transition-colors"} />
+              <div className={activeZone === "center" ? "h-1/3 w-full bg-zinc-100 transition-colors" : "h-1/3 w-full bg-transparent transition-colors"} />
+              <div className={activeZone === "bottom" ? "h-1/3 w-full bg-zinc-100 transition-colors" : "h-1/3 w-full bg-transparent transition-colors"} />
             </div>
             {/* Estímulos renderizados normalmente */}
             {shapes.map((shape) => {
@@ -575,7 +575,7 @@ export function FiltroCoresComSomGame({
                     opacity: shape.isCaptured ? 0.2 : 1,
                     pointerEvents: "none",
                     userSelect: "none",
-                    zIndex: 4,
+                    zIndex: 10,
                   }}
                   draggable={false}
                 />
