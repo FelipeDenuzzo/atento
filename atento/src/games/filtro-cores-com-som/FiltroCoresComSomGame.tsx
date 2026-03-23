@@ -336,7 +336,7 @@ export function FiltroCoresComSomGame({
           <div className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm">
             <div>
               <p className="text-xs text-zinc-500">ALVO ATUAL</p>
-              <p className="text-base font-semibold">
+              <p className="text-base font-semibold text-black">
                 {targetMode === "color"
                   ? COLOR_LABEL[currentTarget as ColorId].toUpperCase()
                   : currentTarget.charAt(0).toUpperCase() + currentTarget.slice(1)}
@@ -356,7 +356,7 @@ export function FiltroCoresComSomGame({
       {phase === "running" && (
         <div className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className={`rounded-lg border px-3 py-2 text-sm font-semibold ${flashTarget ? "border-emerald-400 bg-emerald-50" : "border-zinc-200 bg-white"}`}>
+            <div className={`rounded-lg border px-3 py-2 text-sm font-semibold text-black ${flashTarget ? "border-emerald-400 bg-emerald-50" : "border-zinc-200 bg-white"}`}>
               Alvo: {targetMode === "color"
                 ? COLOR_LABEL[currentTarget as ColorId]
                 : currentTarget.charAt(0).toUpperCase() + currentTarget.slice(1)}
