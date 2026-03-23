@@ -1,14 +1,18 @@
-export type ColorId = "red" | "green" | "blue" | "yellow" | "purple";
 
-export type ShapeKind = "circle" | "square";
+export type ColorId = "red" | "green" | "blue" | "yellow" | "purple";
+export type ShapeKind = "circle" | "square" | "triangle";
+
+export type TargetMode = "color" | "shape";
 
 export type LevelConfig = {
   id: number;
   name: string;
   durationMs: number;
   availableColors: ColorId[];
-  initialTargetColor: ColorId;
-  colorChangeIntervalMs: number;
+  availableShapes: ShapeKind[];
+  targetMode: TargetMode;
+  initialTarget: string; // cor ou forma
+  targetChangeIntervalMs: number;
   spawnIntervalMs: number;
   maxSimultaneousShapes: number;
   fallSpeed: number;

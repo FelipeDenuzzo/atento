@@ -12,7 +12,10 @@ import {
   shouldSpawnShape,
   updateShapes,
 } from "./logic";
-import { ColorId, FallingShape, LevelSummary } from "./types";
+
+import { ColorId, FallingShape, LevelSummary, ShapeKind, TargetMode } from "./types";
+
+type Phase = "intro" | "running" | "level-summary" | "session-summary";
 
 type Props = {
   basePoints: number;
@@ -22,7 +25,12 @@ type Props = {
   onComplete: (result: { success: boolean; pointsEarned: number }) => void;
 };
 
-type Phase = "intro" | "running" | "level-summary" | "session-summary";
+
+const SHAPE_IMG: Record<ShapeKind, string> = {
+  circle: "circulo",
+  square: "quadrado",
+  triangle: "triangulo",
+};
 
 type Feedback = "none" | "correct" | "wrong";
 
@@ -60,9 +68,11 @@ function playTone(type: "correct" | "wrong") {
   }
 }
 
-function speakColor(colorId: ColorId) {
+
+function speakTarget(targetMode: TargetMode, value: string) {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-  const utterance = new SpeechSynthesisUtterance(`${COLOR_LABEL[colorId]}!`);
+  const text = targetMode === "color" ? COLOR_LABEL[value as ColorId] : value.charAt(0).toUpperCase() + value.slice(1);
+  const utterance = new SpeechSynthesisUtterance(`${text}!`);
   utterance.lang = "pt-BR";
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(utterance);
@@ -87,9 +97,7 @@ export function FiltroCoresComSomGame({
 
   const [levelIndex, setLevelIndex] = useState(firstLevelIndex);
   const [phase, setPhase] = useState<Phase>("intro");
-  const [currentTargetColor, setCurrentTargetColor] = useState<ColorId>(
-    levels[firstLevelIndex]?.initialTargetColor ?? "green",
-  );
+  const [currentTarget, setCurrentTarget] = useState<string>(levels[firstLevelIndex]?.initialTarget ?? "green");
   const [flashTarget, setFlashTarget] = useState(false);
   const [timeRemainingMs, setTimeRemainingMs] = useState(levels[firstLevelIndex]?.durationMs ?? 0);
   const [hits, setHits] = useState(0);
@@ -100,6 +108,7 @@ export function FiltroCoresComSomGame({
   const [levelSummaries, setLevelSummaries] = useState<LevelSummary[]>([]);
 
   const level = levels[levelIndex];
+  const targetMode: TargetMode = level.targetMode;
   const canAdvance = levelIndex < levels.length - 1 && levels[levelIndex + 1].id <= lastAllowedLevelId;
 
   const summary = useMemo(() => buildSessionSummary(levelSummaries), [levelSummaries]);
@@ -140,18 +149,15 @@ export function FiltroCoresComSomGame({
     setReactionTimes([]);
     setFeedback("none");
     setTimeRemainingMs(level.durationMs);
-    const initialColor = level.availableColors.includes(level.initialTargetColor)
-      ? level.initialTargetColor
-      : level.availableColors[0];
-    setCurrentTargetColor(initialColor);
+    setCurrentTarget(level.initialTarget);
   }, [level, syncShapes]);
 
   const startLevel = useCallback(() => {
     resetLevelState();
     setPhase("running");
     levelStartRef.current = performance.now();
-    speakColor(level.initialTargetColor);
-  }, [level.initialTargetColor, resetLevelState]);
+    speakTarget(targetMode, level.initialTarget);
+  }, [level.initialTarget, resetLevelState, targetMode]);
 
   useEffect(() => {
     if (phase !== "running") return;
@@ -163,17 +169,24 @@ export function FiltroCoresComSomGame({
       syncShapes([...shapesRef.current, shape]);
     }, level.spawnIntervalMs);
 
-    const colorTimer = window.setInterval(() => {
-      setCurrentTargetColor((current) => {
-        const next = getNextTargetColor(level.availableColors, current);
+    const targetTimer = window.setInterval(() => {
+      setCurrentTarget((current) => {
+        let next;
+        if (targetMode === "color") {
+          const arr = level.availableColors;
+          next = arr[(arr.indexOf(current as ColorId) + 1) % arr.length];
+        } else {
+          const arr = level.availableShapes;
+          next = arr[(arr.indexOf(current as ShapeKind) + 1) % arr.length];
+        }
         if (next !== current) {
-          speakColor(next);
+          speakTarget(targetMode, next);
           setFlashTarget(true);
           window.setTimeout(() => setFlashTarget(false), 300);
         }
         return next;
       });
-    }, level.colorChangeIntervalMs);
+    }, level.targetChangeIntervalMs);
 
     const timeTimer = window.setInterval(() => {
       if (!levelStartRef.current) return;
@@ -187,13 +200,13 @@ export function FiltroCoresComSomGame({
 
     return () => {
       window.clearInterval(spawnTimer);
-      window.clearInterval(colorTimer);
+      window.clearInterval(targetTimer);
       window.clearInterval(timeTimer);
     };
   }, [
     phase,
     level.availableColors,
-    level.colorChangeIntervalMs,
+    level.targetChangeIntervalMs,
     level.durationMs,
     level.maxSimultaneousShapes,
     level.spawnIntervalMs,
@@ -254,26 +267,18 @@ export function FiltroCoresComSomGame({
     }
   }, [phase, syncShapes]);
 
-  const handlePointer = useCallback(
-    (clientX: number, clientY: number) => {
-      if (phase !== "running") return;
-      const container = containerRef.current;
-      if (!container) return;
-
-      const rect = container.getBoundingClientRect();
-      const point = { x: clientX - rect.left, y: clientY - rect.top };
-      const target = hitTestShape(shapesRef.current, point);
+  const handleShapeClick = useCallback(
+    (shape: FallingShape) => {
+      if (phase !== "running" || shape.isCaptured) return;
       const now = performance.now();
-
-      if (!target) {
-        setErrors((value) => value + 1);
-        setFeedback("wrong");
-        playTone("wrong");
-        return;
+      let isCorrect = false;
+      if (targetMode === "color") {
+        isCorrect = shape.colorId === currentTarget;
+      } else {
+        isCorrect = shape.kind === currentTarget;
       }
-
-      if (target.colorId === currentTargetColor) {
-        const reactionMs = Math.max(0, Math.round(now - target.spawnedAt));
+      if (isCorrect) {
+        const reactionMs = Math.max(0, Math.round(now - shape.spawnedAt));
         setReactionTimes((prev) => [...prev, reactionMs]);
         setHits((value) => value + 1);
         setFeedback("correct");
@@ -283,32 +288,15 @@ export function FiltroCoresComSomGame({
         setFeedback("wrong");
         playTone("wrong");
       }
-
-      const nextShapes = shapesRef.current.map((shape) =>
-        shape.id === target.id
-          ? { ...shape, isCaptured: true, capturedAt: now }
-          : shape,
+      const nextShapes = shapesRef.current.map((s) =>
+        s.id === shape.id ? { ...s, isCaptured: true, capturedAt: now } : s
       );
       syncShapes(nextShapes);
     },
-    [currentTargetColor, phase, syncShapes],
+    [currentTarget, phase, syncShapes, targetMode],
   );
 
-  const handleClick = useCallback(
-    (event: React.MouseEvent<HTMLDivElement>) => {
-      handlePointer(event.clientX, event.clientY);
-    },
-    [handlePointer],
-  );
-
-  const handleTouch = useCallback(
-    (event: React.TouchEvent<HTMLDivElement>) => {
-      const touch = event.touches[0];
-      if (!touch) return;
-      handlePointer(touch.clientX, touch.clientY);
-    },
-    [handlePointer],
-  );
+  // Clique/touch agora é por item
 
   function continueAfterLevel() {
     if (canAdvance) {
@@ -339,23 +327,21 @@ export function FiltroCoresComSomGame({
             <p className="text-sm text-zinc-500">Nivel atual</p>
             <h3 className="text-xl font-semibold text-zinc-900">{level.name}</h3>
             <p className="mt-2 text-sm text-zinc-700">
-              Clique somente nas formas da cor anunciada. O alvo muda ao longo do tempo.
+              {targetMode === "color"
+                ? "Clique somente nas formas da cor anunciada. O alvo muda ao longo do tempo."
+                : "Clique somente nas formas do tipo anunciado. O alvo muda ao longo do tempo."}
             </p>
           </div>
-
           <div className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm">
             <div>
               <p className="text-xs text-zinc-500">ALVO ATUAL</p>
-              <p className="text-base font-semibold" style={{ color: COLOR_HEX[currentTargetColor] }}>
-                {COLOR_LABEL[currentTargetColor].toUpperCase()}
+              <p className="text-base font-semibold">
+                {targetMode === "color"
+                  ? COLOR_LABEL[currentTarget as ColorId].toUpperCase()
+                  : currentTarget.charAt(0).toUpperCase() + currentTarget.slice(1)}
               </p>
             </div>
-            <div
-              className="h-6 w-6 rounded-full border border-zinc-300"
-              style={{ backgroundColor: COLOR_HEX[currentTargetColor] }}
-            />
           </div>
-
           <button
             type="button"
             onClick={startLevel}
@@ -370,36 +356,49 @@ export function FiltroCoresComSomGame({
         <div className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className={`rounded-lg border px-3 py-2 text-sm font-semibold ${flashTarget ? "border-emerald-400 bg-emerald-50" : "border-zinc-200 bg-white"}`}>
-              Alvo: <span style={{ color: COLOR_HEX[currentTargetColor] }}>{COLOR_LABEL[currentTargetColor]}</span>
+              Alvo: {targetMode === "color"
+                ? COLOR_LABEL[currentTarget as ColorId]
+                : currentTarget.charAt(0).toUpperCase() + currentTarget.slice(1)}
             </div>
           </div>
-
           <div
             ref={containerRef}
-            onClick={handleClick}
-            onTouchStart={handleTouch}
             className="relative h-[520px] w-full overflow-hidden rounded-2xl border border-zinc-200 bg-gradient-to-b from-zinc-50 to-white"
           >
-            {shapes.map((shape) => (
-              <div
-                key={shape.id}
-                className={`absolute transition-opacity ${shape.isCaptured ? "opacity-20" : "opacity-100"}`}
-                style={{
-                  left: shape.x - shape.size,
-                  top: shape.y - shape.size,
-                  width: shape.size * 2,
-                  height: shape.size * 2,
-                  borderRadius: shape.kind === "circle" ? "9999px" : "12px",
-                  backgroundColor: COLOR_HEX[shape.colorId],
-                  boxShadow: "0 8px 18px rgba(0,0,0,0.08)",
-                }}
-              />
-            ))}
+            {shapes.map((shape) => {
+              const imgSrc = `/images/visual-search/${SHAPE_IMG[shape.kind]}_${COLOR_LABEL[shape.colorId].toLowerCase()}.png`;
+              return (
+                <button
+                  key={shape.id}
+                  type="button"
+                  onClick={() => handleShapeClick(shape)}
+                  className={`absolute transition-opacity focus:outline-none ${shape.isCaptured ? "opacity-20" : "opacity-100"}`}
+                  style={{
+                    left: shape.x - shape.size,
+                    top: shape.y - shape.size,
+                    width: shape.size * 2,
+                    height: shape.size * 2,
+                    zIndex: 2,
+                  }}
+                  tabIndex={0}
+                >
+                  <img
+                    src={imgSrc}
+                    alt={`${COLOR_LABEL[shape.colorId]} ${shape.kind}`}
+                    style={{ width: "100%", height: "100%", pointerEvents: "none", userSelect: "none" }}
+                    draggable={false}
+                  />
+                </button>
+              );
+            })}
           </div>
-
           {feedback !== "none" && (
             <p className={`text-sm ${feedback === "correct" ? "text-emerald-600" : "text-rose-600"}`}>
-              {feedback === "correct" ? "Boa!" : "Essa nao era a cor alvo."}
+              {feedback === "correct"
+                ? "Boa!"
+                : targetMode === "color"
+                  ? "Essa nao era a cor alvo."
+                  : "Essa nao era a forma alvo."}
             </p>
           )}
         </div>
