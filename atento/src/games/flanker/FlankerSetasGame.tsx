@@ -439,7 +439,7 @@ export function FlankerSetas({
     setTransitionContext("next-phase");
     setNextLevel(upcomingLevel);
     setTransitionCountdown(3);
-    setPhase((prev) => prev + 1); // Avança a fase explicitamente
+    // Fase será sempre derivada do level via getLevelConfig(level)
     setStatus("transition");
   };
 
