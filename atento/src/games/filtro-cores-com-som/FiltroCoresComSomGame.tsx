@@ -426,10 +426,26 @@ export function FiltroCoresComSomGame({
                   }}
                   tabIndex={0}
                 >
+                  {/* Demarcação visual das zonas */}
+                  <div style={{
+                    position: "absolute",
+                    left: 0,
+                    top: 0,
+                    width: "100%",
+                    height: "100%",
+                    pointerEvents: "none",
+                    zIndex: 3,
+                    display: "flex",
+                    flexDirection: "column"
+                  }}>
+                    <div style={{ flex: 1, background: "rgba(0,0,0,0.08)", borderTopLeftRadius: 8, borderTopRightRadius: 8, borderBottom: "1px dashed #888" }} />
+                    <div style={{ flex: 1, background: "rgba(0,128,0,0.13)", borderTop: "1px dashed #888", borderBottom: "1px dashed #888" }} />
+                    <div style={{ flex: 1, background: "rgba(0,0,0,0.08)", borderBottomLeftRadius: 8, borderBottomRightRadius: 8, borderTop: "1px dashed #888" }} />
+                  </div>
                   <img
                     src={imgSrc}
                     alt={`${COLOR_LABEL[shape.colorId]} ${shape.kind}`}
-                    style={{ width: "100%", height: "100%", pointerEvents: "none", userSelect: "none" }}
+                    style={{ width: "100%", height: "100%", pointerEvents: "none", userSelect: "none", position: "relative", zIndex: 4 }}
                     draggable={false}
                   />
                 </button>
