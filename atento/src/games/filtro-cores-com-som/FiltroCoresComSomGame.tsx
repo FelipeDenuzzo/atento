@@ -14,7 +14,24 @@ import {
   getClickZone,
 } from "./logic";
 
+
+// Tipos de zona e bloco
+export type Zone = "top" | "center" | "bottom";
+export type BlockConfig = {
+  index: number;
+  activeZone: Zone;
+  // outros parâmetros do bloco podem ser adicionados aqui
+};
+
 import { ColorId, FallingShape, LevelSummary, ShapeKind, TargetMode, ClickZone, AttemptLog } from "./types";
+// Configuração dos blocos/fases com zona ativa
+const BLOCKS: BlockConfig[] = [
+  { index: 1, activeZone: "center" },
+  { index: 2, activeZone: "top" },
+  { index: 3, activeZone: "bottom" },
+];
+// Adiciona zona ao tipo de estímulo
+type StimulusWithZone = FallingShape & { zone: Zone };
 
 type Phase = "intro" | "running" | "level-summary" | "session-summary";
 
@@ -107,13 +124,13 @@ export function FiltroCoresComSomGame({
   const [shapes, setShapes] = useState<FallingShape[]>([]);
   const [reactionTimes, setReactionTimes] = useState<number[]>([]);
   const [levelSummaries, setLevelSummaries] = useState<LevelSummary[]>([]);
-  // Novos estados para avaliação seletiva
+  // Novos estados para avaliação seletiva e zonas
   const [attemptLogs, setAttemptLogs] = useState<AttemptLog[]>([]);
   const [centralHits, setCentralHits] = useState(0);
-  const [nearMisses, setNearMisses] = useState(0);
-  const [selectionErrors, setSelectionErrors] = useState(0);
-  const [falseAlarms, setFalseAlarms] = useState(0);
   const [omissions, setOmissions] = useState(0);
+  const [spatialErrors, setSpatialErrors] = useState(0);
+  const [falseAlarms, setFalseAlarms] = useState(0);
+  const [activeZone, setActiveZone] = useState<Zone>(BLOCKS[0].activeZone);
 
   const level = levels[levelIndex];
   const targetMode: TargetMode = level.targetMode;
@@ -159,7 +176,15 @@ export function FiltroCoresComSomGame({
     setFeedback("none");
     setTimeRemainingMs(level.durationMs);
     setCurrentTarget(level.initialTarget);
-  }, [level, syncShapes]);
+    setAttemptLogs([]);
+    setCentralHits(0);
+    setOmissions(0);
+    setSpatialErrors(0);
+    setFalseAlarms(0);
+    // Atualiza zona ativa conforme bloco
+    const block = BLOCKS.find(b => b.index === levelIndex + 1);
+    setActiveZone(block?.activeZone ?? "center");
+  }, [level, syncShapes, levelIndex]);
 
   const startLevel = useCallback(() => {
     resetLevelState();
@@ -276,14 +301,21 @@ export function FiltroCoresComSomGame({
     }
   }, [phase, syncShapes]);
 
-  // Função para registrar tentativa detalhada
-  const registerAttempt = useCallback((log: AttemptLog) => {
+  // Função para registrar tentativa detalhada e atualizar métricas
+  const registerAttempt = useCallback((log: AttemptLog & {
+    targetZone: Zone | null;
+    activeZone: Zone;
+    clickZone: Zone | null;
+    hasTarget: boolean;
+    isClick: boolean;
+    isCorrectTarget: boolean;
+  }) => {
     setAttemptLogs((prev) => [...prev, log]);
-    // Atualiza métricas agregadas
-    if (log.isCorrectItem && log.isCentralHit) setCentralHits((v) => v + 1);
-    else if (log.isCorrectItem && log.clickedZone && (log.clickedZone === "top" || log.clickedZone === "bottom")) setNearMisses((v) => v + 1);
-    else if (!log.isCorrectItem && log.clickedItemId) setSelectionErrors((v) => v + 1);
-    else if (!log.isCorrectItem && !log.clickedItemId) setFalseAlarms((v) => v + 1);
+    // Métricas
+    if (log.isCorrectTarget) setCentralHits((v) => v + 1);
+    else if (log.hasTarget && log.targetZone === log.activeZone && !log.isClick) setOmissions((v) => v + 1);
+    else if (log.hasTarget && log.targetZone === log.activeZone && log.isClick && log.clickZone !== log.activeZone) setSpatialErrors((v) => v + 1);
+    else if (!log.hasTarget || (log.hasTarget && log.targetZone !== log.activeZone && log.isClick)) setFalseAlarms((v) => v + 1);
   }, []);
 
   // Função para detectar zona do clique
@@ -296,34 +328,44 @@ export function FiltroCoresComSomGame({
     (shape: FallingShape, event?: React.MouseEvent) => {
       if (phase !== "running" || shape.isCaptured) return;
       const now = performance.now();
-      let isCorrect = false;
+      let isTarget = false;
       if (targetMode === "color") {
-        isCorrect = shape.colorId === currentTarget;
+        isTarget = shape.colorId === currentTarget;
       } else {
-        isCorrect = shape.kind === currentTarget;
+        isTarget = shape.kind === currentTarget;
       }
+      // Determina zona do estímulo
+      const shapeZone: Zone = shape.zone ?? "center";
       // Calcular zona do clique
-      let clickedZone: ClickZone = "center";
+      let clickedZone: Zone = shapeZone;
       if (event && event.nativeEvent) {
         const btn = event.currentTarget as HTMLElement;
         const rect = btn.getBoundingClientRect();
         const clickY = event.nativeEvent.clientY - rect.top;
-        clickedZone = getClickZone(shape, shape.y - shape.size + clickY);
+        clickedZone = getClickZone(shape, shape.y - shape.size + clickY) as Zone;
       }
-      const isCentralHit = isCorrect && clickedZone === "center";
-      const reactionMs = isCorrect ? Math.max(0, Math.round(now - shape.spawnedAt)) : null;
+      const isClick = true;
+      const hasTarget = isTarget;
+      const isCorrectTarget = hasTarget && shapeZone === activeZone && clickedZone === activeZone;
+      const reactionMs = isCorrectTarget ? Math.max(0, Math.round(now - shape.spawnedAt)) : null;
       // Registro detalhado
       registerAttempt({
         targetMode,
         targetValue: currentTarget,
         clickedItemId: shape.id,
         clickedZone,
-        isCorrectItem: isCorrect,
-        isCentralHit,
+        isCorrectItem: isTarget,
+        isCentralHit: isCorrectTarget,
         reactionTimeMs: reactionMs,
+        targetZone: shapeZone,
+        activeZone,
+        clickZone: clickedZone,
+        hasTarget,
+        isClick,
+        isCorrectTarget,
       });
-      if (isCorrect) {
-        if (isCentralHit) setReactionTimes((prev) => [...prev, reactionMs!]);
+      if (isCorrectTarget) {
+        setReactionTimes((prev) => [...prev, reactionMs!]);
         setHits((value) => value + 1);
         setFeedback("correct");
         playTone("correct");
@@ -337,7 +379,7 @@ export function FiltroCoresComSomGame({
       );
       syncShapes(nextShapes);
     },
-    [currentTarget, phase, syncShapes, targetMode, registerAttempt],
+    [currentTarget, phase, syncShapes, targetMode, registerAttempt, activeZone],
   );
 
   // Clique/touch agora é por item
@@ -363,6 +405,29 @@ export function FiltroCoresComSomGame({
     resetLevelState();
   }, [phase, resetLevelState]);
 
+
+  // Função para sortear zona de cada estímulo
+  function assignZoneToShape(shape: FallingShape): StimulusWithZone {
+    // Distribui aleatoriamente entre as zonas
+    const zones: Zone[] = ["top", "center", "bottom"];
+    const zone = zones[Math.floor(Math.random() * zones.length)];
+    return { ...shape, zone };
+  }
+
+  // Adapta shapes para incluir zona
+  const shapesWithZone: StimulusWithZone[] = useMemo(() => {
+    return shapes.map(assignZoneToShape);
+  }, [shapes]);
+
+  // Renderização das zonas
+  function ZoneRow({ zone, children }: { zone: Zone; children: React.ReactNode }) {
+    const isActive = zone === activeZone;
+    const base =
+      "flex-1 flex flex-row flex-wrap items-center justify-center py-2 sm:py-3 gap-2 sm:gap-3 rounded-lg";
+    const style = isActive ? "bg-white border-2 border-emerald-400" : "bg-zinc-200";
+    return <div className={`${base} ${style}`}>{children}</div>;
+  }
+
   return (
     <div className="space-y-5">
       {phase === "intro" && (
@@ -371,10 +436,12 @@ export function FiltroCoresComSomGame({
             <p className="text-sm text-zinc-500">Nivel atual</p>
             <h3 className="text-xl font-semibold text-zinc-900">{level.name}</h3>
             <p className="mt-2 text-sm text-zinc-700">
-              {targetMode === "color"
-                ? "Clique somente nas formas da cor anunciada. O alvo muda ao longo do tempo."
-                : "Clique somente nas formas do tipo anunciado. O alvo muda ao longo do tempo."}
+              Clique apenas quando o alvo (cor ou forma anunciada) estiver na faixa destacada.
             </p>
+            <div className="mt-2 flex flex-col gap-1">
+              <span className="text-xs text-zinc-500">Faixa ativa deste bloco:</span>
+              <span className="font-bold text-base" style={{ color: "#059669" }}>{activeZone === "top" ? "Faixa superior" : activeZone === "center" ? "Faixa central" : "Faixa inferior"}</span>
+            </div>
           </div>
           <div className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm">
             <div>
@@ -407,42 +474,92 @@ export function FiltroCoresComSomGame({
           </div>
           <div
             ref={containerRef}
-            className="relative h-[520px] w-full overflow-hidden rounded-2xl border border-zinc-200 bg-gradient-to-b from-zinc-50 to-white"
+            className="relative h-[520px] w-full overflow-hidden rounded-2xl border border-zinc-200 bg-gradient-to-b from-zinc-50 to-white flex flex-col gap-2"
           >
-            {shapes.map((shape) => {
-              const imgSrc = `/images/visual-search/${SHAPE_IMG[shape.kind]}_${COLOR_LABEL[shape.colorId].toLowerCase()}.png`;
-              return (
-                <button
-                  key={shape.id}
-                  type="button"
-                  onClick={(e) => handleShapeClick(shape, e)}
-                  className={`absolute transition-opacity focus:outline-none ${shape.isCaptured ? "opacity-20" : "opacity-100"}`}
-                  style={{
-                    left: shape.x - shape.size,
-                    top: shape.y - shape.size,
-                    width: shape.size * 2,
-                    height: shape.size * 2,
-                    zIndex: 2,
-                  }}
-                  tabIndex={0}
-                >
-                  <img
-                    src={imgSrc}
-                    alt={`${COLOR_LABEL[shape.colorId]} ${shape.kind}`}
-                    style={{ width: "100%", height: "100%", pointerEvents: "none", userSelect: "none", position: "relative", zIndex: 4 }}
-                    draggable={false}
-                  />
-                </button>
-              );
-            })}
+            <ZoneRow zone="top">
+              {shapesWithZone.filter(s => s.zone === "top").map((shape) => {
+                const imgSrc = `/images/visual-search/${SHAPE_IMG[shape.kind]}_${COLOR_LABEL[shape.colorId].toLowerCase()}.png`;
+                return (
+                  <button
+                    key={shape.id}
+                    type="button"
+                    onClick={(e) => handleShapeClick(shape, e)}
+                    className={`transition-opacity focus:outline-none ${shape.isCaptured ? "opacity-20" : "opacity-100"}`}
+                    style={{
+                      width: shape.size * 2,
+                      height: shape.size * 2,
+                      zIndex: 2,
+                    }}
+                    tabIndex={0}
+                  >
+                    <img
+                      src={imgSrc}
+                      alt={`${COLOR_LABEL[shape.colorId]} ${shape.kind}`}
+                      style={{ width: "100%", height: "100%", pointerEvents: "none", userSelect: "none", position: "relative", zIndex: 4 }}
+                      draggable={false}
+                    />
+                  </button>
+                );
+              })}
+            </ZoneRow>
+            <ZoneRow zone="center">
+              {shapesWithZone.filter(s => s.zone === "center").map((shape) => {
+                const imgSrc = `/images/visual-search/${SHAPE_IMG[shape.kind]}_${COLOR_LABEL[shape.colorId].toLowerCase()}.png`;
+                return (
+                  <button
+                    key={shape.id}
+                    type="button"
+                    onClick={(e) => handleShapeClick(shape, e)}
+                    className={`transition-opacity focus:outline-none ${shape.isCaptured ? "opacity-20" : "opacity-100"}`}
+                    style={{
+                      width: shape.size * 2,
+                      height: shape.size * 2,
+                      zIndex: 2,
+                    }}
+                    tabIndex={0}
+                  >
+                    <img
+                      src={imgSrc}
+                      alt={`${COLOR_LABEL[shape.colorId]} ${shape.kind}`}
+                      style={{ width: "100%", height: "100%", pointerEvents: "none", userSelect: "none", position: "relative", zIndex: 4 }}
+                      draggable={false}
+                    />
+                  </button>
+                );
+              })}
+            </ZoneRow>
+            <ZoneRow zone="bottom">
+              {shapesWithZone.filter(s => s.zone === "bottom").map((shape) => {
+                const imgSrc = `/images/visual-search/${SHAPE_IMG[shape.kind]}_${COLOR_LABEL[shape.colorId].toLowerCase()}.png`;
+                return (
+                  <button
+                    key={shape.id}
+                    type="button"
+                    onClick={(e) => handleShapeClick(shape, e)}
+                    className={`transition-opacity focus:outline-none ${shape.isCaptured ? "opacity-20" : "opacity-100"}`}
+                    style={{
+                      width: shape.size * 2,
+                      height: shape.size * 2,
+                      zIndex: 2,
+                    }}
+                    tabIndex={0}
+                  >
+                    <img
+                      src={imgSrc}
+                      alt={`${COLOR_LABEL[shape.colorId]} ${shape.kind}`}
+                      style={{ width: "100%", height: "100%", pointerEvents: "none", userSelect: "none", position: "relative", zIndex: 4 }}
+                      draggable={false}
+                    />
+                  </button>
+                );
+              })}
+            </ZoneRow>
           </div>
           {feedback !== "none" && (
             <p className={`text-sm ${feedback === "correct" ? "text-emerald-600" : "text-rose-600"}`}>
               {feedback === "correct"
                 ? "Boa!"
-                : targetMode === "color"
-                  ? "Essa nao era a cor alvo."
-                  : "Essa nao era a forma alvo."}
+                : "Clique apenas quando o alvo estiver na faixa destacada."}
             </p>
           )}
         </div>
@@ -450,32 +567,31 @@ export function FiltroCoresComSomGame({
 
       {phase === "level-summary" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-6">
-          <h3 className="text-xl font-semibold text-zinc-900">Resumo do nivel</h3>
+          <h3 className="text-xl font-semibold text-zinc-900">Resumo do nível</h3>
           <div className="space-y-2 text-zinc-700">
-            <p>Foco preciso no alvo: <strong>{hits > 0 ? Math.round((centralHits / hits) * 100) : 0}%</strong></p>
-            <p>Desvios do foco: <strong>{hits > 0 ? Math.round((nearMisses / hits) * 100) : 0}%</strong></p>
-            <p>Respostas indevidas: <strong>{selectionErrors + falseAlarms}</strong></p>
-            <p>Tempo de resposta (acertos centrais): <strong>{average(reactionTimes) ?? "-"}ms</strong></p>
+            <p>Você clicou no alvo na área destacada em <strong>{hits > 0 ? Math.round((centralHits / hits) * 100) : 0}%</strong> das vezes.</p>
+            <p>Você deixou de clicar quando o alvo estava na área destacada em <strong>{hits > 0 ? Math.round((omissions / hits) * 100) : 0}%</strong> das vezes.</p>
+            <p>Você clicou fora da área destacada ou sem alvo em <strong>{spatialErrors + falseAlarms}</strong> ocasiões.</p>
+            <p>Tempo de resposta (acertos): <strong>{average(reactionTimes) ?? "-"}ms</strong></p>
           </div>
           <button
             type="button"
             onClick={continueAfterLevel}
             className="w-full rounded-lg bg-zinc-900 px-4 py-3 text-base font-medium text-white hover:bg-zinc-700"
           >
-            {canAdvance ? "Proximo nivel" : "Ver resumo final"}
+            {canAdvance ? "Próximo nível" : "Ver resumo final"}
           </button>
         </div>
       )}
 
       {phase === "session-summary" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-6">
-          <h3 className="text-xl font-semibold text-zinc-900">Sessao concluida</h3>
+          <h3 className="text-xl font-semibold text-zinc-900">Sessão concluída</h3>
           <div className="space-y-2 text-zinc-700">
-            <p>Foco preciso no alvo: <strong>{hits > 0 ? Math.round((centralHits / hits) * 100) : 0}%</strong></p>
-            <p>Desvios do foco: <strong>{hits > 0 ? Math.round((nearMisses / hits) * 100) : 0}%</strong></p>
-            <p>Respostas indevidas: <strong>{selectionErrors + falseAlarms}</strong></p>
-            <p>Tempo de resposta (acertos centrais): <strong>{average(reactionTimes) ?? "-"}ms</strong></p>
-            <p>Omissões: <strong>{omissions}</strong></p>
+            <p>Você clicou no alvo na área destacada em <strong>{hits > 0 ? Math.round((centralHits / hits) * 100) : 0}%</strong> das vezes.</p>
+            <p>Você deixou de clicar quando o alvo estava na área destacada em <strong>{hits > 0 ? Math.round((omissions / hits) * 100) : 0}%</strong> das vezes.</p>
+            <p>Você clicou fora da área destacada ou sem alvo em <strong>{spatialErrors + falseAlarms}</strong> ocasiões.</p>
+            <p>Tempo de resposta (acertos): <strong>{average(reactionTimes) ?? "-"}ms</strong></p>
             <p>Total de tentativas: <strong>{attemptLogs.length}</strong></p>
           </div>
           <button
@@ -483,7 +599,7 @@ export function FiltroCoresComSomGame({
             onClick={finishSession}
             className="w-full rounded-lg bg-emerald-600 px-4 py-3 text-base font-medium text-white hover:bg-emerald-700"
           >
-            Concluir exercicio
+            Concluir exercício
           </button>
         </div>
       )}
