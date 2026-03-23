@@ -244,9 +244,9 @@ export const trainingPlans: TrainingPlan[] = [
       },
       {
         id: "sel-14",
-        title: "Flanker — Seta Central",
+        title: "A seta certa",
         attentionType: "seletiva",
-        kind: "flanker",
+        kind: "A seta certa",
         instructions:
           "Indique a direção da seta alvo ignorando as laterais.",
         startingLevel: 1,
