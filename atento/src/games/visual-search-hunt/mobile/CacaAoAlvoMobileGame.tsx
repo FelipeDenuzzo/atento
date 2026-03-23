@@ -83,6 +83,15 @@ function getLevelConfig(level: number): {
   };
 }
 
+type CacaAoAlvoMobileGameProps = {
+  onCorrectSound?: () => void;
+  onErrorSound?: () => void;
+  onEnd: (result: { success: boolean; pointsEarned: number }) => void;
+  basePoints: number;
+  startingLevel: number;
+  maxLevelHint: number;
+};
+
 export function CacaAoAlvoMobileGame({
   onCorrectSound,
   onErrorSound,
@@ -90,7 +99,7 @@ export function CacaAoAlvoMobileGame({
   basePoints,
   startingLevel,
   maxLevelHint,
-}: Props) {
+}: CacaAoAlvoMobileGameProps) {
   // Guard clause para props obrigatórios
   if (basePoints == null || startingLevel == null || maxLevelHint == null || typeof onEnd !== 'function') {
     return null;

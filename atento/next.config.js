@@ -1,7 +1,6 @@
+/** @type {import('next').NextConfig} */
 const nextConfig = {
-  turbopack: {
-    root: process.cwd(),
-  },
+  // Outras configs válidas aqui
 };
 
 module.exports = nextConfig;
