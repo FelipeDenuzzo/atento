@@ -145,6 +145,7 @@ function generateTrial(id: number, config: LevelConfig): Trial {
     level: config.level,
     phase: config.phase,
     arrowCount: config.arrowCount,
+    targetIndex: TARGET_INDEX,
     stimulus,
     correctDirection: stimulus[TARGET_INDEX]?.direction,
     flankerDirection,
