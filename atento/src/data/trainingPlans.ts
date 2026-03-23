@@ -255,11 +255,11 @@ export const trainingPlans: TrainingPlan[] = [
       },
       {
         id: "sel-15",
-        title: "Stroop Invertido",
+        title: "Cor da palavra",
         attentionType: "seletiva",
         kind: "stroop",
         instructions:
-          "Clique na cor da tinta, nao na palavra escrita.",
+          "Clique na cor e não na palavra escrita.",
         startingLevel: 1,
         maxLevelHint: 8,
         points: 30,
