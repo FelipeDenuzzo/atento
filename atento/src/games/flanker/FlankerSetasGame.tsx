@@ -330,6 +330,7 @@ export function FlankerSetas({
       playFeedbackSound(isCorrect);
       setFeedback(isCorrect ? "correct" : "incorrect");
 
+
       setTrials((prev) =>
         prev.map((trial, index) =>
           index === currentTrialIndex
@@ -340,23 +341,28 @@ export function FlankerSetas({
                 reactionTimeMs: reactionTime,
                 timedOut,
               }
-            : trial,
-        ),
-            if (!currentTrial.stimulus || !currentTrial.stimulus[TARGET_INDEX]) {
+            : trial
+        )
+      );
+
+      if (!currentTrial.stimulus || !currentTrial.stimulus[TARGET_INDEX]) {
+        setFeedback(null);
+        moveToNextTrial();
+        return;
+      }
 
       if (isCorrect) {
         setHits((value) => value + 1);
         setScore((value) => value + (reactionTime !== null && reactionTime <= 1000 ? 12 : 8));
       } else {
         setErrors((value) => value + 1);
-            const correctDirection = currentTrial.stimulus[TARGET_INDEX].direction;
       }
 
       window.setTimeout(() => {
         moveToNextTrial();
       }, 300);
     },
-    [currentTrial, currentTrialIndex, moveToNextTrial, status],
+    [currentTrial, currentTrialIndex, moveToNextTrial, status]
   );
 
   const handleAnswer = useCallback(
