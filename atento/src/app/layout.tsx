@@ -37,7 +37,7 @@ export default function RootLayout({
             padding: "6px 0 0 0"
           }}
         >
-          versão - 1.001.001.004 - 24/03/26 - 18:15
+          versão - 1.001.001.004 - 24/03/26 - 18:16
         </div>
         <div style={{ paddingTop: "24px" }}>{children}</div>
       </body>
