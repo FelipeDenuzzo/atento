@@ -95,6 +95,8 @@ export function EscutaSeletivaCocktailPartyDesktopGame({
   const [trialIndex, setTrialIndex] = useState(0);
   const [currentTrial, setCurrentTrial] = useState(buildTrial);
   const [answer, setAnswer] = useState(["", "", ""]);
+  // Refs para inputs de resposta
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [feedback, setFeedback] = useState<null | { correct: boolean; expected: number[] }>(null);
   const [results, setResults] = useState<TrialResult[]>([]);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
@@ -196,7 +198,17 @@ export function EscutaSeletivaCocktailPartyDesktopGame({
       next[index] = sanitized;
       return next;
     });
+    if (sanitized !== "" && index < 2) {
+      inputRefs.current[index + 1]?.focus();
+    }
   };
+
+  // Foca automaticamente no primeiro input ao entrar na fase 'answering'
+  React.useEffect(() => {
+    if (phase === "answering") {
+      setTimeout(() => inputRefs.current[0]?.focus(), 100);
+    }
+  }, [phase]);
 
   const submitAnswer = useCallback(() => {
     const userAnswer = answer.map((v) => Number(v));
@@ -294,6 +306,7 @@ export function EscutaSeletivaCocktailPartyDesktopGame({
             {answer.map((value, index) => (
               <input
                 key={index}
+                ref={el => { inputRefs.current[index] = el; }}
                 value={value}
                 onChange={(e) => updateAnswer(index, e.target.value)}
                 inputMode="numeric"
