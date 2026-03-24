@@ -219,32 +219,10 @@ const beginPlayback = useCallback(async () => {
       responseTimeMs,
     };
 
-    const updated = [...results, result];
-    setResults(updated);
+    setResults((prev) => [...prev, result]);
     setFeedback({ correct, expected });
     setPhase("feedback");
-
-    if (isLastTrial) {
-      const hits = updated.filter((r) => r.correct).length;
-      const report = {
-        game: "escuta-seletiva-cocktail-party",
-        totalTrials,
-        hits,
-        errors: totalTrials - hits,
-        accuracy: totalTrials ? hits / totalTrials : 0,
-        trials: updated,
-        finishedAt: new Date().toISOString(),
-        ...reportContext,
-      };
-      const pointsEarned = hits * basePoints;
-      onComplete({
-        success: hits === totalTrials,
-        pointsEarned,
-        report,
-      });
-      setPhase("finished");
-    }
-  }, [answer, currentTrial, isLastTrial, onComplete, results, totalTrials, trialIndex]);
+  }, [answer, currentTrial, trialIndex]);
 
   const nextTrial = useCallback(() => {
     const nextIndex = trialIndex + 1;
@@ -347,8 +325,8 @@ const beginPlayback = useCallback(async () => {
           <button
             onClick={() => {
               if (isLastTrial) {
-                // Garante chamada de onComplete caso usuário clique em Finalizar
-                const hits = [...results, {
+                // Finaliza e gera o relatório com os resultados já atualizados
+                const totalHits = [...results, {
                   trial: trialIndex + 1,
                   targetVoice: currentTrial.targetVoice,
                   targetSequence: currentTrial.targetSequence,
@@ -357,15 +335,14 @@ const beginPlayback = useCallback(async () => {
                   userAnswer: answer.map((v) => Number(v)),
                   correct: feedback.correct,
                   responseTimeMs: answerStartRef.current ? Math.round(performance.now() - answerStartRef.current) : 0,
-                }];
-                const totalHits = hits.filter((r) => r.correct).length;
+                }].filter((r, i, arr) => arr.findIndex(x => x.trial === r.trial) === i).filter((r) => r.correct).length;
                 const report = {
                   game: "escuta-seletiva-cocktail-party",
                   totalTrials,
                   hits: totalHits,
                   errors: totalTrials - totalHits,
                   accuracy: totalTrials ? totalHits / totalTrials : 0,
-                  trials: hits,
+                  trials: results,
                   finishedAt: new Date().toISOString(),
                   ...reportContext,
                 };
