@@ -357,6 +357,33 @@ export function EscutaSeletivaCocktailPartyDesktopGame({
           <p className="text-neutral-300">
             Acertos: {results.filter((r) => r.correct).length} de {results.length}
           </p>
+          <div className="mt-4">
+            <h3 className="text-lg font-semibold mb-2">Detalhamento dos Trials</h3>
+            <table className="w-full text-sm border border-white/10 rounded-xl overflow-hidden">
+              <thead className="bg-neutral-800">
+                <tr>
+                  <th className="px-2 py-1">#</th>
+                  <th className="px-2 py-1">Voz-alvo</th>
+                  <th className="px-2 py-1">Esperado</th>
+                  <th className="px-2 py-1">Resposta</th>
+                  <th className="px-2 py-1">Correto?</th>
+                  <th className="px-2 py-1">Tempo (ms)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {results.map((r, i) => (
+                  <tr key={i} className={r.correct ? "bg-neutral-900" : "bg-red-900/30"}>
+                    <td className="px-2 py-1 text-center">{r.trial}</td>
+                    <td className="px-2 py-1 text-center">{voiceLabel(r.targetVoice)}</td>
+                    <td className="px-2 py-1 text-center">{r.targetSequence.join("-")}</td>
+                    <td className="px-2 py-1 text-center">{r.userAnswer.join("-")}</td>
+                    <td className="px-2 py-1 text-center font-bold">{r.correct ? "✔️" : "❌"}</td>
+                    <td className="px-2 py-1 text-center">{r.responseTimeMs}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
