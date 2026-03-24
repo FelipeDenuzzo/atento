@@ -286,7 +286,6 @@ const beginPlayback = useCallback(async () => {
           </p>
           <button
             onClick={() => {
-              console.log('[ATENTO][TESTE AUDIO] Botão de teste de áudio clicado');
               playSingle('/audio/0_masc.MP3');
             }}
             className="rounded-xl bg-yellow-600 px-4 py-2 font-medium hover:bg-yellow-500"
