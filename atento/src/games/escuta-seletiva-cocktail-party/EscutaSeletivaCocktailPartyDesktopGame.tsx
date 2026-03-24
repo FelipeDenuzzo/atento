@@ -99,10 +99,11 @@ export function EscutaSeletivaCocktailPartyDesktopGame({
   const [results, setResults] = useState<TrialResult[]>([]);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
   const [countdown, setCountdown] = useState(3);
-  const countdownRef = useRef<NodeJS.Timeout | null>(null);
 
   const answerStartRef = useRef<number | null>(null);
   const isLastTrial = trialIndex >= totalTrials - 1;
+  // Ref para evitar múltiplos playbacks por trial
+  const playbackStartedRef = useRef(false);
 
   const instructions = useMemo(
     () =>
@@ -145,48 +146,45 @@ export function EscutaSeletivaCocktailPartyDesktopGame({
   }, []);
 
   const playSequence = useCallback(async () => {
-    setPhase("playing");
     for (const item of currentTrial.fullSequence) {
-      console.log('[ATENTO][PLAY SEQUENCE] Tocando áudio:', item.src);
       await playSingle(item.src);
       await new Promise((r) => setTimeout(r, 350));
     }
-    console.log('[ATENTO][PLAY SEQUENCE] Fim da sequência, indo para answering');
     setPhase("answering");
     answerStartRef.current = performance.now();
   }, [currentTrial.fullSequence, playSingle]);
 
 
-  // Função para iniciar a reprodução após a contagem
-const beginPlayback = useCallback(async () => {
-  console.log('[ATENTO][BEGIN PLAYBACK] Iniciando beginPlayback');
-  await unlockAudio();
-  await playSequence();
-}, [playSequence, unlockAudio]);
+    // Função para iniciar a reprodução após a contagem
+    const beginPlayback = useCallback(async () => {
+      await unlockAudio();
+      await playSequence();
+    }, [playSequence, unlockAudio]);
 
   // Inicia a contagem regressiva ao clicar em "Iniciar treino"
   const startCountdown = useCallback(() => {
+    playbackStartedRef.current = false;
     setCountdown(3);
     setPhase("countdown");
-    if (countdownRef.current) clearInterval(countdownRef.current);
-    let current = 3;
-    countdownRef.current = setInterval(() => {
-      current -= 1;
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(countdownRef.current!);
-          setPhase("playing");
-          // beginPlayback será chamado via useEffect abaixo
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
   }, []);
 
-  // Garante que beginPlayback é chamado sempre que a fase muda para 'playing'
+  // Controla a contagem regressiva com setTimeout
   React.useEffect(() => {
-    if (phase === "playing") {
+    if (phase !== "countdown") return;
+    if (countdown <= 0) {
+      setPhase("playing");
+      return;
+    }
+    const timer = setTimeout(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [phase, countdown]);
+
+  // Garante que beginPlayback é chamado sempre que a fase muda para 'playing', mas só uma vez por trial
+  React.useEffect(() => {
+    if (phase === "playing" && !playbackStartedRef.current) {
+      playbackStartedRef.current = true;
       beginPlayback();
     }
   }, [phase, beginPlayback]);
@@ -234,10 +232,8 @@ const beginPlayback = useCallback(async () => {
     setCurrentTrial(buildTrial());
     setAnswer(["", "", ""]);
     setFeedback(null);
-    setCountdown(3);
-    setPhase("countdown");
-    // O startCountdown não é chamado aqui, pois a transição para 'playing' já será tratada pelo useEffect
-  }, [totalTrials, trialIndex]);
+    startCountdown();
+  }, [totalTrials, trialIndex, startCountdown]);
 
 
   return (
@@ -326,16 +322,7 @@ const beginPlayback = useCallback(async () => {
             onClick={() => {
               if (isLastTrial) {
                 // Finaliza e gera o relatório com os resultados já atualizados
-                const totalHits = [...results, {
-                  trial: trialIndex + 1,
-                  targetVoice: currentTrial.targetVoice,
-                  targetSequence: currentTrial.targetSequence,
-                  distractorSequence: currentTrial.distractorSequence,
-                  fullSequence: currentTrial.fullSequence.map((item) => ({ digit: item.digit, voice: item.voice })),
-                  userAnswer: answer.map((v) => Number(v)),
-                  correct: feedback.correct,
-                  responseTimeMs: answerStartRef.current ? Math.round(performance.now() - answerStartRef.current) : 0,
-                }].filter((r, i, arr) => arr.findIndex(x => x.trial === r.trial) === i).filter((r) => r.correct).length;
+                const totalHits = results.filter((r) => r.correct).length;
                 const report = {
                   game: "escuta-seletiva-cocktail-party",
                   totalTrials,
