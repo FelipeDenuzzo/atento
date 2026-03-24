@@ -191,7 +191,7 @@ export function EscutaSeletivaCocktailPartyMobileGame({
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Escuta seletiva</h2>
           <p className="text-sm text-neutral-300">
-            Você ouvirá 6 números alternando entre voz masculina e feminina. Foque apenas na voz-alvo indicada e depois digite os 3 números dessa voz, na ordem.
+            Neste treino, você ouvirá uma sequência de 6 números, alternando entre uma voz masculina e uma feminina. Sua tarefa é prestar atenção apenas na voz-alvo indicada e, ao final, digitar os 3 números falados por essa voz, ignorando os números da outra voz. Recomendamos o uso de fones de ouvido.
           </p>
           <button
             onClick={() => setPhase("ready")}
@@ -206,7 +206,7 @@ export function EscutaSeletivaCocktailPartyMobileGame({
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Rodada {trialIndex + 1}</h2>
           <p className="text-base">
-            Voz-alvo: <strong>{voiceLabel(currentTrial.targetVoice)}</strong>
+            Voz-alvo: <strong>{voiceLabel(currentTrial.targetVoice).toUpperCase()}</strong>
           </p>
           <button
             onClick={playSequence}
@@ -234,7 +234,7 @@ export function EscutaSeletivaCocktailPartyMobileGame({
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Sua resposta</h2>
           <p className="text-sm text-neutral-300">
-            Digite os 3 números da voz <strong>{voiceLabel(currentTrial.targetVoice)}</strong>.
+            Digite os 3 números da voz <strong>{voiceLabel(currentTrial.targetVoice).toUpperCase()}</strong>.
           </p>
           <div className="grid grid-cols-3 gap-3">
             {answer.map((value, index) => (
