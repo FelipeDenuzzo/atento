@@ -262,10 +262,17 @@ const beginPlayback = useCallback(async () => {
             Neste treino, você ouvirá uma sequência de 6 números, alternando entre uma voz masculina e uma feminina. Sua tarefa é prestar atenção apenas na voz-alvo indicada e, ao final, digitar os 3 números falados por essa voz, ignorando os números da outra voz. Recomendamos o uso de fones de ouvido.
           </p>
 
+          <button
+            onClick={() => playSingle('/audio/0_masc.MP3')}
+            className="rounded-xl bg-yellow-600 px-4 py-2 font-medium hover:bg-yellow-500"
+          >
+            Testar áudio
+          </button>
+
           <p className="text-base text-neutral-200 mt-2">
             Voz-alvo desta rodada: {" "}
             <span className="font-semibold">
-              {voiceLabel(currentTrial.targetVoice)}
+              {voiceLabel(currentTrial.targetVoice).toUpperCase()}
             </span>
           </p>
 
@@ -284,14 +291,6 @@ const beginPlayback = useCallback(async () => {
           <p className="text-base text-neutral-200 mt-2">
             Voz-alvo desta rodada: <span className="font-semibold">{voiceLabel(currentTrial.targetVoice).toUpperCase()}</span>
           </p>
-          <button
-            onClick={() => {
-              playSingle('/audio/0_masc.MP3');
-            }}
-            className="rounded-xl bg-yellow-600 px-4 py-2 font-medium hover:bg-yellow-500"
-          >
-            Testar áudio
-          </button>
           <p className="text-sm text-neutral-300">Prepare-se! O treino começará em instantes.</p>
         </div>
       )}
