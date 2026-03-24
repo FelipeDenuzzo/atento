@@ -176,13 +176,20 @@ const beginPlayback = useCallback(async () => {
         if (prev <= 1) {
           clearInterval(countdownRef.current!);
           setPhase("playing");
-          beginPlayback();
+          // beginPlayback será chamado via useEffect abaixo
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
-  }, [beginPlayback]);
+  }, []);
+
+  // Garante que beginPlayback é chamado sempre que a fase muda para 'playing'
+  React.useEffect(() => {
+    if (phase === "playing") {
+      beginPlayback();
+    }
+  }, [phase, beginPlayback]);
 
   const updateAnswer = (index: number, value: string) => {
     const sanitized = value.replace(/\D/g, "").slice(0, 1);
@@ -251,6 +258,7 @@ const beginPlayback = useCallback(async () => {
     setFeedback(null);
     setCountdown(3);
     setPhase("countdown");
+    // O startCountdown não é chamado aqui, pois a transição para 'playing' já será tratada pelo useEffect
   }, [totalTrials, trialIndex]);
 
 
