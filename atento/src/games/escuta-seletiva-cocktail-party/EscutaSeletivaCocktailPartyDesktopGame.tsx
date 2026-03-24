@@ -339,7 +339,41 @@ const beginPlayback = useCallback(async () => {
             Sequência correta: {feedback.expected.join(" - ")}
           </p>
           <button
-            onClick={nextTrial}
+            onClick={() => {
+              if (isLastTrial) {
+                // Garante chamada de onComplete caso usuário clique em Finalizar
+                const hits = [...results, {
+                  trial: trialIndex + 1,
+                  targetVoice: currentTrial.targetVoice,
+                  targetSequence: currentTrial.targetSequence,
+                  distractorSequence: currentTrial.distractorSequence,
+                  fullSequence: currentTrial.fullSequence.map((item) => ({ digit: item.digit, voice: item.voice })),
+                  userAnswer: answer.map((v) => Number(v)),
+                  correct: feedback.correct,
+                  responseTimeMs: answerStartRef.current ? Math.round(performance.now() - answerStartRef.current) : 0,
+                }];
+                const totalHits = hits.filter((r) => r.correct).length;
+                const report = {
+                  game: "escuta-seletiva-cocktail-party",
+                  totalTrials,
+                  hits: totalHits,
+                  errors: totalTrials - totalHits,
+                  accuracy: totalTrials ? totalHits / totalTrials : 0,
+                  trials: hits,
+                  finishedAt: new Date().toISOString(),
+                  ...reportContext,
+                };
+                const pointsEarned = totalHits * basePoints;
+                onComplete({
+                  success: totalHits === totalTrials,
+                  pointsEarned,
+                  report,
+                });
+                setPhase("finished");
+              } else {
+                nextTrial();
+              }
+            }}
             className="rounded-xl bg-blue-600 px-4 py-2 font-medium hover:bg-blue-500"
           >
             {isLastTrial ? "Finalizar" : "Próxima rodada"}
