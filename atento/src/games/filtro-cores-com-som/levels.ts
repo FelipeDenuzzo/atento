@@ -73,32 +73,4 @@ export const LEVELS: LevelConfig[] = [
     maxSimultaneousShapes: 12,
     fallSpeed: 130,
   },
-  // Fase 5: alvo por cor E forma específica
-  {
-    id: 5,
-    name: "Nivel 5 (Cor e Forma: Círculo Azul)",
-    durationMs: 40000,
-    availableColors: ["blue"],
-    availableShapes: ["círculo"],
-    targetMode: "shape-color",
-    initialTarget: "círculo-azul",
-    targetChangeIntervalMs: 40000,
-    spawnIntervalMs: 600,
-    maxSimultaneousShapes: 10,
-    fallSpeed: 120,
-  },
-  // Fase 6: alvo por cor E forma específica
-  {
-    id: 6,
-    name: "Nivel 6 (Cor e Forma: Quadrado Vermelho)",
-    durationMs: 40000,
-    availableColors: ["red"],
-    availableShapes: ["quadrado"],
-    targetMode: "shape-color",
-    initialTarget: "quadrado-vermelho",
-    targetChangeIntervalMs: 40000,
-    spawnIntervalMs: 600,
-    maxSimultaneousShapes: 10,
-    fallSpeed: 120,
-  },
 ];

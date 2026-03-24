@@ -196,14 +196,8 @@ export function FiltroCoresComSomGame({
     resetLevelState();
     setPhase("running");
     levelStartRef.current = performance.now();
-    if (targetMode === "shape-color") {
-      const newTarget = getRandomShapeColorTarget();
-      setCurrentTarget(newTarget);
-      speakTarget(targetMode, newTarget);
-    } else {
-      setCurrentTarget(level.initialTarget);
-      speakTarget(targetMode, level.initialTarget);
-    }
+    setCurrentTarget(level.initialTarget);
+    speakTarget(targetMode, level.initialTarget);
   }, [level.initialTarget, resetLevelState, targetMode, level.availableColors, level.availableShapes]);
 
   useEffect(() => {
@@ -218,22 +212,21 @@ export function FiltroCoresComSomGame({
 
     const targetTimer = window.setInterval(() => {
       setCurrentTarget((current) => {
-        let next;
+        let next: string | undefined;
         if (targetMode === "color") {
           const arr = level.availableColors;
           next = arr[(arr.indexOf(current as ColorId) + 1) % arr.length];
         } else if (targetMode === "shape") {
           const arr = level.availableShapes;
           next = arr[(arr.indexOf(current as ShapeKind) + 1) % arr.length];
-        } else if (targetMode === "shape-color") {
-          next = getRandomShapeColorTarget();
         }
-        if (next !== current) {
+        if (next !== undefined && next !== current) {
           speakTarget(targetMode, next);
           setFlashTarget(true);
           window.setTimeout(() => setFlashTarget(false), 300);
+          return next;
         }
-        return next;
+        return current;
       });
     }, level.targetChangeIntervalMs);
 
@@ -348,12 +341,9 @@ export function FiltroCoresComSomGame({
         isTarget = shape.colorId === currentTarget;
       } else if (targetMode === "shape") {
         isTarget = shape.kind === currentTarget;
-      } else if (targetMode === "shape-color") {
-        const [targetShape, targetColor] = currentTarget.split("-");
-        isTarget = shape.kind === targetShape && shape.colorId === targetColor;
       }
-      // Determina zona do estímulo
-      const shapeZone: Zone = shape.zone ?? "center";
+      // Determina zona do estímulo (não existe shape.zone, usar 'center')
+      const shapeZone: Zone = "center";
       // Calcular zona do clique
       let clickedZone: Zone = shapeZone;
       if (event && event.nativeEvent) {
