@@ -1,5 +1,14 @@
 import { SymbolMapLevelConfig } from "./types";
 
+// Lista de imagens disponíveis
+const symbolImages = Array.from({ length: 28 }, (_, i) => `${18 + i}.png`);
+
+function getRandomSymbols(count: number, exclude: string[] = []): string[] {
+  const pool = symbolImages.filter((img) => !exclude.includes(img));
+  const shuffled = pool.sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
+
 export const defaultSymbolMapLevels = (): SymbolMapLevelConfig[] => [
   {
     id: 1,
@@ -7,9 +16,9 @@ export const defaultSymbolMapLevels = (): SymbolMapLevelConfig[] => [
     rows: 5,
     cols: 5,
     timeLimitSec: 50,
-    targetSymbols: ["☆"],
+    targetSymbols: getRandomSymbols(1),
     targetCount: 6,
-    distractorSymbols: ["●", "■", "▲", "✚", "◆"],
+    distractorSymbols: getRandomSymbols(5, []),
   },
   {
     id: 2,
@@ -17,9 +26,9 @@ export const defaultSymbolMapLevels = (): SymbolMapLevelConfig[] => [
     rows: 6,
     cols: 6,
     timeLimitSec: 45,
-    targetSymbols: ["★"],
+    targetSymbols: getRandomSymbols(1),
     targetCount: 8,
-    distractorSymbols: ["☆", "✦", "✧", "✩", "✪"],
+    distractorSymbols: getRandomSymbols(5, []),
   },
   {
     id: 3,
@@ -27,9 +36,9 @@ export const defaultSymbolMapLevels = (): SymbolMapLevelConfig[] => [
     rows: 7,
     cols: 7,
     timeLimitSec: 40,
-    targetSymbols: ["○"],
+    targetSymbols: getRandomSymbols(1),
     targetCount: 10,
-    distractorSymbols: ["◯", "◉", "●", "◌", "◎"],
+    distractorSymbols: getRandomSymbols(5, []),
   },
   {
     id: 4,
@@ -37,8 +46,8 @@ export const defaultSymbolMapLevels = (): SymbolMapLevelConfig[] => [
     rows: 8,
     cols: 8,
     timeLimitSec: 35,
-    targetSymbols: ["△", "▲"],
+    targetSymbols: getRandomSymbols(2),
     targetCount: 14,
-    distractorSymbols: ["▽", "▼", "◮", "◭", "▵", "▴"],
+    distractorSymbols: getRandomSymbols(6, []),
   },
 ];

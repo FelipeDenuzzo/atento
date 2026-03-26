@@ -226,15 +226,20 @@ export function MapaDeSimbolosGame({
                   key={cell.id}
                   type="button"
                   onClick={() => onCellClick(cell)}
-                  className={`aspect-square rounded-md border text-xl transition ${
+                  className={`aspect-square rounded-md border transition flex items-center justify-center p-1 ${
                     isFound
-                      ? "border-emerald-300 bg-emerald-100 text-emerald-800"
+                      ? "border-emerald-300 bg-emerald-100"
                       : isFlashingMiss
-                        ? "border-rose-300 bg-rose-100 text-rose-700"
-                        : "border-zinc-200 bg-zinc-50 text-zinc-800 hover:bg-zinc-100"
+                        ? "border-rose-300 bg-rose-100"
+                        : "border-zinc-200 bg-zinc-50 hover:bg-zinc-100"
                   }`}
                 >
-                  {cell.symbol}
+                  <img
+                    src={"/simbolos/" + cell.symbol}
+                    alt="símbolo"
+                    className="max-w-full max-h-full object-contain"
+                    draggable={false}
+                  />
                 </button>
               );
             })}
