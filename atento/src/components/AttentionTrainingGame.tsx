@@ -1024,17 +1024,7 @@ export function AttentionTrainingGame() {
                   if (success) {
                     setHits((value) => value + 1);
                   }
-                  const nextIndex = currentIndex + 1;
-                  if (nextIndex >= activeExercises.length) {
-                    setStage("result");
-                  } else {
-                    setCurrentIndex(nextIndex);
-                    setSelectedOption(null);
-                    setSubmitted(false);
-                    setStage(
-                      getStageForExercise(activeExercises[nextIndex]),
-                    );
-                  }
+                  setStage("result");
                 }}
               />
             ) : currentExercise.kind === "stroop" ? (
