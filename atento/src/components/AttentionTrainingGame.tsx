@@ -1745,13 +1745,51 @@ export function AttentionTrainingGame() {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={restart}
-              className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
-            >
-              Jogar novamente
-            </button>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                className="flex-1 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700"
+                onClick={() => {
+                  // Avançar para o próximo treino
+                  const next = activeExercises[currentIndex + 1];
+                  if (next) {
+                    setCurrentIndex(currentIndex + 1);
+                    setScore(0);
+                    setHits(0);
+                    setStage(getStageForExercise(next));
+                  } else {
+                    setStage("intro"); // acabou a trilha
+                    setCurrentIndex(0);
+                    setTrainingMode(null);
+                  }
+                }}
+              >
+                Avançar para o próximo treino
+              </button>
+              <button
+                type="button"
+                className="flex-1 rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
+                onClick={() => {
+                  // Refazer o treino atual
+                  setScore(0);
+                  setHits(0);
+                  setStage("exercise");
+                }}
+              >
+                Refazer este treino
+              </button>
+              <button
+                type="button"
+                className="flex-1 rounded-lg border border-zinc-200 px-4 py-2 font-medium text-zinc-700 hover:bg-zinc-50"
+                onClick={() => {
+                  setStage("intro");
+                  setCurrentIndex(0);
+                  setTrainingMode(null);
+                }}
+              >
+                Voltar à tela inicial
+              </button>
+            </div>
           </div>
         )}
       </section>
