@@ -191,9 +191,17 @@ export function MapaDeSimbolosGame({
 
           <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
             <p className="text-xs text-zinc-500">ALVO(S)</p>
-            <p className="mt-2 text-3xl font-bold tracking-widest text-zinc-900">
-              {level.targetSymbols.join("  ")}
-            </p>
+            <div className="mt-2 flex gap-4 justify-center">
+              {level.targetSymbols.map((symbol, idx) => (
+                <img
+                  key={symbol + idx}
+                  src={"/simbolos/" + symbol}
+                  alt="símbolo alvo"
+                  className="h-16 w-16 object-contain inline-block"
+                  draggable={false}
+                />
+              ))}
+            </div>
             <p className="mt-2 text-sm text-zinc-600">
               Grade {level.rows}x{level.cols} · Tempo {level.timeLimitSec}s
             </p>
