@@ -1,3 +1,6 @@
+
+"use client";
+
 import { AcharOFaltandoInstructions } from "@/games/achar-o-faltando/AcharOFaltandoInstructions";
 import { FlankerSetasInstructions } from "@/games/flanker/FlankerSetasInstructions";
 import { StroopInvertidoInstructions } from "@/games/stroop-invertido/StroopInvertidoInstructions";
@@ -49,7 +52,6 @@ const instructionComponents: Record<string, any> = {
   "escutaseletiva-cocktail-party": EscutaSeletivaCocktailPartyInstructions,
   "visual-search": VisualSearchHuntInstructions,
 };
-"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import {
