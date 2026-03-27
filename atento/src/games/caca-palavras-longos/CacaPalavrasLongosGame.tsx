@@ -337,7 +337,6 @@ export function CacaPalavrasLongosGame({ basePoints, reportContext, onComplete }
     <div className="space-y-5">
       {phase === "intro" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <h3 className="text-xl font-semibold text-zinc-900">Caça-Palavras Longos</h3>
           <button
             type="button"
             onClick={startSession}
