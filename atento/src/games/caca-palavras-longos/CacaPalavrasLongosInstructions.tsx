@@ -4,7 +4,7 @@ interface Props {
   onStart: () => void;
 }
 
-export function CacaPalavrasLongosInstructions({ onStart }: Props) {
+export default function CacaPalavrasLongosInstructions({ onStart }: Props) {
   return (
     <InstructionScreen
       title="Caça Palavras Longos"

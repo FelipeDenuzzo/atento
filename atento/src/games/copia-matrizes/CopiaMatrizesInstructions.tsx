@@ -4,7 +4,7 @@ interface Props {
   onStart: () => void;
 }
 
-export function CopiaMatrizesInstructions({ onStart }: Props) {
+export default function CopiaMatrizesInstructions({ onStart }: Props) {
   return (
     <InstructionScreen
       title="Cópia de Matrizes"

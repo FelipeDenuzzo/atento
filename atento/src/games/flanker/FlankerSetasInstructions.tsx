@@ -4,7 +4,7 @@ interface Props {
   onStart: () => void;
 }
 
-export function FlankerSetasInstructions({ onStart }: Props) {
+export default function FlankerSetasInstructions({ onStart }: Props) {
   return (
     <InstructionScreen
       title="Flanker de Setas"

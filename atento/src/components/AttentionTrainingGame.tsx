@@ -1,9 +1,9 @@
 
 "use client";
 
-import { AcharOFaltandoInstructions } from "@/games/achar-o-faltando/AcharOFaltandoInstructions";
-import { FlankerSetasInstructions } from "@/games/flanker/FlankerSetasInstructions";
-import { StroopInvertidoInstructions } from "@/games/stroop-invertido/StroopInvertidoInstructions";
+import AcharOFaltandoInstructions from "@/games/achar-o-faltando/AcharOFaltandoInstructions";
+import FlankerSetasInstructions from "@/games/flanker/FlankerSetasInstructions";
+import StroopInvertidoInstructions from "@/games/stroop-invertido/StroopInvertidoInstructions";
 import GoNoGoQuickClickInstructions from "@/games/GoNoGoQuickClick/GoNoGoQuickClickInstructions";
 import GoNoGoExpandidoInstructions from "@/games/go-no-go-expandido/GoNoGoExpandidoInstructions";
 import FiltroCoresComSomInstructions from "@/games/filtro-cores-com-som/FiltroCoresComSomInstructions";
@@ -11,20 +11,20 @@ import ContagemEstimulosFluxoInstructions from "@/games/contagem-estimulos-fluxo
 import LabirintosProlongadosInstructions from "@/games/labirintos-prolongados/LabirintosProlongadosInstructions";
 import MapaDeSimbolosInstructions from "@/games/mapa-de-simbolos/MapaDeSimbolosInstructions";
 import BuscaSimbolosMatrizInstructions from "@/games/busca-simbolos-matriz/BuscaSimbolosMatrizInstructions";
-import { CopiaMatrizesInstructions } from "@/games/copia-matrizes/CopiaMatrizesInstructions";
-import { CacaPalavrasLongosInstructions } from "@/games/caca-palavras-longos/CacaPalavrasLongosInstructions";
-import { RadarTonoInstructions } from "@/games/radar-tono/RadarTonoInstructions";
-import { DirijaPalavrasAlvoInstructions } from "@/games/dirija-palavras-alvo/DirijaPalavrasAlvoInstructions";
+import CopiaMatrizesInstructions from "@/games/copia-matrizes/CopiaMatrizesInstructions";
+import CacaPalavrasLongosInstructions from "@/games/caca-palavras-longos/CacaPalavrasLongosInstructions";
+import RadarTonoInstructions from "@/games/radar-tono/RadarTonoInstructions";
+import DirijaPalavrasAlvoInstructions from "@/games/dirija-palavras-alvo/DirijaPalavrasAlvoInstructions";
 import ChatVigilanciaErrosInstructions from "@/games/chat-vigilancia-erros/ChatVigilanciaErrosInstructions";
 import MapaSimbolosMonitorSomInstructions from "@/games/mapa-simbolos-monitor-som/MapaSimbolosMonitorSomInstructions";
 import ClassificacaoRapidaMemoriaAtualizavelInstructions from "@/games/classificacao-rapida-memoria-atualizavel/ClassificacaoRapidaMemoriaAtualizavelInstructions";
 import CorOuFormaSwitchInstructions from "@/games/cor-ou-forma-switch/CorOuFormaSwitchInstructions";
-import { TopoBaixoPositionRuleSwitchInstructions } from "@/games/topo-baixo-position-rule-switch/TopoBaixoPositionRuleSwitchInstructions";
+import TopoBaixoPositionRuleSwitchInstructions from "@/games/topo-baixo-position-rule-switch/TopoBaixoPositionRuleSwitchInstructions";
 import ReversalGoNoGoSwitchInstructions from "@/games/reversal-go-nogo-switch/ReversalGoNoGoSwitchInstructions";
-import { TrilhaAlternadaTmtbInstructions } from "@/games/trilha-alternada-tmtb/TrilhaAlternadaTmtbInstructions";
+import TrilhaAlternadaTmtbInstructions from "@/games/trilha-alternada-tmtb/TrilhaAlternadaTmtbInstructions";
 import EscutaSeletivaInstructions from "@/games/escutaseletiva/EscutaSeletivaInstructions";
 import EscutaSeletivaCocktailPartyInstructions from "@/games/escutaseletiva/EscutaSeletivaCocktailPartyInstructions";
-import { VisualSearchHuntInstructions } from "@/games/visual-search-hunt/VisualSearchHuntInstructions";
+import VisualSearchHuntInstructions from "@/games/visual-search-hunt/VisualSearchHuntInstructions";
 
 const instructionComponents: Record<string, any> = {
   "find-missing-item": AcharOFaltandoInstructions,

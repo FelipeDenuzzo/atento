@@ -4,7 +4,7 @@ interface Props {
   onStart: () => void;
 }
 
-export function RadarTonoInstructions({ onStart }: Props) {
+export default function RadarTonoInstructions({ onStart }: Props) {
   return (
     <InstructionScreen
       title="Radar Tono"

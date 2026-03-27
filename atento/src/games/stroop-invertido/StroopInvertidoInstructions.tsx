@@ -4,7 +4,7 @@ interface Props {
   onStart: () => void;
 }
 
-export function StroopInvertidoInstructions({ onStart }: Props) {
+export default function StroopInvertidoInstructions({ onStart }: Props) {
   return (
     <InstructionScreen
       title="Stroop Invertido"

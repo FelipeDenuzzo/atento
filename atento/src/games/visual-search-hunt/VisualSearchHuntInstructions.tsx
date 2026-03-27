@@ -4,7 +4,7 @@ interface Props {
   onStart: () => void;
 }
 
-export function VisualSearchHuntInstructions({ onStart }: Props) {
+export default function VisualSearchHuntInstructions({ onStart }: Props) {
   return (
     <InstructionScreen
       title="Visual Search Hunt"

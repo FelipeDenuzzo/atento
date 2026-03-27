@@ -4,7 +4,7 @@ interface Props {
   onStart: () => void;
 }
 
-export function TopoBaixoPositionRuleSwitchInstructions({ onStart }: Props) {
+export default function TopoBaixoPositionRuleSwitchInstructions({ onStart }: Props) {
   return (
     <InstructionScreen
       title="Topo-Baixo Position Rule Switch"

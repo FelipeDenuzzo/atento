@@ -4,7 +4,7 @@ interface Props {
   onStart: () => void;
 }
 
-export function DirijaPalavrasAlvoInstructions({ onStart }: Props) {
+export default function DirijaPalavrasAlvoInstructions({ onStart }: Props) {
   return (
     <InstructionScreen
       title="Dirija Palavras Alvo"

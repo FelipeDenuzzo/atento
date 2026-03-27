@@ -4,7 +4,7 @@ interface Props {
   onStart: () => void;
 }
 
-export function AcharOFaltandoInstructions({ onStart }: Props) {
+export default function AcharOFaltandoInstructions({ onStart }: Props) {
   return (
     <InstructionScreen
       title="Achar o Faltando"

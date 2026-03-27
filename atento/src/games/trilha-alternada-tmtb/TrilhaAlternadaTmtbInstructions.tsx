@@ -4,7 +4,7 @@ interface Props {
   onStart: () => void;
 }
 
-export function TrilhaAlternadaTmtbInstructions({ onStart }: Props) {
+export default function TrilhaAlternadaTmtbInstructions({ onStart }: Props) {
   return (
     <InstructionScreen
       title="Trilha Alternada TMT-B"
