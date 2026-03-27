@@ -7,7 +7,7 @@ interface Props {
 export default function CacaPalavrasLongosInstructions({ onStart }: Props) {
   return (
     <InstructionScreen
-      title="Caça Palavras Longos"
+      title=""
       instructions={
         <>
           <p>Encontre todas as palavras na grade mantendo foco contínuo até o fim.</p>
