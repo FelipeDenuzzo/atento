@@ -783,9 +783,33 @@ export function AttentionTrainingGame() {
 
         {stage === "instructions" && currentExercise && (
           <div className="mt-4 space-y-5">
-            <h2 className="text-xl font-semibold text-zinc-900">
-              {currentExercise.title}
-            </h2>
+            {/* Só mostra o título dentro do card se não estiver no cabeçalho principal */}
+            {![
+              "quiz",
+              "visual-search",
+              "flanker",
+              "filtro-cores-com-som",
+              "counting-flow-task",
+              "long-mazes",
+              "symbol-map",
+              "symbol-matrix-search",
+              "go-no-go",
+              "go-no-go-expandido",
+              "radar-tone",
+              "drive-word-target",
+              "chat-error-vigilance",
+              "symbol-map-sound-monitor",
+              "rapid-classification-updatable-memory",
+              "color-shape-switch",
+              "top-bottom-position-rule-switch",
+              "reversal-go-nogo-switch",
+              "trilha-alternada-tmtb",
+              "escutaseletiva-cocktail-party",
+            ].includes(currentExercise.kind) && (
+              <h2 className="text-xl font-semibold text-zinc-900">
+                {currentExercise.title}
+              </h2>
+            )}
             {currentExercise.instructions && (
               <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
                 <p
