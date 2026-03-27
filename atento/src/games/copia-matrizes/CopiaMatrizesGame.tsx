@@ -574,18 +574,6 @@ export function CopiaMatrizesGame({ basePoints, reportContext, onComplete }: Pro
     <div className="space-y-5">
       {phase === "intro" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <h3 className="text-xl font-semibold text-zinc-900">Cópia de Matrizes</h3>
-          <p className="text-sm text-zinc-700">
-            Copie a matriz modelo com máxima precisão, mantendo foco estável durante toda a rodada.
-          </p>
-
-          <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
-            <p>
-              O treino roda em <strong>{ROUND_PRESETS.length} fases progressivas</strong>, já prontas e não configuráveis.
-            </p>
-            <p className="mt-1">Clique na célula para abrir o popup de opções e escolher em um único passo.</p>
-          </div>
-
           <button
             type="button"
             onClick={startSession}
