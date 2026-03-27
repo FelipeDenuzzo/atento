@@ -472,7 +472,6 @@ export function AcharOFaltandoGame({
       <div className="space-y-5">
       {phase === "intro" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <h3 className="text-xl font-semibold text-zinc-900">Achar o Faltando</h3>
           <button
             type="button"
             onClick={startSession}
