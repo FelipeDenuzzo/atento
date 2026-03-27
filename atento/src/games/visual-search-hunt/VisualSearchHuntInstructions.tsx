@@ -1,10 +1,15 @@
-import InstructionScreen from '../../components/InstructionScreen';
+import { InstructionScreen } from "@/components/InstructionScreen";
 
-export default function VisualSearchHuntInstructions() {
+interface Props {
+  onStart: () => void;
+}
+
+export function VisualSearchHuntInstructions({ onStart }: Props) {
   return (
     <InstructionScreen
       title="Visual Search Hunt"
-      description="Encontre rapidamente o alvo visual entre os distractores."
+      instructions={<p>Encontre rapidamente o alvo visual entre os distractores.</p>}
+      onStart={onStart}
     />
   );
 }

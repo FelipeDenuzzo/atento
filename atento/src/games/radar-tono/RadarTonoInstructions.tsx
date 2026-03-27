@@ -1,10 +1,15 @@
-import InstructionScreen from '../../components/InstructionScreen';
+import { InstructionScreen } from "@/components/InstructionScreen";
 
-export default function RadarTonoInstructions() {
+interface Props {
+  onStart: () => void;
+}
+
+export function RadarTonoInstructions({ onStart }: Props) {
   return (
     <InstructionScreen
       title="Radar Tono"
-      description="Identifique rapidamente o tom apresentado no radar."
+      instructions={<p>Identifique rapidamente o tom apresentado no radar.</p>}
+      onStart={onStart}
     />
   );
 }

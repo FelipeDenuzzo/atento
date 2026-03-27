@@ -1,10 +1,15 @@
-import InstructionScreen from '../../components/InstructionScreen';
+import { InstructionScreen } from "@/components/InstructionScreen";
 
-export default function CacaPalavrasLongosInstructions() {
+interface Props {
+  onStart: () => void;
+}
+
+export function CacaPalavrasLongosInstructions({ onStart }: Props) {
   return (
     <InstructionScreen
       title="Caça Palavras Longos"
-      description="Encontre todas as palavras escondidas na matriz."
+      instructions={<p>Encontre todas as palavras escondidas na matriz.</p>}
+      onStart={onStart}
     />
   );
 }

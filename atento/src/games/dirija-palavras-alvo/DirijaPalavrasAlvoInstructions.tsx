@@ -1,10 +1,15 @@
-import InstructionScreen from '../../components/InstructionScreen';
+import { InstructionScreen } from "@/components/InstructionScreen";
 
-export default function DirijaPalavrasAlvoInstructions() {
+interface Props {
+  onStart: () => void;
+}
+
+export function DirijaPalavrasAlvoInstructions({ onStart }: Props) {
   return (
     <InstructionScreen
       title="Dirija Palavras Alvo"
-      description="Dirija-se rapidamente para as palavras-alvo indicadas."
+      instructions={<p>Dirija-se rapidamente para as palavras-alvo indicadas.</p>}
+      onStart={onStart}
     />
   );
 }

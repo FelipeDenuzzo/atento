@@ -1,10 +1,15 @@
-import InstructionScreen from '../../components/InstructionScreen';
+import { InstructionScreen } from "@/components/InstructionScreen";
 
-export default function TrilhaAlternadaTmtbInstructions() {
+interface Props {
+  onStart: () => void;
+}
+
+export function TrilhaAlternadaTmtbInstructions({ onStart }: Props) {
   return (
     <InstructionScreen
       title="Trilha Alternada TMT-B"
-      description="Alterne entre números e letras na sequência correta o mais rápido possível."
+      instructions={<p>Alterne entre números e letras na sequência correta o mais rápido possível.</p>}
+      onStart={onStart}
     />
   );
 }
