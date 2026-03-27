@@ -351,19 +351,6 @@ export function BuscaSimbolosMatrizGame({
     <div className="space-y-5">
       {phase === "intro" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <h3 className="text-xl font-semibold text-zinc-900">Busca de Símbolos em Matriz</h3>
-          <div className="space-y-3 rounded-lg border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
-            <p>
-              Marque (clique) <strong>todos os alvos</strong> que aparecerem na matriz, ignorando os demais símbolos.
-            </p>
-            <p>
-              Para não se perder, siga uma varredura organizada (linha por linha ou coluna por coluna) até cobrir a grade inteira.
-            </p>
-            <p>
-              Mantenha o foco do início ao fim, porque a tarefa exige atenção contínua para evitar deixar alvos sem marcar.
-            </p>
-          </div>
-
           <div className="rounded-lg border border-zinc-200 bg-white p-4">
             <p className="text-xs text-zinc-500">ALVO</p>
 
