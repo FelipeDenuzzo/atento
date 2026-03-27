@@ -470,7 +470,18 @@ export function AcharOFaltandoGame({
 
   return (
       <div className="space-y-5">
-      {phase === "intro" && null}
+      {phase === "intro" && (
+        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
+          <h3 className="text-xl font-semibold text-zinc-900">Achar o Faltando</h3>
+          <button
+            type="button"
+            onClick={startSession}
+            className="w-full rounded-lg bg-zinc-900 px-4 py-3 font-semibold text-white hover:bg-zinc-700"
+          >
+            Iniciar treino
+          </button>
+        </div>
+      )}
 
       {(phase === "running" || phase === "feedback") && currentRound && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
