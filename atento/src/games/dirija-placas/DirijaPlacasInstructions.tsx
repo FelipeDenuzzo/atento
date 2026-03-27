@@ -1,10 +1,10 @@
-import InstructionScreen from '../../components/InstructionScreen';
+import { InstructionScreen } from '../../components/InstructionScreen';
 
 export default function DirijaPlacasInstructions() {
   return (
     <InstructionScreen
       title="Dirija Placas"
-      description="Dirija-se rapidamente para as placas indicadas."
+      instructions="Dirija-se rapidamente para as placas indicadas."
     />
   );
 }
