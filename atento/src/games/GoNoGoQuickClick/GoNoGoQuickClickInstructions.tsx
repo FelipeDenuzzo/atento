@@ -1,4 +1,4 @@
-import InstructionScreen from '../../components/InstructionScreen';
+import { InstructionScreen } from '../../components/InstructionScreen';
 
 export default function GoNoGoQuickClickInstructions() {
   return (
