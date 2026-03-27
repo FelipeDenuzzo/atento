@@ -380,21 +380,6 @@ export function ClassificacaoRapidaMemoriaAtualizavelGame({
     <div className="space-y-5">
       {phase === "intro" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <h3 className="text-xl font-semibold text-zinc-900">
-            Classificação Rápida + Memória Atualizável
-          </h3>
-          <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
-            <p className="font-semibold text-zinc-900">{roundNameByIndex(roundIndex)}</p>
-            <p className="mt-1">Classifique cada estímulo imediatamente por regra simples.</p>
-            <p className="mt-1">Mantenha a memória ativa e responda checagens pontuais por teclado.</p>
-            <p className="mt-1">A pontuação final combina 50% classificação + 50% memória.</p>
-          </div>
-
-          <div className="grid gap-2 rounded-lg border border-black/10 bg-zinc-50 p-3 text-sm text-zinc-700 sm:grid-cols-2">
-            <p>{classificationRuleLabel(currentConfig)}</p>
-            <p>{memoryRuleLabel(currentConfig)}</p>
-          </div>
-
           <button
             type="button"
             onClick={startRound}

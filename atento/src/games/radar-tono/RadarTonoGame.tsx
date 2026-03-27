@@ -523,16 +523,6 @@ export function RadarTonoGame({ basePoints, reportContext, onComplete }: Props) 
     <div className="space-y-5">
       {phase === "intro" && currentConfig && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <h3 className="text-xl font-semibold text-zinc-900">Radar e Tom</h3>
-          <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
-            <p className="font-semibold text-zinc-900">{currentConfig.name}</p>
-            <p className="mt-1">Mantenha o cursor sobre o ponto em movimento o maior tempo possível.</p>
-            <p className="mt-1">Ao ouvir tom grave, pressione <strong>J</strong>. Ao ouvir tom agudo, pressione <strong>K</strong>.</p>
-            {currentConfig.hasDistractorSphere && (
-              <p className="mt-1">Nesta fase há uma esfera vermelha de distração. Siga e conte apenas a esfera preta.</p>
-            )}
-            <p className="mt-1">Foco contínuo nas duas tarefas até o fim da fase.</p>
-          </div>
           <button
             type="button"
             onClick={startCurrentRound}

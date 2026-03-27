@@ -343,14 +343,6 @@ export function ChatVigilanciaErrosGame({
     <div className="space-y-5">
       {phase === "intro" && currentConfig && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <h3 className="text-xl font-semibold text-zinc-900">Chat Simulado + Vigilância de Erros</h3>
-          <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
-            <p className="font-semibold text-zinc-900">{currentConfig.name}</p>
-            <p className="mt-1">Responda a mensagem ativa escolhendo a melhor opção no chat.</p>
-            <p className="mt-1">A mensagem só avança quando você responder.</p>
-            <p className="mt-1">Quando surgir anomalia no fundo (barra vermelha, símbolo ⛔ ou alerta ⚠), pressione <strong>ESPAÇO</strong>.</p>
-            <p className="mt-1">As duas tarefas acontecem ao mesmo tempo até o fim da fase.</p>
-          </div>
           <button
             type="button"
             onClick={startCurrentRound}
