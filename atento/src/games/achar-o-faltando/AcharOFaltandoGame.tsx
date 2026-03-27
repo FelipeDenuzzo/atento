@@ -470,40 +470,7 @@ export function AcharOFaltandoGame({
 
   return (
       <div className="space-y-5">
-      {phase === "intro" && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <h3 className="text-xl font-semibold text-zinc-900">Achar o Faltando</h3>
-
-          <div className="space-y-2 rounded-lg border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
-            <p>Compare as duas grades (ou listas) que aparecem na tela.</p>
-            <p>
-              Elas são quase iguais, mas existe uma diferença: em uma delas <strong>falta</strong> um item ou existe
-              um item <strong>a mais</strong>.
-            </p>
-            <p>Sua tarefa é encontrar essa diferença e marcar onde ela está.</p>
-            <p>
-              Vá com calma e confira linha por linha (ou coluna por coluna) até ter certeza.
-            </p>
-          </div>
-
-          <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
-            <p>
-              O treino é aplicado em <strong>{ROUND_PRESETS.length} rodadas progressivas</strong>, com dificuldade crescente.
-            </p>
-            <p className="mt-1">
-              Você só precisa iniciar e seguir até o final.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={startSession}
-            className="w-full rounded-lg bg-zinc-900 px-4 py-3 font-semibold text-white hover:bg-zinc-700"
-          >
-            Iniciar treino
-          </button>
-        </div>
-      )}
+      {phase === "intro" && null}
 
       {(phase === "running" || phase === "feedback") && currentRound && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
