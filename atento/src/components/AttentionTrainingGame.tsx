@@ -515,26 +515,29 @@ export function AttentionTrainingGame() {
           <p className="text-sm font-medium text-zinc-500">
             {stageTitle[stage]}
           </p>
-          {stage === "intro" && introStep === "menu" ? (
-            <button
-              type="button"
-              onClick={() => setIntroStep("didactic")}
-              className="rounded-lg border border-zinc-200 px-3 py-1 text-xs font-semibold text-zinc-700 hover:bg-zinc-50"
-            >
-              Sobre o Atento
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
-                setStage("intro");
-                setCurrentIndex(0);
-                setTrainingMode(null);
-              }}
-              className="rounded-lg border border-zinc-200 px-3 py-1 text-xs font-semibold text-zinc-700 hover:bg-zinc-50"
-            >
-              Voltar
-            </button>
+          {/* Não exibe botão na tela inicial explicativa */}
+          {!(stage === "intro" && introStep === "didactic") && (
+            stage === "intro" && introStep === "menu" ? (
+              <button
+                type="button"
+                onClick={() => setIntroStep("didactic")}
+                className="rounded-lg border border-zinc-200 px-3 py-1 text-xs font-semibold text-zinc-700 hover:bg-zinc-50"
+              >
+                Sobre o Atento
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setStage("intro");
+                  setCurrentIndex(0);
+                  setTrainingMode(null);
+                }}
+                className="rounded-lg border border-zinc-200 px-3 py-1 text-xs font-semibold text-zinc-700 hover:bg-zinc-50"
+              >
+                Voltar
+              </button>
+            )
           )}
         </div>
 
