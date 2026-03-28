@@ -209,7 +209,7 @@ export function TopoBaixoPositionRuleSwitchGame({
   const [sessionConfigs, setSessionConfigs] = useState<PositionRuleRoundConfig[]>(() =>
     configsForScheme("color-as-shape-kl"),
   );
-  const [phase, setPhase] = useState<Phase>("intro");
+  const [phase, setPhase] = useState<Phase>("running");
   const [roundIndex, setRoundIndex] = useState(0);
   const [trialStage, setTrialStage] = useState<TrialStage>("fixation");
   const [remainingMs, setRemainingMs] = useState(sessionConfigs[0]?.durationMs ?? 0);
@@ -247,7 +247,12 @@ export function TopoBaixoPositionRuleSwitchGame({
     setSessionConfigs(configsForScheme(nextScheme));
     setRemainingMs(configsForScheme(nextScheme)[0]?.durationMs ?? 0);
     setSchemeReady(true);
+    setPhase("running");
   }, []);
+
+  useEffect(() => {
+    if (schemeReady) startRound(0);
+  }, [schemeReady]);
 
   function clearTimer() {
     if (timerRef.current) {
@@ -482,35 +487,6 @@ export function TopoBaixoPositionRuleSwitchGame({
 
   return (
     <div className="space-y-5">
-      {phase === "intro" && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <h3 className="text-xl font-semibold text-zinc-900">Topo/Baixo — Position-Rule Switch</h3>
-          <div className="rounded-lg border-2 border-zinc-300 bg-zinc-50 p-4 text-sm text-zinc-700">
-            <p className="text-base font-semibold text-zinc-900">{currentConfig.name}</p>
-            <p className="mt-2 text-base font-medium">Se aparecer no TOPO, use Regra A.</p>
-            <p className="mt-1 text-base font-medium">Se aparecer em BAIXO, use Regra B.</p>
-            <p className="mt-2 text-base">Responda usando as letras no teclado.</p>
-            <div className="mt-3 space-y-2 rounded-lg border border-zinc-300 bg-white p-3 text-zinc-900">
-              <p className="text-base font-semibold leading-tight">{topRule.position}</p>
-              <p className="text-base font-semibold leading-tight">{topRule.dimension}</p>
-              <p className="text-sm font-medium">{topRule.mapping}</p>
-            </div>
-            <div className="mt-2 space-y-2 rounded-lg border border-zinc-300 bg-white p-3 text-zinc-900">
-              <p className="text-base font-semibold leading-tight">{bottomRule.position}</p>
-              <p className="text-base font-semibold leading-tight">{bottomRule.dimension}</p>
-              <p className="text-sm font-medium">{bottomRule.mapping}</p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => startRound(roundIndex)}
-            disabled={!schemeReady}
-            className="w-full rounded-lg bg-zinc-900 px-4 py-3 font-semibold text-white hover:bg-zinc-700"
-          >
-            {schemeReady ? "Iniciar fase" : "Preparando esquema..."}
-          </button>
-        </div>
-      )}
 
       {phase === "running" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
