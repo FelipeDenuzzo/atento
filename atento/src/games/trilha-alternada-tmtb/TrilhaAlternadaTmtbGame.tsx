@@ -344,172 +344,261 @@ export function TrilhaAlternadaTmtbGame({ basePoints, reportContext, onComplete 
     const nextDistractors = phaseConfig.enableDistractors
       ? generateDistractors({
           count: phaseConfig.distractorCount,
-          if (resetAggregate) {
-            const now = Date.now();
-            setErrorsTotal(0);
-            setErrorsOnNumberTarget(0);
-            setErrorsOnLetterTarget(0);
-            setBackStepsApplied(0);
-            setLogs([]);
-          }
-                          ? "0 0 0 5px #60a5fa"
-                          : "0 0 0 2px #93c5fd"
-                        : "none",
-                    }}
-                    aria-label={`Nó ${item.label}`}
-                  >
-                    {item.label}
-                  </button>
-                );
-              })}
-            </div>
-            {/* Métricas e feedback podem ser exibidos externamente */}
-          </div>
-        </div>
-      );
-                    height: 64,
-                    backgroundColor: isVisited ? "#e4e4e7" : "#ffffff",
-                    borderColor: isWrong ? "#dc2626" : isTarget || isDualPathDecoy ? "#2563eb" : "#d4d4d8",
-                    boxShadow: isTarget || isDualPathDecoy
-                      ? targetBlinkBlue
-                        ? "0 0 0 5px #60a5fa"
-                        : "0 0 0 2px #93c5fd"
-                      : "none",
-                  }}
-                  aria-label={`Nó ${item.label}`}
-                >
-                  {item.label}
-                </button>
-              );
-            })}
-          </div>
+          theme: phaseConfig.distractorTheme,
+          occupied: nextNodes.map((item) => ({ xPct: item.xPct, yPct: item.yPct })),
+        })
+      : [];
 
-          {sessionKind !== "practice" && (
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-lg border border-black/10 bg-zinc-50 p-3 text-sm">
-                <p className="text-zinc-500">Erros totais</p>
-                <p className="font-semibold text-zinc-900">{errorsTotal}</p>
-              </div>
-              <div className="rounded-lg border border-black/10 bg-zinc-50 p-3 text-sm">
-                <p className="text-zinc-500">Erros em alvo número</p>
-                <p className="font-semibold text-zinc-900">{errorsOnNumberTarget}</p>
-              </div>
-              <div className="rounded-lg border border-black/10 bg-zinc-50 p-3 text-sm">
-                <p className="text-zinc-500">Erros em alvo letra</p>
-                <p className="font-semibold text-zinc-900">{errorsOnLetterTarget}</p>
-              </div>
-            </div>
-          )}
+    if (resetAggregate) {
+      const now = Date.now();
+      setErrorsTotal(0);
+      setErrorsOnNumberTarget(0);
+      setErrorsOnLetterTarget(0);
+      setBackStepsApplied(0);
+      setLogs([]);
+      setCompletedSequenceLength(0);
+      setResult(null);
+      setIsResultPopupOpen(false);
+      setValidStartedAtMs(now);
+      setElapsedValidMs(0);
+      phaseDurationsRef.current = { 1: 0, 2: 0, 3: 0 };
+      phaseStartedAtRef.current = now;
+    }
+
+    setSessionKind(sessionKindFromPhaseId(phaseId));
+    setValidPhaseId(phaseId);
+    setSequence(nextSequence);
+    setNodes(nextNodes);
+    setDistractors(nextDistractors);
+    setCurrentSeqIndex(0);
+    setWrongNodeId(null);
+    setWrongDistractorId(null);
+    setTargetBlinkBlue(false);
+    phaseStartedAtRef.current = Date.now();
+  }
+
+  function handleNodeClick(node: TmtbNode) {
+    if (phase !== "running") return;
+    if (!currentExpected) return;
+
+    const config = sessionKind === "practice" ? PRACTICE_CONFIG : MAIN_CONFIG;
+    const now = Date.now();
+
+    const evaluation = evaluateClick({
+      clickedSeqIndex: node.seqIndex,
+      currentSeqIndex,
+      penaltyMode: config.penaltyMode,
+      backStepsOnError: config.backStepsOnError,
+    });
+
+    if (sessionKind !== "practice") {
+      setLogs((prev) => [
+        ...prev,
+        {
+          sessionKind,
+          atMs: now,
+          clickedLabel: node.label,
+          clickedSeqIndex: node.seqIndex,
+          expectedLabel: currentExpected.label,
+          expectedSeqIndex: currentExpected.seqIndex,
+          correct: evaluation.correct,
+        },
+      ]);
+    }
+
+    if (evaluation.correct) {
+      handleCorrect(now, evaluation.nextSeqIndex);
+      return;
+    }
+
+    triggerVisualError({ nodeId: node.id });
+    registerErrorAndBackStep(evaluation.nextSeqIndex, evaluation.backStepsApplied);
+  }
+
+  function handleDistractorClick(distractor: DistractorNode) {
+    if (phase !== "running") return;
+    if (sessionKind === "practice") return;
+    if (!currentExpected) return;
+
+    const now = Date.now();
+    const evaluation = evaluateClick({
+      clickedSeqIndex: -1,
+      currentSeqIndex,
+      penaltyMode: MAIN_CONFIG.penaltyMode,
+      backStepsOnError: MAIN_CONFIG.backStepsOnError,
+    });
+
+    setLogs((prev) => [
+      ...prev,
+      {
+        sessionKind,
+        atMs: now,
+        clickedLabel: distractor.label,
+        clickedSeqIndex: -1,
+        expectedLabel: currentExpected.label,
+        expectedSeqIndex: currentExpected.seqIndex,
+        correct: false,
+      },
+    ]);
+
+    triggerVisualError({ distractorId: distractor.id, blinkTarget: true });
+    registerErrorAndBackStep(evaluation.nextSeqIndex, evaluation.backStepsApplied);
+  }
+
+  function handleCorrect(now: number, nextSeqIndex: number) {
+    setCurrentSeqIndex(nextSeqIndex);
+
+    if (sessionKind !== "practice" && validStartedAtMs != null) {
+      setElapsedValidMs(now - validStartedAtMs);
+    }
+
+    if (nextSeqIndex < sequence.length) {
+      return;
+    }
+
+    if (sessionKind === "practice") {
+      setPhase("practice-feedback");
+      return;
+    }
+
+    if (validPhaseId < 3) {
+      finalizePhaseTiming(now, validPhaseId);
+      setCompletedSequenceLength((value) => value + sequence.length);
+      setPhase("phase-feedback");
+      return;
+    }
+
+    finalizePhaseTiming(now, validPhaseId);
+    finishAllValidPhases(now);
+  }
+
+  function finishAllValidPhases(endedAtMs: number) {
+    const startedAtMs = validStartedAtMs ?? endedAtMs;
+    const totalLength = completedSequenceLength + sequence.length;
+
+    const sessionResult = buildSessionResult({
+      participantId: reportContext?.participantName,
+      startedAtMs,
+      endedAtMs,
+      sequenceLength: totalLength,
+      errorsTotal,
+      errorsOnNumberTarget,
+      errorsOnLetterTarget,
+      backStepsApplied,
+      clicks: logs,
+      phaseDurationsMs: phaseDurationsRef.current,
+    });
+
+    setResult(sessionResult);
+    setIsResultPopupOpen(true);
+    const pointsEarned = Math.round(basePoints * Math.min(1, sessionResult.finalScore / 100));
+    onComplete({ success: sessionResult.finalScore >= 60, pointsEarned });
+    setPhase("result");
+  }
+
+  function downloadTXT() {
+    if (!result) return;
+    downloadFile(
+      buildTxtReportFileName({
+        mode: reportContext?.mode ?? "single",
+        attentionTypeLabel: reportContext?.attentionTypeLabel,
+        participantName: reportContext?.participantName,
+      }),
+      exportTXT(result),
+      "text/plain;charset=utf-8",
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
+        <div className="relative h-[70vh] rounded-xl border border-zinc-300 bg-white">
+          <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+            {polylinePoints && (
+              <polyline
+                points={polylinePoints}
+                fill="none"
+                stroke="#2563eb"
+                strokeWidth="0.5"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+              />
+            )}
+          </svg>
+          {distractors.map((item) => {
+            const isWrong = wrongDistractorId === item.id;
+            const romanTheme = item.theme === "roman-symbol";
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => handleDistractorClick(item)}
+                className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 text-base font-semibold"
+                style={{
+                  left: `${item.xPct}%`,
+                  top: `${item.yPct}%`,
+                  width: 56,
+                  height: 56,
+                  borderColor: isWrong ? "#dc2626" : "#d4d4d8",
+                  backgroundColor: romanTheme ? "#fafafa" : "#ffffff",
+                  color: romanTheme ? "#111111" : "#4b5563",
+                }}
+                aria-label={`Distrator ${item.label}`}
+              >
+                {item.label}
+              </button>
+            );
+          })}
+          {nodes.map((item) => {
+            const isVisited = item.seqIndex < currentSeqIndex;
+            const isTarget = item.seqIndex === currentSeqIndex;
+            const isDualPathDecoy = showDualPathsTrap && dualPathDecoyNodeId === item.id;
+            const isWrong = wrongNodeId === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => handleNodeClick(item)}
+                className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 text-lg font-semibold text-zinc-900"
+                style={{
+                  left: `${item.xPct}%`,
+                  top: `${item.yPct}%`,
+                  width: 68,
+                  height: 68,
+                  backgroundColor: isVisited ? "#e4e4e7" : "#ffffff",
+                  borderColor: isWrong ? "#dc2626" : isTarget || isDualPathDecoy ? "#2563eb" : "#d4d4d8",
+                  boxShadow: isTarget || isDualPathDecoy
+                    ? targetBlinkBlue
+                      ? "0 0 0 5px #60a5fa"
+                      : "0 0 0 2px #93c5fd"
+                    : "none",
+                }}
+                aria-label={`Nó ${item.label}`}
+              >
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+        {/* Métricas e feedback podem ser exibidos externamente */}
+      </div>
+      {sessionKind !== "practice" && (
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div className="rounded-lg border border-black/10 bg-zinc-50 p-3 text-sm">
+            <p className="text-zinc-500">Erros totais</p>
+            <p className="font-semibold text-zinc-900">{errorsTotal}</p>
+          </div>
+          <div className="rounded-lg border border-black/10 bg-zinc-50 p-3 text-sm">
+            <p className="text-zinc-500">Erros em alvo número</p>
+            <p className="font-semibold text-zinc-900">{errorsOnNumberTarget}</p>
+          </div>
+          <div className="rounded-lg border border-black/10 bg-zinc-50 p-3 text-sm">
+            <p className="text-zinc-500">Erros em alvo letra</p>
+            <p className="font-semibold text-zinc-900">{errorsOnLetterTarget}</p>
+          </div>
         </div>
       )}
-
-      {phase === "practice-feedback" && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <h3 className="text-xl font-semibold text-zinc-900">Treino concluído</h3>
-          <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm font-medium text-amber-800">
-            Este treino é apenas familiarização e não entra na validação final.
-          </p>
-          <button
-            type="button"
-            onClick={() => startValidPhase(1, true)}
-            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
-          >
-            Continuar
-          </button>
-        </div>
-      )}
-
-      {phase === "phase-feedback" && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <h3 className="text-xl font-semibold text-zinc-900">Etapa concluída</h3>
-          <p className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-700">
-            A próxima etapa começa automaticamente e aumenta a exigência de controle inibitório.
-          </p>
-          <button
-            type="button"
-            onClick={() => startValidPhase((validPhaseId + 1) as ValidPhaseId, false)}
-            className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
-          >
-            Continuar
-          </button>
-        </div>
-      )}
-
-      {phase === "result" && result && isResultPopupOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4">
-          <div className="max-h-[92vh] w-full max-w-4xl space-y-4 overflow-y-auto rounded-lg border border-black/10 bg-white p-5 shadow-xl">
-          <h3 className="text-xl font-semibold text-zinc-900">Resultado final</h3>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Tempo total</p>
-              <p className="font-semibold text-zinc-900">{result.totalTimeSeconds.toFixed(2)} s</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Velocidade total da fase</p>
-              <p className="font-semibold text-zinc-900">{result.totalClickRatePerSecond.toFixed(3)} cliques/s</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Maior intervalo entre cliques</p>
-              <p className="font-semibold text-zinc-900">{(result.maxInterClickMs / 1000).toFixed(2)} s</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Erros</p>
-              <p className="font-semibold text-zinc-900">{result.errorsTotal}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Recuos aplicados</p>
-              <p className="font-semibold text-zinc-900">{result.backStepsApplied}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Pontuação final</p>
-              <p className="font-semibold text-zinc-900">{result.finalScore.toFixed(1)}%</p>
-            </div>
-          </div>
-
-          <div className="rounded-lg border border-black/10 bg-zinc-50 p-3 text-sm text-zinc-700">
-            <p>{result.interpretation}</p>
-          </div>
-
-          <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-            <p className="text-sm font-semibold text-zinc-900">Métricas por fase (didático)</p>
-            <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-              {result.phaseMetrics.map((metric) => (
-                <div key={metric.phaseId} className="rounded-md border border-zinc-200 bg-white p-2 text-sm">
-                  <p className="font-medium text-zinc-900">Fase {metric.phaseId}</p>
-                  <p className="text-zinc-700">Velocidade: {metric.clickRatePerSecond.toFixed(3)} cliques/s</p>
-                  <p className="text-zinc-700">Maior intervalo: {(metric.maxInterClickMs / 1000).toFixed(2)} s</p>
-                </div>
-              ))}
-              <div className="rounded-md border border-zinc-200 bg-white p-2 text-sm">
-                <p className="font-medium text-zinc-900">Total geral</p>
-                <p className="text-zinc-700">Velocidade: {result.totalClickRatePerSecond.toFixed(3)} cliques/s</p>
-                <p className="text-zinc-700">Maior intervalo: {(result.maxInterClickMs / 1000).toFixed(2)} s</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={downloadTXT}
-              className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50"
-            >
-              Baixar resultados (.txt)
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setIsResultPopupOpen(false);
-                setPhase("intro");
-              }}
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
-            >
-              Jogar novamente
-            </button>
-          </div>
-        </div>
-        </div>
-      )}
+      {/* Demais telas de feedback/resultados podem ser adicionadas conforme necessário */}
     </div>
   );
 }
