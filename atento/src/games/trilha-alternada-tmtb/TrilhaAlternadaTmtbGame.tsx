@@ -344,90 +344,14 @@ export function TrilhaAlternadaTmtbGame({ basePoints, reportContext, onComplete 
     const nextDistractors = phaseConfig.enableDistractors
       ? generateDistractors({
           count: phaseConfig.distractorCount,
-          theme: phaseConfig.distractorTheme,
-          occupied: nextNodes.map((item) => ({ xPct: item.xPct, yPct: item.yPct })),
-        })
-      : [];
-
-    setSessionKind(sessionKindFromPhaseId(phaseId));
-    setValidPhaseId(phaseId);
-    setSequence(nextSequence);
-    setNodes(nextNodes);
-    setDistractors(nextDistractors);
-    setCurrentSeqIndex(0);
-    setWrongNodeId(null);
-    setWrongDistractorId(null);
-    setTargetBlinkBlue(false);
-    phaseStartedAtRef.current = Date.now();
-
-    if (resetAggregate) {
-      const now = Date.now();
-      setErrorsTotal(0);
-      setErrorsOnNumberTarget(0);
-      setErrorsOnLetterTarget(0);
-      setBackStepsApplied(0);
-      setLogs([]);
-      // O componente agora só renderiza o exercício, sem instruções/tela inicial/resultados popup
-      return (
-        <div className="space-y-5">
-          {/* Renderize apenas a interface do exercício, sem lógica de instrução/tela inicial */}
-          <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-            <div className="relative h-[70vh] rounded-xl border border-zinc-300 bg-white">
-              <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                {polylinePoints && (
-                  <polyline
-                    points={polylinePoints}
-                    fill="none"
-                    stroke="#2563eb"
-                    strokeWidth="0.5"
-                    strokeLinejoin="round"
-                    strokeLinecap="round"
-                  />
-                )}
-              </svg>
-              {distractors.map((item) => {
-                const isWrong = wrongDistractorId === item.id;
-                const romanTheme = item.theme === "roman-symbol";
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => handleDistractorClick(item)}
-                    className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 text-base font-semibold"
-                    style={{
-                      left: `${item.xPct}%`,
-                      top: `${item.yPct}%`,
-                      width: 56,
-                      height: 56,
-                      borderColor: isWrong ? "#dc2626" : "#d4d4d8",
-                      backgroundColor: romanTheme ? "#fafafa" : "#ffffff",
-                      color: romanTheme ? "#111111" : "#4b5563",
-                    }}
-                    aria-label={`Distrator ${item.label}`}
-                  >
-                    {item.label}
-                  </button>
-                );
-              })}
-              {nodes.map((item) => {
-                const isVisited = item.seqIndex < currentSeqIndex;
-                const isTarget = item.seqIndex === currentSeqIndex;
-                const isDualPathDecoy = showDualPathsTrap && dualPathDecoyNodeId === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => handleNodeClick(item)}
-                    className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 text-lg font-semibold text-zinc-900"
-                    style={{
-                      left: `${item.xPct}%`,
-                      top: `${item.yPct}%`,
-                      width: 68,
-                      height: 68,
-                      backgroundColor: isVisited ? "#e4e4e7" : "#ffffff",
-                      borderColor: isWrong ? "#dc2626" : isTarget || isDualPathDecoy ? "#2563eb" : "#d4d4d8",
-                      boxShadow: isTarget || isDualPathDecoy
-                        ? targetBlinkBlue
+          if (resetAggregate) {
+            const now = Date.now();
+            setErrorsTotal(0);
+            setErrorsOnNumberTarget(0);
+            setErrorsOnLetterTarget(0);
+            setBackStepsApplied(0);
+            setLogs([]);
+          }
                           ? "0 0 0 5px #60a5fa"
                           : "0 0 0 2px #93c5fd"
                         : "none",
