@@ -892,6 +892,11 @@ export function AttentionTrainingGame() {
                   {currentExercise.question}
                 </h2>
               )}
+              {currentExercise.kind === "quiz" && (
+                <h2 className="text-xl font-semibold text-zinc-900">
+                  {currentExercise.question}
+                </h2>
+              )}
               {currentExercise.kind === "visual-search" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   Caça às Figuras
@@ -899,32 +904,7 @@ export function AttentionTrainingGame() {
               )}
               {currentExercise.kind === "escutaseletiva-cocktail-party" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
-                  Escuta Seletiva
-                </h2>
-              )}
-              {currentExercise.kind === "flanker" && (
-                <h2 className="text-xl font-semibold text-zinc-900">
-                  Flanker de Setas
-                </h2>
-              )}
-              {currentExercise.kind === "filtro-cores-com-som" && (
-                <h2 className="text-xl font-semibold text-zinc-900">
-                  Filtro de Cores com Som
-                </h2>
-              )}
-              {currentExercise.kind === "counting-flow-task" && (
-                <h2 className="text-xl font-semibold text-zinc-900">
-                  Contagem de Estímulos em Fluxo
-                </h2>
-              )}
-              {currentExercise.kind === "long-mazes" && (
-                <h2 className="text-xl font-semibold text-zinc-900">
-                  Labirintos Prolongados
-                </h2>
-              )}
-              {currentExercise.kind === "symbol-map" && (
-                <h2 className="text-xl font-semibold text-zinc-900">
-                  Mapa de Símbolos (Symbol Matching)
+                  Escuta Seletiva: Cocktail Party
                 </h2>
               )}
               {currentExercise.kind === "symbol-matrix-search" && (
