@@ -172,7 +172,8 @@ function generateDistractors(params: {
 }
 
 export function TrilhaAlternadaTmtbGame({ basePoints, reportContext, onComplete }: Props) {
-  const [phase, setPhase] = useState<Phase>("intro");
+  // O controle de fase (intro, instrução, etc) será feito externamente
+  const [phase, setPhase] = useState<Phase>("running");
   const [sessionKind, setSessionKind] = useState<TmtbSessionKind>("practice");
   const [validPhaseId, setValidPhaseId] = useState<ValidPhaseId>(1);
 
@@ -325,27 +326,7 @@ export function TrilhaAlternadaTmtbGame({ basePoints, reportContext, onComplete 
     phaseStartedAtRef.current = null;
   }
 
-  function startPractice() {
-    const nextSequence = buildAlternatingSequence({
-      numbersCount: PRACTICE_CONFIG.numbersCount,
-      lettersCount: PRACTICE_CONFIG.lettersCount,
-    });
-    const nextNodes = generateNodeLayout({
-      items: nextSequence,
-      minDistancePct: PRACTICE_CONFIG.minNodeDistancePct,
-    });
-
-    setSessionKind("practice");
-    setSequence(nextSequence);
-    setNodes(nextNodes);
-    setDistractors([]);
-    setCurrentSeqIndex(0);
-    setWrongNodeId(null);
-    setWrongDistractorId(null);
-    setTargetBlinkBlue(false);
-    setIsResultPopupOpen(false);
-    setPhase("running");
-  }
+  // O início do treino deve ser disparado externamente, não há mais tela de instrução interna
 
   function startValidPhase(phaseId: ValidPhaseId, resetAggregate: boolean) {
     const phaseConfig = VALID_PHASES.find((item) => item.id === phaseId) ?? VALID_PHASES[0]!;
@@ -386,229 +367,82 @@ export function TrilhaAlternadaTmtbGame({ basePoints, reportContext, onComplete 
       setErrorsOnLetterTarget(0);
       setBackStepsApplied(0);
       setLogs([]);
-      setCompletedSequenceLength(0);
-      setResult(null);
-      setIsResultPopupOpen(false);
-      setValidStartedAtMs(now);
-      setElapsedValidMs(0);
-      phaseDurationsRef.current = { 1: 0, 2: 0, 3: 0 };
-      phaseStartedAtRef.current = now;
-    }
-
-    setPhase("running");
-  }
-
-  function finishAllValidPhases(endedAtMs: number) {
-    const startedAtMs = validStartedAtMs ?? endedAtMs;
-    const totalLength = completedSequenceLength + sequence.length;
-
-    const sessionResult = buildSessionResult({
-      participantId: reportContext?.participantName,
-      startedAtMs,
-      endedAtMs,
-      sequenceLength: totalLength,
-      errorsTotal,
-      errorsOnNumberTarget,
-      errorsOnLetterTarget,
-      backStepsApplied,
-      clicks: logs,
-      phaseDurationsMs: phaseDurationsRef.current,
-    });
-
-    setResult(sessionResult);
-    setIsResultPopupOpen(true);
-    const pointsEarned = Math.round(basePoints * Math.min(1, sessionResult.finalScore / 100));
-    onComplete({ success: sessionResult.finalScore >= 60, pointsEarned });
-    setPhase("result");
-  }
-
-  function handleCorrect(now: number, nextSeqIndex: number) {
-    setCurrentSeqIndex(nextSeqIndex);
-
-    if (sessionKind !== "practice" && validStartedAtMs != null) {
-      setElapsedValidMs(now - validStartedAtMs);
-    }
-
-    if (nextSeqIndex < sequence.length) {
-      return;
-    }
-
-    if (sessionKind === "practice") {
-      setPhase("practice-feedback");
-      return;
-    }
-
-    if (validPhaseId < 3) {
-      finalizePhaseTiming(now, validPhaseId);
-      setCompletedSequenceLength((value) => value + sequence.length);
-      setPhase("phase-feedback");
-      return;
-    }
-
-    finalizePhaseTiming(now, validPhaseId);
-    finishAllValidPhases(now);
-  }
-
-  function handleNodeClick(node: TmtbNode) {
-    if (phase !== "running") return;
-    if (!currentExpected) return;
-
-    const config = sessionKind === "practice" ? PRACTICE_CONFIG : MAIN_CONFIG;
-    const now = Date.now();
-
-    const evaluation = evaluateClick({
-      clickedSeqIndex: node.seqIndex,
-      currentSeqIndex,
-      penaltyMode: config.penaltyMode,
-      backStepsOnError: config.backStepsOnError,
-    });
-
-    if (sessionKind !== "practice") {
-      setLogs((prev) => [
-        ...prev,
-        {
-          sessionKind,
-          atMs: now,
-          clickedLabel: node.label,
-          clickedSeqIndex: node.seqIndex,
-          expectedLabel: currentExpected.label,
-          expectedSeqIndex: currentExpected.seqIndex,
-          correct: evaluation.correct,
-        },
-      ]);
-    }
-
-    if (evaluation.correct) {
-      handleCorrect(now, evaluation.nextSeqIndex);
-      return;
-    }
-
-    triggerVisualError({ nodeId: node.id });
-    registerErrorAndBackStep(evaluation.nextSeqIndex, evaluation.backStepsApplied);
-  }
-
-  function handleDistractorClick(distractor: DistractorNode) {
-    if (phase !== "running") return;
-    if (sessionKind === "practice") return;
-    if (!currentExpected) return;
-
-    const now = Date.now();
-    const evaluation = evaluateClick({
-      clickedSeqIndex: -1,
-      currentSeqIndex,
-      penaltyMode: MAIN_CONFIG.penaltyMode,
-      backStepsOnError: MAIN_CONFIG.backStepsOnError,
-    });
-
-    setLogs((prev) => [
-      ...prev,
-      {
-        sessionKind,
-        atMs: now,
-        clickedLabel: distractor.label,
-        clickedSeqIndex: -1,
-        expectedLabel: currentExpected.label,
-        expectedSeqIndex: currentExpected.seqIndex,
-        correct: false,
-      },
-    ]);
-
-    triggerVisualError({ distractorId: distractor.id, blinkTarget: true });
-    registerErrorAndBackStep(evaluation.nextSeqIndex, evaluation.backStepsApplied);
-  }
-
-  function downloadTXT() {
-    if (!result) return;
-    downloadFile(
-      buildTxtReportFileName({
-        mode: reportContext?.mode ?? "single",
-        attentionTypeLabel: reportContext?.attentionTypeLabel,
-        participantName: reportContext?.participantName,
-      }),
-      exportTXT(result),
-      "text/plain;charset=utf-8",
-    );
-  }
-
-  return (
-    <div className="space-y-5">
-      {phase === "intro" && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <h3 className="text-xl font-semibold text-zinc-900">Trilha Alternada 1-A-2-B (TMT-B)</h3>
-
-          <div className="rounded-lg border-2 border-zinc-300 bg-zinc-50 p-4 text-zinc-700">
-            <p className="text-base font-semibold text-zinc-900">Como funciona</p>
-            <p className="mt-2 text-sm font-medium">Clique na ordem alternada: 1 → A → 2 → B → 3 → C...</p>
-            <p className="mt-1 text-sm font-medium">O próximo alvo fica destacado em azul.</p>
-            <p className="mt-1 text-sm font-medium">Se errar, você volta um passo e precisa retomar a trilha corretamente.</p>
+      // O componente agora só renderiza o exercício, sem instruções/tela inicial/resultados popup
+      return (
+        <div className="space-y-5">
+          {/* Renderize apenas a interface do exercício, sem lógica de instrução/tela inicial */}
+          <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
+            <div className="relative h-[70vh] rounded-xl border border-zinc-300 bg-white">
+              <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                {polylinePoints && (
+                  <polyline
+                    points={polylinePoints}
+                    fill="none"
+                    stroke="#2563eb"
+                    strokeWidth="0.5"
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                  />
+                )}
+              </svg>
+              {distractors.map((item) => {
+                const isWrong = wrongDistractorId === item.id;
+                const romanTheme = item.theme === "roman-symbol";
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleDistractorClick(item)}
+                    className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 text-base font-semibold"
+                    style={{
+                      left: `${item.xPct}%`,
+                      top: `${item.yPct}%`,
+                      width: 56,
+                      height: 56,
+                      borderColor: isWrong ? "#dc2626" : "#d4d4d8",
+                      backgroundColor: romanTheme ? "#fafafa" : "#ffffff",
+                      color: romanTheme ? "#111111" : "#4b5563",
+                    }}
+                    aria-label={`Distrator ${item.label}`}
+                  >
+                    {item.label}
+                  </button>
+                );
+              })}
+              {nodes.map((item) => {
+                const isVisited = item.seqIndex < currentSeqIndex;
+                const isTarget = item.seqIndex === currentSeqIndex;
+                const isDualPathDecoy = showDualPathsTrap && dualPathDecoyNodeId === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleNodeClick(item)}
+                    className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 text-lg font-semibold text-zinc-900"
+                    style={{
+                      left: `${item.xPct}%`,
+                      top: `${item.yPct}%`,
+                      width: 68,
+                      height: 68,
+                      backgroundColor: isVisited ? "#e4e4e7" : "#ffffff",
+                      borderColor: isWrong ? "#dc2626" : isTarget || isDualPathDecoy ? "#2563eb" : "#d4d4d8",
+                      boxShadow: isTarget || isDualPathDecoy
+                        ? targetBlinkBlue
+                          ? "0 0 0 5px #60a5fa"
+                          : "0 0 0 2px #93c5fd"
+                        : "none",
+                    }}
+                    aria-label={`Nó ${item.label}`}
+                  >
+                    {item.label}
+                  </button>
+                );
+              })}
+            </div>
+            {/* Métricas e feedback podem ser exibidos externamente */}
           </div>
-
-          <button
-            type="button"
-            onClick={startPractice}
-            className="w-full rounded-lg bg-zinc-900 px-4 py-3 font-semibold text-white hover:bg-zinc-700"
-          >
-            Iniciar treino
-          </button>
         </div>
-      )}
-
-      {phase === "running" && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <div className="relative h-[70vh] rounded-xl border border-zinc-300 bg-white">
-            <svg className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-              {polylinePoints && (
-                <polyline
-                  points={polylinePoints}
-                  fill="none"
-                  stroke="#2563eb"
-                  strokeWidth="0.5"
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                />
-              )}
-            </svg>
-
-            {distractors.map((item) => {
-              const isWrong = wrongDistractorId === item.id;
-              const romanTheme = item.theme === "roman-symbol";
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => handleDistractorClick(item)}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 text-base font-semibold"
-                  style={{
-                    left: `${item.xPct}%`,
-                    top: `${item.yPct}%`,
-                    width: 56,
-                    height: 56,
-                    borderColor: isWrong ? "#dc2626" : "#d4d4d8",
-                    backgroundColor: romanTheme ? "#fafafa" : "#ffffff",
-                    color: romanTheme ? "#111111" : "#4b5563",
-                  }}
-                  aria-label={`Distrator ${item.label}`}
-                >
-                  {item.label}
-                </button>
-              );
-            })}
-
-            {nodes.map((item) => {
-              const isVisited = item.seqIndex < currentSeqIndex;
-              const isTarget = item.seqIndex === currentSeqIndex;
-              const isDualPathDecoy = showDualPathsTrap && dualPathDecoyNodeId === item.id;
-              const isWrong = wrongNodeId === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => handleNodeClick(item)}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-2 text-lg font-semibold text-zinc-900"
-                  style={{
-                    left: `${item.xPct}%`,
-                    top: `${item.yPct}%`,
-                    width: 64,
+      );
                     height: 64,
                     backgroundColor: isVisited ? "#e4e4e7" : "#ffffff",
                     borderColor: isWrong ? "#dc2626" : isTarget || isDualPathDecoy ? "#2563eb" : "#d4d4d8",
