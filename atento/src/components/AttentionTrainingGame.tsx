@@ -262,22 +262,10 @@ export function AttentionTrainingGame() {
 
   const getStageForExercise = (
     exercise: TrainingPlan["exercises"][number] | undefined,
-  ): GameStage =>
-    exercise?.kind === "symbol-matrix-search" ||
-    exercise?.kind === "find-missing-item" ||
-    exercise?.kind === "copy-matrices" ||
-    exercise?.kind === "long-word-search" ||
-    exercise?.kind === "radar-tone" ||
-    exercise?.kind === "drive-word-target" ||
-    exercise?.kind === "chat-error-vigilance" ||
-    exercise?.kind === "symbol-map-sound-monitor" ||
-    exercise?.kind === "rapid-classification-updatable-memory" ||
-    exercise?.kind === "top-bottom-position-rule-switch" ||
-    exercise?.kind === "reversal-go-nogo-switch"
-      ? "exercise"
-      : exercise?.kind === "color-shape-switch" || exercise?.kind === "trilha-alternada-tmtb"
-      ? "instructions"
-      : "instructions";
+  ): GameStage => {
+    if (!exercise) return "intro";
+    return "instructions";
+  };
 
   const startPlan = () => {
     const focusedPlanId = getPlanIdByAttentionType(selectedAttentionType);
@@ -321,7 +309,7 @@ export function AttentionTrainingGame() {
   const startFromExercise = (
     exerciseIndex: number,
     options?: { cocktailStartLevel?: number },
-    startStage: GameStage = "exercise",
+    startStage: GameStage = "instructions",
   ) => {
     const selectedExercise = selectedPlan.exercises[exerciseIndex];
     if (
@@ -342,23 +330,7 @@ export function AttentionTrainingGame() {
     setSubmitted(false);
     setQuizResults([]);
     setShowingQuizResults(false);
-    setStage(
-      selectedExercise.kind === "symbol-matrix-search" ||
-        selectedExercise.kind === "find-missing-item" ||
-        selectedExercise.kind === "copy-matrices" ||
-        selectedExercise.kind === "long-word-search" ||
-        selectedExercise.kind === "radar-tone" ||
-        selectedExercise.kind === "drive-word-target" ||
-        selectedExercise.kind === "chat-error-vigilance" ||
-        selectedExercise.kind === "symbol-map-sound-monitor" ||
-        selectedExercise.kind === "rapid-classification-updatable-memory" ||
-        selectedExercise.kind === "color-shape-switch" ||
-        selectedExercise.kind === "top-bottom-position-rule-switch" ||
-        selectedExercise.kind === "reversal-go-nogo-switch" ||
-        selectedExercise.kind === "trilha-alternada-tmtb"
-        ? "exercise"
-        : startStage,
-    );
+    setStage(startStage);
   };
 
   const submitAnswer = () => {
