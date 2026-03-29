@@ -101,7 +101,7 @@ export type ReportContext = {
 };
 
 const stageTitle: Record<GameStage, string> = {
-  intro: "Treino de Atenção",
+  intro: "INTRO -Treino de Atenção",
   instructions: "Orientações do próximo exercício",
   exercise: "Exercício em andamento",
   result: "Resultado final",
