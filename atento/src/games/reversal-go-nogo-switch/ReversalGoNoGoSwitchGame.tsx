@@ -108,7 +108,7 @@ function shapeGlyph(shape: StimulusShape | null): string {
   if (shape === "circle") return "●";
   if (shape === "square") return "■";
   if (shape === "triangle") return "▲";
-  return "•";
+  return "";
 }
 
 function shapeText(shape: StimulusShape | null): string {
