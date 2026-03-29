@@ -340,20 +340,21 @@ export function handleKeyDown(params: {
   const responseLineY = params.responseLineY ?? params.runtime.config.arenaHeightPx / 2;
   const tolerance = 24; // metade da altura da faixa verde (48px)
 
-  const targetIndex = params.runtime.activeBlocks.findIndex(
+  // Busca todos os blocos-alvo na faixa verde
+  const targetsInGreen = params.runtime.activeBlocks.filter(
     (block) =>
       block.isTarget &&
       !block.answeredAtMs &&
       Math.abs(block.y - responseLineY) <= tolerance,
   );
 
-  if (targetIndex >= 0) {
-    const target = params.runtime.activeBlocks[targetIndex];
-    if (target) {
+  if (targetsInGreen.length > 0) {
+    // Marca todos os alvos na faixa como respondidos
+    targetsInGreen.forEach((target) => {
       target.answeredAtMs = params.atMs;
       target.responseType = "hit";
       params.runtime.hits += 1;
-    }
+    });
     return { hit: true, falsePositive: false };
   }
 
