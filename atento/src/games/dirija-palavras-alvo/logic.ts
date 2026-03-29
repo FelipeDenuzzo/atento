@@ -340,20 +340,26 @@ export function handleKeyDown(params: {
   const responseLineY = params.responseLineY ?? params.runtime.config.arenaHeightPx / 2;
   const tolerance = 24; // metade da altura da faixa verde (48px)
 
-  // Busca todos os blocos-alvo na faixa verde
-  const targetsInGreen = params.runtime.activeBlocks.filter(
+  // Busca se existe pelo menos um alvo não respondido na faixa verde
+  const hasUnansweredTarget = params.runtime.activeBlocks.some(
     (block) =>
       block.isTarget &&
       !block.answeredAtMs &&
       Math.abs(block.y - responseLineY) <= tolerance,
   );
 
-  if (targetsInGreen.length > 0) {
-    // Marca todos os alvos na faixa como respondidos
-    targetsInGreen.forEach((target) => {
-      target.answeredAtMs = params.atMs;
-      target.responseType = "hit";
-      params.runtime.hits += 1;
+  if (hasUnansweredTarget) {
+    // Marca todos os alvos não respondidos na faixa como respondidos
+    params.runtime.activeBlocks.forEach((block) => {
+      if (
+        block.isTarget &&
+        !block.answeredAtMs &&
+        Math.abs(block.y - responseLineY) <= tolerance
+      ) {
+        block.answeredAtMs = params.atMs;
+        block.responseType = "hit";
+        params.runtime.hits += 1;
+      }
     });
     return { hit: true, falsePositive: false };
   }
