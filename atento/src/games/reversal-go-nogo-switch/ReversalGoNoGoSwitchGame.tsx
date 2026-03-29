@@ -426,7 +426,7 @@ export function ReversalGoNoGoSwitchGame({
                 className="mx-auto flex h-[260px] w-full max-w-[280px] items-center justify-center rounded-2xl border-2 border-zinc-300 bg-white text-[128px] text-zinc-900 hover:bg-zinc-50 disabled:cursor-not-allowed"
                 aria-label="Clique para responder"
               >
-                {shapeGlyph(currentShape)}
+                {currentShape ? shapeGlyph(currentShape) : <span style={{opacity: 0}}>&nbsp;★&nbsp;</span>}
               </button>
             ) : null}
           </div>
