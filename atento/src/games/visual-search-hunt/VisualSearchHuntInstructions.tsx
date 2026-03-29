@@ -8,7 +8,10 @@ export default function VisualSearchHuntInstructions({ onStart }: Props) {
   return (
     <InstructionScreen
       title="Caça às Figuras"
-      instructions={<p>Neste exercício, você vai procurar um <strong>símbolo específico</strong> em meio a vários outros espalhados pela tela. Antes de começar, você verá qual é o seu alvo — o símbolo que deve encontrar. Durante o jogo, ele aparecerá misturado a outros símbolos parecidos, que servem como distração. Seu objetivo é <strong>encontrar o alvo e tocar nele</strong> o mais rápido que conseguir, sem se deixar enganar pelos outros. Com o tempo, o exercício fica mais desafiador: mais itens na tela, distrações mais parecidas com o alvo ou menos tempo disponível.</p>}
+      instructions={
+      <p>Este exercício treina a sua <strong>atenção seletiva</strong> — a capacidade de encontrar o que importa em meio a muita informação ao mesmo tempo. No dia a dia, usamos essa habilidade quando procuramos um produto numa prateleira cheia, um rosto numa multidão ou um item numa lista longa. Com o treino, esse filtro mental fica mais ágil e preciso.
+      </p>
+      }
       onStart={onStart}
     />
   );
