@@ -206,7 +206,7 @@ export const StroopInvertido: React.FC<StroopInvertidoProps> = ({
         <>
           <h2 style={{ fontSize: 24, marginBottom: 8 }}>Stroop Invertido</h2>
           <p style={{ fontSize: 16, marginBottom: 24, textAlign: "center" }}>
-            Clique na <b>cor da palavra</b>, não no que está escrito.
+            Uma palavra vai aparecer na tela escrita em uma cor. Sua tarefa é identificar <strong>a cor em que a palavra está escrita</strong> — e não o que a palavra diz. Por exemplo, se a palavra "AZUL" aparecer escrita em vermelho, a resposta correta é <strong>vermelho</strong>. Responda o mais rápido que conseguir. A cada fase, o ritmo aumenta e as combinações ficam mais desafiadoras.
           </p>
           <button
             style={{ fontSize: 20, padding: "12px 32px", borderRadius: 8 }}

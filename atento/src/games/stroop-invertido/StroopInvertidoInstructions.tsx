@@ -8,10 +8,9 @@ export default function StroopInvertidoInstructions({ onStart }: Props) {
   return (
     <InstructionScreen
       title="Cor da palavra"
-      instructions={<p>Clique na cor da tinta, <strong>não</strong> na palavra escrita. Mantenha o foco e evite respostas automáticas.
-            O treino é aplicado em <strong>várias rodadas</strong>, com diferentes níveis de dificuldade.<br />
-            Clique em "Iniciar treino" para começar.
-          </p>}
+      instructions={<p>Este exercício treina a sua <strong>atenção seletiva</strong> — especificamente a capacidade de ignorar uma informação automática e focar no que realmente foi pedido. O cérebro tende a ler palavras antes de perceber cores, e esse treino trabalha justamente esse conflito, fortalecendo o controle sobre respostas automáticas.
+      </p>
+      }
       onStart={onStart}
     />
   );

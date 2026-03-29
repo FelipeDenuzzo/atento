@@ -520,13 +520,13 @@ export function FiltroCoresComSomGame({
             <p className="text-sm text-zinc-500">Nível atual</p>
             <h3 className="text-xl font-semibold text-zinc-900">{level.name}</h3>
             <p className="mt-2 text-sm text-zinc-700">
-              Clique apenas nas formas que correspondem ao <strong>alvo anunciado</strong>, e somente quando estiverem na <strong>faixa indicada abaixo</strong>. Ignore tudo o que estiver fora dela.
+              Formas coloridas vão cair pela tela. Uma voz vai anunciar uma cor — e essa é a <strong>única cor que você deve clicar</strong>. Deixe todas as outras formas passarem sem tocar. Fique atento: a voz pode anunciar uma <strong>nova cor a qualquer momento</strong>, e você precisará mudar seu foco imediatamente.
             </p>
             <div className="mt-2 flex flex-col gap-1">
               <span className="text-xs text-zinc-500">Faixa ativa deste bloco:</span>
               <span className="font-bold text-base" style={{ color: "#059669" }}>{activeZone === "top" ? "Faixa superior" : activeZone === "center" ? "Faixa central" : "Faixa inferior"}</span>
             </div>
-          </div>
+</div>
           <div className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm">
             <div>
               <p className="text-xs text-zinc-500">ALVO ATUAL</p>

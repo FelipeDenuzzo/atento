@@ -243,26 +243,29 @@ export function GoNoGoExpandidoGame({
             <p className="mt-2 text-lg text-zinc-700">{level.name}</p>
           </div>
 
-          <div className="space-y-4 rounded-lg bg-zinc-50 p-5">
-            <h3 className="text-lg font-semibold text-zinc-900">Como funciona:</h3>
-            <div className="space-y-3 text-zinc-700">
-              <p>
-                • Você verá itens aparecerem na tela
+
+        <div className="space-y-4 rounded-lg bg-zinc-50 p-5">
+          <h3 className="text-lg font-semibold text-zinc-900">Como funciona:</h3>
+          <div className="space-y-3 text-zinc-700">
+            <p>
+              Imagens vão aparecer na tela rapidamente, uma de cada vez. As imagens mostradas acima são <strong>exemplos da categoria que você deve clicar</strong> — ou seja, qualquer item desse tipo é válido, não apenas os mostrados aqui.
+            </p>
+            <p>
+              <strong>Clique</strong> ou <strong>pressione ESPAÇO</strong> sempre que aparecer um item da categoria certa, e fique parado quando aparecer qualquer outra coisa.
+            </p>
+            <p>
+              Cuidado: o ritmo aumenta a cada fase, e clicar no momento errado conta como erro.
+            </p>
+            {level.maxItemsPerWindow > 1 && (
+              <p className="text-sm italic text-zinc-600">
+                * Neste nível, podem aparecer vários itens ao mesmo tempo.<br />
+                Só clique se <strong>TODOS</strong> forem do tipo indicado.
               </p>
-              <p>
-                • <strong>Clique</strong> ou <strong>pressione ESPAÇO</strong> apenas quando aparecer o tipo de item indicado
-              </p>
-              <p>
-                • Não faça nada quando aparecer outro tipo de item
-              </p>
-              {level.maxItemsPerWindow > 1 && (
-                <p className="text-sm italic text-zinc-600">
-                  * Neste nível, podem aparecer vários itens ao mesmo tempo. 
-                  Só clique se <strong>TODOS</strong> forem do tipo indicado.
-                </p>
-              )}
-            </div>
+            )}
           </div>
+        </div>
+
+
 
           <button
             type="button"
