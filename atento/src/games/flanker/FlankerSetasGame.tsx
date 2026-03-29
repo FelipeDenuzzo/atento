@@ -652,11 +652,8 @@ export function FlankerSetas({
 
           <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm text-zinc-700">
             <p><strong>Como jogar:</strong></p>
-            <p>Veja a fileira de setas e encontre A seta certa (destacada).</p>
-            <p>Se A seta certa apontar para a esquerda, pressione ←.</p>
-            <p>Se A seta certa apontar para a direita, pressione →.</p>
-            <p>Ignore as setas ao redor, mesmo que apontem para o lado contrário.</p>
-            <p>Responda o mais rápido que conseguir, antes do tempo acabar.</p>
+            <p>Uma fileira de setas vai aparecer na tela. Sua única tarefa é observar a <strong>seta do meio</strong> e indicar para qual lado ela aponta — para a esquerda ou para a direita. <strong>Ignore as setas ao redor</strong>, elas estão lá para te distrair. Responda o mais rápido que conseguir, mas sem perder a precisão. A cada fase, o ritmo aumenta e o conflito entre as setas fica maior.
+            </p>
           </div>
 
           <button

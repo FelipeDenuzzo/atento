@@ -9,7 +9,8 @@ export default function FlankerSetasInstructions({ onStart }: Props) {
     <InstructionScreen
       title="A seta certa"
       instructions={
-          <p>Foque na <strong>seta central</strong> e indique a direção dela, ignorando as setas laterais. Responda o mais rápido possível, mas sem perder a precisão. O treino é aplicado em <strong>várias rodadas</strong>, com diferentes níveis de dificuldade.</p>
+<p>Este exercício treina a sua <strong>atenção seletiva</strong> — a capacidade de focar no que importa e ignorar informações ao redor que tentam te confundir. No dia a dia, usamos essa habilidade quando precisamos seguir uma instrução específica em meio a muitas outras informações chegando ao mesmo tempo.
+</p>
       }
       onStart={onStart}
     />
