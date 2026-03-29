@@ -17,8 +17,8 @@ export function InstructionScreen({
 }: InstructionScreenProps) {
   return (
     <div className="space-y-5">
-      <h2 className="text-2xl font-bold text-zinc-900">{title}</h2>
-      <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
+      <h2 className="text-2xl font-bold text-zinc-900 text-left">{title}</h2>
+      <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 text-sm text-black text-left">
         {instructions}
       </div>
       {extraContent}
