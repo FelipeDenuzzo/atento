@@ -380,7 +380,7 @@ export function ClassificacaoRapidaMemoriaAtualizavelGame({
 
     <div className="space-y-5">
       {phase === "intro" && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
+        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5 text-left text-black">
           <p>O jogo exige <strong>duas tarefas ao mesmo tempo</strong>:</p>
 
 <p>

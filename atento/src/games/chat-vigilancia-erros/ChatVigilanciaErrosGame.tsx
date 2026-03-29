@@ -342,7 +342,7 @@ export function ChatVigilanciaErrosGame({
   return (
     <div className="space-y-5">
       {phase === "intro" && currentConfig && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
+        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5 text-left text-black">
           <p>Você terá <strong>duas tarefas ao mesmo tempo</strong>:</p>
           <p>
             💬 <strong>Tarefa de chat</strong> → leia mensagens curtas que aparecem na tela e escolha a resposta mais adequada entre as opções apresentadas
