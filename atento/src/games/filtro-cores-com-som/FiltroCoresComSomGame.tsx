@@ -520,7 +520,8 @@ export function FiltroCoresComSomGame({
             <p className="text-sm text-zinc-500">Nível atual</p>
             <h3 className="text-xl font-semibold text-zinc-900">{level.name}</h3>
             <p className="mt-2 text-sm text-zinc-700">
-              Formas coloridas vão cair pela tela. Uma voz vai anunciar uma cor — e essa é a <strong>única cor que você deve clicar</strong>. Deixe todas as outras formas passarem sem tocar. Fique atento: a voz pode anunciar uma <strong>nova cor a qualquer momento</strong>, e você precisará mudar seu foco imediatamente.
+              Formas coloridas vão cair pela tela. Uma voz vai anunciar uma cor ou uma forma — e essa é a <strong>única cor ou forma que você deve clicar</strong>. Deixe todos outros itens passarem sem tocar. Fique atento: a voz pode anunciar uma <strong>nova cor a qualquer momento</strong>, e você precisará mudar seu foco imediatamente.
+              Você deve clicar apenas quando o item anunciado estiver na faixa destacada em verde. A cada bloco, a faixa ativa muda, então preste atenção para não clicar fora dela!
             </p>
             <div className="mt-2 flex flex-col gap-1">
               <span className="text-xs text-zinc-500">Faixa ativa deste bloco:</span>

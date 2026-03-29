@@ -8,7 +8,7 @@ export default function EscutaSeletivaInstructions({ onStart }: Props) {
   return (
     <InstructionScreen
       title="Escuta Seletiva"
-      instructions="Foque nos sons relevantes e ignore os demais."
+      instructions="instrucons curtas Foque nos sons relevantes e ignore os demais."
       onStart={onStart}
     />
   );

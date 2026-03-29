@@ -248,7 +248,7 @@ export function GoNoGoExpandidoGame({
           <h3 className="text-lg font-semibold text-zinc-900">Como funciona:</h3>
           <div className="space-y-3 text-zinc-700">
             <p>
-              Imagens vão aparecer na tela rapidamente, uma de cada vez. As imagens mostradas acima são <strong>exemplos da categoria que você deve clicar</strong> — ou seja, qualquer item desse tipo é válido, não apenas os mostrados aqui.
+              Imagens vão aparecer na tela rapidamente, uma de cada vez. As imagens mostradas como alvo na próxima tela são <strong>exemplos da categoria que você deve clicar</strong> — ou seja, qualquer item desse tipo é válido, não apenas os mostrados.
             </p>
             <p>
               <strong>Clique</strong> ou <strong>pressione ESPAÇO</strong> sempre que aparecer um item da categoria certa, e fique parado quando aparecer qualquer outra coisa.
