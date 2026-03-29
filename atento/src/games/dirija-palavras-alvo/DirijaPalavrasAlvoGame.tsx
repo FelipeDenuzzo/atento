@@ -182,7 +182,7 @@ function playFeedbackTone(type: "positive" | "negative") {
   const gain = audioContext.createGain();
   osc.type = "sine";
   osc.frequency.value = type === "positive" ? 860 : 220;
-  gain.gain.value = 0.05;
+  gain.gain.value = 0.12; // Mais alto para ser perceptível
   osc.connect(gain);
   gain.connect(audioContext.destination);
   osc.start();
@@ -216,7 +216,7 @@ function startContinuousErrorTone(params: {
   const gain = audioContext.createGain();
   osc.type = "sine";
   osc.frequency.value = 170;
-  gain.gain.value = 0.03;
+  gain.gain.value = 0.09; // Mais alto para ser perceptível
   osc.connect(gain);
   gain.connect(audioContext.destination);
   osc.start();
@@ -612,15 +612,17 @@ export function DirijaPalavrasAlvoGame({
                 {/* Largura da célula da palavra: padding px-3 (24px) + texto (aprox. 40px) = ~64px. Usar 80px para garantir. */}
                 {/** Ajuste: linha verde = 2x célula da palavra **/}
                 {(() => {
-                  const wordCellWidth = 80; // px, pode ser ajustado conforme necessário
+                  // Ajuste: célula da palavra pode ser maior, então aumentamos para 110px
+                  const wordCellWidth = 110; // px, mais visível
                   const greenWidth = 2 * wordCellWidth;
                   return (
                     <div
-                      className="absolute inset-y-0 rounded-md bg-emerald-500/45"
+                      className="absolute inset-y-0 rounded-md bg-emerald-500/70 border-2 border-emerald-700"
                       style={{
                         width: greenWidth,
                         left:
                           greenCenterX - (bandCenterX - currentConfig.bandWidthPx / 2) - greenWidth / 2,
+                        boxShadow: '0 0 0 2px #059669, 0 0 16px 4px #34d39988',
                       }}
                     />
                   );
