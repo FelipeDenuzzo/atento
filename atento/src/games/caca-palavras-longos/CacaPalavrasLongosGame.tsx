@@ -337,13 +337,6 @@ export function CacaPalavrasLongosGame({ basePoints, reportContext, onComplete }
     <div className="space-y-5">
       {phase === "intro" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <h3 className="text-xl font-semibold text-zinc-900">Caça-Palavras Longos</h3>
-          <div className="space-y-2 rounded-lg border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
-            <p>Encontre todas as palavras na grade mantendo foco contínuo até o fim.</p>
-            <p>As rodadas aumentam de dificuldade (12x12 até 20x20), com mais palavras e orientações.</p>
-            <p>Selecione a palavra clicando no início e no fim, ou arrastando pela direção correta.</p>
-          </div>
-
           <button
             type="button"
             onClick={startSession}

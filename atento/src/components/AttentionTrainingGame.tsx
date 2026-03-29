@@ -1,4 +1,57 @@
+
 "use client";
+
+import AcharOFaltandoInstructions from "@/games/achar-o-faltando/AcharOFaltandoInstructions";
+import FlankerSetasInstructions from "@/games/flanker/FlankerSetasInstructions";
+import StroopInvertidoInstructions from "@/games/stroop-invertido/StroopInvertidoInstructions";
+import GoNoGoQuickClickInstructions from "@/games/GoNoGoQuickClick/GoNoGoQuickClickInstructions";
+import GoNoGoExpandidoInstructions from "@/games/go-no-go-expandido/GoNoGoExpandidoInstructions";
+import FiltroCoresComSomInstructions from "@/games/filtro-cores-com-som/FiltroCoresComSomInstructions";
+import ContagemEstimulosFluxoInstructions from "@/games/contagem-estimulos-fluxo/ContagemEstimulosFluxoInstructions";
+import LabirintosProlongadosInstructions from "@/games/labirintos-prolongados/LabirintosProlongadosInstructions";
+import MapaDeSimbolosInstructions from "@/games/mapa-de-simbolos/MapaDeSimbolosInstructions";
+import BuscaSimbolosMatrizInstructions from "@/games/busca-simbolos-matriz/BuscaSimbolosMatrizInstructions";
+import CopiaMatrizesInstructions from "@/games/copia-matrizes/CopiaMatrizesInstructions";
+import CacaPalavrasLongosInstructions from "@/games/caca-palavras-longos/CacaPalavrasLongosInstructions";
+import RadarTonoInstructions from "@/games/radar-tono/RadarTonoInstructions";
+import DirijaPalavrasAlvoInstructions from "@/games/dirija-palavras-alvo/DirijaPalavrasAlvoInstructions";
+import ChatVigilanciaErrosInstructions from "@/games/chat-vigilancia-erros/ChatVigilanciaErrosInstructions";
+import MapaSimbolosMonitorSomInstructions from "@/games/mapa-simbolos-monitor-som/MapaSimbolosMonitorSomInstructions";
+import ClassificacaoRapidaMemoriaAtualizavelInstructions from "@/games/classificacao-rapida-memoria-atualizavel/ClassificacaoRapidaMemoriaAtualizavelInstructions";
+import CorOuFormaSwitchInstructions from "@/games/cor-ou-forma-switch/CorOuFormaSwitchInstructions";
+import TopoBaixoPositionRuleSwitchInstructions from "@/games/topo-baixo-position-rule-switch/TopoBaixoPositionRuleSwitchInstructions";
+import ReversalGoNoGoSwitchInstructions from "@/games/reversal-go-nogo-switch/ReversalGoNoGoSwitchInstructions";
+import TrilhaAlternadaTmtbInstructions from "@/games/trilha-alternada-tmtb/TrilhaAlternadaTmtbInstructions";
+import EscutaSeletivaInstructions from "@/games/escutaseletiva/EscutaSeletivaInstructions";
+import EscutaSeletivaCocktailPartyInstructions from "@/games/escutaseletiva/EscutaSeletivaCocktailPartyInstructions";
+import VisualSearchHuntInstructions from "@/games/visual-search-hunt/VisualSearchHuntInstructions";
+
+const instructionComponents: Record<string, any> = {
+  "find-missing-item": AcharOFaltandoInstructions,
+  "flanker": FlankerSetasInstructions,
+  "stroop": StroopInvertidoInstructions,
+  "go-no-go": GoNoGoQuickClickInstructions,
+  "go-no-go-expandido": GoNoGoExpandidoInstructions,
+  "filtro-cores-com-som": FiltroCoresComSomInstructions,
+  "counting-flow-task": ContagemEstimulosFluxoInstructions,
+  "long-mazes": LabirintosProlongadosInstructions,
+  "symbol-map": MapaDeSimbolosInstructions,
+  "symbol-matrix-search": BuscaSimbolosMatrizInstructions,
+  "copy-matrices": CopiaMatrizesInstructions,
+  "long-word-search": CacaPalavrasLongosInstructions,
+  "radar-tone": RadarTonoInstructions,
+  "drive-word-target": DirijaPalavrasAlvoInstructions,
+  "chat-error-vigilance": ChatVigilanciaErrosInstructions,
+  "symbol-map-sound-monitor": MapaSimbolosMonitorSomInstructions,
+  "rapid-classification-updatable-memory": ClassificacaoRapidaMemoriaAtualizavelInstructions,
+  "color-shape-switch": CorOuFormaSwitchInstructions,
+  "top-bottom-position-rule-switch": TopoBaixoPositionRuleSwitchInstructions,
+  "reversal-go-nogo-switch": ReversalGoNoGoSwitchInstructions,
+  "trilha-alternada-tmtb": TrilhaAlternadaTmtbInstructions,
+  "escutaseletiva": EscutaSeletivaInstructions,
+  "escutaseletiva-cocktail-party": EscutaSeletivaCocktailPartyInstructions,
+  "visual-search": VisualSearchHuntInstructions,
+};
 
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -209,22 +262,10 @@ export function AttentionTrainingGame() {
 
   const getStageForExercise = (
     exercise: TrainingPlan["exercises"][number] | undefined,
-  ): GameStage =>
-    exercise?.kind === "symbol-matrix-search" ||
-    exercise?.kind === "find-missing-item" ||
-    exercise?.kind === "copy-matrices" ||
-    exercise?.kind === "long-word-search" ||
-    exercise?.kind === "radar-tone" ||
-    exercise?.kind === "drive-word-target" ||
-    exercise?.kind === "chat-error-vigilance" ||
-    exercise?.kind === "symbol-map-sound-monitor" ||
-    exercise?.kind === "rapid-classification-updatable-memory" ||
-    exercise?.kind === "color-shape-switch" ||
-    exercise?.kind === "top-bottom-position-rule-switch" ||
-    exercise?.kind === "reversal-go-nogo-switch" ||
-    exercise?.kind === "trilha-alternada-tmtb"
-      ? "exercise"
-      : "instructions";
+  ): GameStage => {
+    if (!exercise) return "intro";
+    return "instructions";
+  };
 
   const startPlan = () => {
     const focusedPlanId = getPlanIdByAttentionType(selectedAttentionType);
@@ -268,7 +309,7 @@ export function AttentionTrainingGame() {
   const startFromExercise = (
     exerciseIndex: number,
     options?: { cocktailStartLevel?: number },
-    startStage: GameStage = "exercise",
+    startStage: GameStage = "instructions",
   ) => {
     const selectedExercise = selectedPlan.exercises[exerciseIndex];
     if (
@@ -289,23 +330,7 @@ export function AttentionTrainingGame() {
     setSubmitted(false);
     setQuizResults([]);
     setShowingQuizResults(false);
-    setStage(
-      selectedExercise.kind === "symbol-matrix-search" ||
-        selectedExercise.kind === "find-missing-item" ||
-        selectedExercise.kind === "copy-matrices" ||
-        selectedExercise.kind === "long-word-search" ||
-        selectedExercise.kind === "radar-tone" ||
-        selectedExercise.kind === "drive-word-target" ||
-        selectedExercise.kind === "chat-error-vigilance" ||
-        selectedExercise.kind === "symbol-map-sound-monitor" ||
-        selectedExercise.kind === "rapid-classification-updatable-memory" ||
-        selectedExercise.kind === "color-shape-switch" ||
-        selectedExercise.kind === "top-bottom-position-rule-switch" ||
-        selectedExercise.kind === "reversal-go-nogo-switch" ||
-        selectedExercise.kind === "trilha-alternada-tmtb"
-        ? "exercise"
-        : startStage,
-    );
+    setStage(startStage);
   };
 
   const submitAnswer = () => {
@@ -462,13 +487,30 @@ export function AttentionTrainingGame() {
           <p className="text-sm font-medium text-zinc-500">
             {stageTitle[stage]}
           </p>
-          <button
-            type="button"
-            onClick={handleReturnToMenu}
-            className="rounded-lg border border-zinc-200 px-3 py-1 text-xs font-semibold text-zinc-700 hover:bg-zinc-50"
-          >
-            Voltar ao menu
-          </button>
+          {/* Não exibe botão na tela inicial explicativa */}
+          {!(stage === "intro" && introStep === "didactic") && (
+            stage === "intro" && introStep === "menu" ? (
+              <button
+                type="button"
+                onClick={() => setIntroStep("didactic")}
+                className="rounded-lg border border-zinc-200 px-3 py-1 text-xs font-semibold text-zinc-700 hover:bg-zinc-50"
+              >
+                Sobre o Atento
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setStage("intro");
+                  setCurrentIndex(0);
+                  setTrainingMode(null);
+                }}
+                className="rounded-lg border border-zinc-200 px-3 py-1 text-xs font-semibold text-zinc-700 hover:bg-zinc-50"
+              >
+                Voltar
+              </button>
+            )
+          )}
         </div>
 
         {stage === "intro" && (
@@ -782,68 +824,46 @@ export function AttentionTrainingGame() {
         )}
 
         {stage === "instructions" && currentExercise && (
-          <div className="mt-4 space-y-5">
-            {/* Só mostra o título dentro do card se não estiver no cabeçalho principal */}
-            {![
-              "quiz",
-              "visual-search",
-              "flanker",
-              "filtro-cores-com-som",
-              "counting-flow-task",
-              "long-mazes",
-              "symbol-map",
-              "symbol-matrix-search",
-              "go-no-go",
-              "go-no-go-expandido",
-              "radar-tone",
-              "drive-word-target",
-              "chat-error-vigilance",
-              "symbol-map-sound-monitor",
-              "rapid-classification-updatable-memory",
-              "color-shape-switch",
-              "top-bottom-position-rule-switch",
-              "reversal-go-nogo-switch",
-              "trilha-alternada-tmtb",
-              "escutaseletiva-cocktail-party",
-            ].includes(currentExercise.kind) && (
-              <h2 className="text-xl font-semibold text-zinc-900">
-                {currentExercise.title}
-              </h2>
-            )}
-            {currentExercise.instructions && (
-              <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
-                <p
-                  dangerouslySetInnerHTML={{
-                    __html: currentExercise.instructions,
-                  }}
-                />
-              </div>
-            )}
-            {currentExercise.kind === "escutaseletiva-cocktail-party" ? (
-              <div className="flex flex-wrap gap-3">
+          (() => {
+            const InstructionComponent = instructionComponents[currentExercise.kind];
+            if (InstructionComponent) {
+              return (
+                <InstructionComponent onStart={() => setStage("exercise")} />
+              );
+            }
+            // fallback padrão antigo
+            return (
+              <div className="mt-4 space-y-5">
+                <h2 className="text-xl font-semibold text-zinc-900">{currentExercise.title}</h2>
+                {currentExercise.instructions && (
+                  <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
+                    <p
+                      dangerouslySetInnerHTML={{
+                        __html: currentExercise.instructions,
+                      }}
+                    />
+                  </div>
+                )}
                 <button
                   type="button"
                   onClick={() => setStage("exercise")}
-                  className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-500"
+                  className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
                 >
                   Iniciar treino
                 </button>
               </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setStage("exercise")}
-                className="rounded-lg bg-zinc-900 px-4 py-2 font-medium text-white hover:bg-zinc-700"
-              >
-                Começar exercício
-              </button>
-            )}
-          </div>
+            );
+          })()
         )}
 
         {stage === "exercise" && currentExercise && (
           <div className="mt-4 space-y-6">
             <div className="space-y-1">
+              {currentExercise.kind === "quiz" && (
+                <h2 className="text-xl font-semibold text-zinc-900">
+                  {currentExercise.question}
+                </h2>
+              )}
               {currentExercise.kind === "quiz" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
                   {currentExercise.question}
@@ -856,32 +876,7 @@ export function AttentionTrainingGame() {
               )}
               {currentExercise.kind === "escutaseletiva-cocktail-party" && (
                 <h2 className="text-xl font-semibold text-zinc-900">
-                  Escuta Seletiva
-                </h2>
-              )}
-              {currentExercise.kind === "flanker" && (
-                <h2 className="text-xl font-semibold text-zinc-900">
-                  Flanker de Setas
-                </h2>
-              )}
-              {currentExercise.kind === "filtro-cores-com-som" && (
-                <h2 className="text-xl font-semibold text-zinc-900">
-                  Filtro de Cores com Som
-                </h2>
-              )}
-              {currentExercise.kind === "counting-flow-task" && (
-                <h2 className="text-xl font-semibold text-zinc-900">
-                  Contagem de Estímulos em Fluxo
-                </h2>
-              )}
-              {currentExercise.kind === "long-mazes" && (
-                <h2 className="text-xl font-semibold text-zinc-900">
-                  Labirintos Prolongados
-                </h2>
-              )}
-              {currentExercise.kind === "symbol-map" && (
-                <h2 className="text-xl font-semibold text-zinc-900">
-                  Mapa de Símbolos (Symbol Matching)
+                  Escuta Seletiva: Cocktail Party
                 </h2>
               )}
               {currentExercise.kind === "symbol-matrix-search" && (

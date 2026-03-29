@@ -243,7 +243,8 @@ function buildResultText(result: RadarToneSessionResult, reportContext?: ReportC
 }
 
 export function RadarTonoGame({ basePoints, reportContext, onComplete }: Props) {
-  const [phase, setPhase] = useState<Phase>("intro");
+  // O controle de fase (intro, instrução, etc) será feito externamente
+  const [phase, setPhase] = useState<Phase>("running");
   const [roundIndex, setRoundIndex] = useState(0);
   const [remainingMs, setRemainingMs] = useState(ROUND_CONFIGS[0]?.durationMs ?? 0);
   const [dotPosition, setDotPosition] = useState<{ x: number; y: number }>({ x: 180, y: 180 });
@@ -519,131 +520,48 @@ export function RadarTonoGame({ basePoints, reportContext, onComplete }: Props) 
     URL.revokeObjectURL(url);
   }
 
+  // O componente agora só renderiza o exercício, sem instruções/tela inicial/resultados popup
   return (
     <div className="space-y-5">
-      {phase === "intro" && currentConfig && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <h3 className="text-xl font-semibold text-zinc-900">Radar e Tom</h3>
-          <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
-            <p className="font-semibold text-zinc-900">{currentConfig.name}</p>
-            <p className="mt-1">Mantenha o cursor sobre o ponto em movimento o maior tempo possível.</p>
-            <p className="mt-1">Ao ouvir tom grave, pressione <strong>J</strong>. Ao ouvir tom agudo, pressione <strong>K</strong>.</p>
-            {currentConfig.hasDistractorSphere && (
-              <p className="mt-1">Nesta fase há uma esfera vermelha de distração. Siga e conte apenas a esfera preta.</p>
-            )}
-            <p className="mt-1">Foco contínuo nas duas tarefas até o fim da fase.</p>
-          </div>
-          <button
-            type="button"
-            onClick={startCurrentRound}
-            className="w-full rounded-lg bg-zinc-900 px-4 py-3 font-semibold text-white hover:bg-zinc-700"
-          >
-            Iniciar fase
-          </button>
+      {/* Renderize apenas a interface do exercício, sem lógica de instrução/tela inicial */}
+      <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
+        <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
+            <p className="text-xs text-zinc-500">Tempo restante</p>
+            <p className="font-semibold text-zinc-900">{formatClock(remainingMs)}</p>
         </div>
-      )}
-
-      {phase === "running" && currentConfig && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Tempo restante</p>
-              <p className="font-semibold text-zinc-900">{formatClock(remainingMs)}</p>
-          </div>
-
-          <div className="space-y-3">
+        <div className="space-y-3">
+          <div
+            onMouseMove={updateMousePosition}
+            onMouseLeave={clearMousePosition}
+            className="relative mx-auto rounded-lg border border-zinc-300 bg-zinc-50"
+            style={{ width: currentConfig.arenaSizePx, height: currentConfig.arenaSizePx }}
+          >
             <div
-              onMouseMove={updateMousePosition}
-              onMouseLeave={clearMousePosition}
-              className="relative mx-auto rounded-lg border border-zinc-300 bg-zinc-50"
-              style={{ width: currentConfig.arenaSizePx, height: currentConfig.arenaSizePx }}
-            >
+              className="absolute rounded-full bg-zinc-900"
+              style={{
+                width: currentConfig.dotRadiusPx * 2,
+                height: currentConfig.dotRadiusPx * 2,
+                left: dotPosition.x - currentConfig.dotRadiusPx,
+                top: dotPosition.y - currentConfig.dotRadiusPx,
+              }}
+            />
+            {redDotPosition && (
               <div
-                className="absolute rounded-full bg-zinc-900"
+                className="absolute rounded-full bg-red-600"
                 style={{
                   width: currentConfig.dotRadiusPx * 2,
                   height: currentConfig.dotRadiusPx * 2,
-                  left: dotPosition.x - currentConfig.dotRadiusPx,
-                  top: dotPosition.y - currentConfig.dotRadiusPx,
+                  left: redDotPosition.x - currentConfig.dotRadiusPx,
+                  top: redDotPosition.y - currentConfig.dotRadiusPx,
                 }}
               />
-              {redDotPosition && (
-                <div
-                  className="absolute rounded-full bg-red-600"
-                  style={{
-                    width: currentConfig.dotRadiusPx * 2,
-                    height: currentConfig.dotRadiusPx * 2,
-                    left: redDotPosition.x - currentConfig.dotRadiusPx,
-                    top: redDotPosition.y - currentConfig.dotRadiusPx,
-                  }}
-                />
-              )}
-            </div>
-            <p className="text-xs text-zinc-600">
-              Grave = J | Agudo = K
-            </p>
+            )}
           </div>
+          <p className="text-xs text-zinc-600">
+            Grave = J | Agudo = K
+          </p>
         </div>
-      )}
-
-      {phase === "round-feedback" && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <h3 className="text-xl font-semibold text-zinc-900">Fase concluída</h3>
-          <button
-            type="button"
-            onClick={nextRound}
-            className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50"
-          >
-            Próxima fase
-          </button>
-        </div>
-      )}
-
-      {phase === "result" && sessionResult && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <h3 className="text-xl font-semibold text-zinc-900">Resultado final</h3>
-          {reportContext && (
-            <p className="text-sm text-zinc-600">
-              {reportContext.mode === "sequence" ? "Trilha" : "Jogo individual"}: {reportContext.scopeLabel}
-            </p>
-          )}
-
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Dual score médio</p>
-              <p className="font-semibold text-zinc-900">{sessionResult.averageDualScore.toFixed(1)}%</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Radar (tempo em cima)</p>
-              <p className="font-semibold text-zinc-900">{sessionResult.averageRadarTrackedPercent.toFixed(1)}%</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Tons (taxa de acerto)</p>
-              <p className="font-semibold text-zinc-900">{sessionResult.averageToneAccuracyPercent.toFixed(1)}%</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3 sm:col-span-3">
-              <p className="text-xs text-zinc-500">Tendência</p>
-              <p className="font-semibold text-zinc-900">{sessionResult.trendSummary}</p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={downloadText}
-              className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50"
-            >
-              Baixar resultados (.txt)
-            </button>
-            <button
-              type="button"
-              onClick={concludeExercise}
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
-            >
-              Concluir exercício
-            </button>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 }

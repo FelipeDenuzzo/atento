@@ -543,22 +543,6 @@ export function DirijaPalavrasAlvoGame({
     <div className="space-y-5">
       {phase === "intro" && currentConfig && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <h3 className="text-xl font-semibold text-zinc-900">
-            Dirija + Palavras-Alvo
-          </h3>
-          <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
-            <p className="font-semibold text-zinc-900">{currentConfig.name}</p>
-            <p className="mt-1">
-              Mantenha o retângulo preto dentro da <strong>área verde</strong> da barra cinza usando <strong>←/→</strong> ou <strong>A/D</strong>.
-            </p>
-            <p className="mt-1">
-              Pressione <strong>ESPAÇO</strong> quando a palavra-alvo cruzar a linha horizontal no meio da tela.
-            </p>
-            <p className="mt-1">
-              Palavra-alvo desta fase: <strong>{currentConfig.targetWord}</strong>
-            </p>
-            <p className="mt-1">Foco contínuo nas duas tarefas até o fim da fase.</p>
-          </div>
           <button
             type="button"
             onClick={startCurrentRound}

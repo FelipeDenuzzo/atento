@@ -328,16 +328,33 @@ export function MobileAttentionTrainingGame() {
     setShowingQuizResults(false);
   };
 
-  const confirmReturnToMenu = () => {
-    if (typeof window === "undefined") return false;
-    return window.confirm(
-      "Voltar ao menu inicial? O progresso atual sera perdido.",
-    );
-  };
 
-  const handleReturnToMenu = () => {
-    if (!confirmReturnToMenu()) return;
-    restart();
+  // Botão de navegação adaptado para o novo fluxo
+  const renderNavButton = () => {
+    if (stage === "intro" && introStep === "menu") {
+      return (
+        <button
+          type="button"
+          onClick={() => setIntroStep("didactic")}
+          className="rounded-lg border border-zinc-200 px-3 py-1 text-xs font-semibold text-zinc-700 hover:bg-zinc-50"
+        >
+          Sobre o Atento
+        </button>
+      );
+    }
+    return (
+      <button
+        type="button"
+        onClick={() => {
+          setStage("intro");
+          setCurrentIndex(0);
+          setTrainingMode(null);
+        }}
+        className="rounded-lg border border-zinc-200 px-3 py-1 text-xs font-semibold text-zinc-700 hover:bg-zinc-50"
+      >
+        Voltar
+      </button>
+    );
   };
 
   const downloadQuizResults = () => {
@@ -399,6 +416,10 @@ export function MobileAttentionTrainingGame() {
   return (
     <main className="mx-auto w-full flex min-h-screen max-w-3xl items-center px-6 py-10">
       <section className="w-full border border-black/10 bg-white shadow-sm rounded-2xl p-6 sm:p-8">
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm font-medium text-zinc-500">{stageTitle[stage]}</p>
+          {renderNavButton()}
+        </div>
         <div className="flex flex-col items-center justify-center py-12">
             {/* ...outros estágios e lógica... */}
             {stage === "exercise" && currentExercise && (

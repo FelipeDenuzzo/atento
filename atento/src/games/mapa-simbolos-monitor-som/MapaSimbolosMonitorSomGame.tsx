@@ -343,13 +343,6 @@ export function MapaSimbolosMonitorSomGame({
     <div className="space-y-5">
       {phase === "intro" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <h3 className="text-xl font-semibold text-zinc-900">Mapa de Símbolos + Monitor de Som</h3>
-          <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
-            <p className="font-semibold text-zinc-900">{roundNameByIndex(roundIndex)}</p>
-            <p className="mt-1">Encontre na grade o símbolo-alvo no topo o mais rápido possível.</p>
-            <p className="mt-1">Em paralelo, detecte falhas sonoras e responda com <strong>ESPAÇO</strong> ou no botão “Detectei glitch”.</p>
-            <p className="mt-1">As duas tarefas contam 50% cada no resultado final.</p>
-          </div>
           <button
             type="button"
             onClick={startRound}
