@@ -103,13 +103,6 @@ function cueClass(rule: RuleMode | null): string {
   return "border-zinc-300 bg-zinc-100 text-zinc-700";
 }
 
-function shapeGlyph(shape: StimulusShape | null): string {
-  if (shape === "star") return "★";
-  if (shape === "circle") return "●";
-  if (shape === "square") return "■";
-  if (shape === "triangle") return "▲";
-  return "";
-}
 
 function shapeText(shape: StimulusShape | null): string {
   if (shape === "star") return "ESTRELA";
@@ -426,7 +419,15 @@ export function ReversalGoNoGoSwitchGame({
                 className="mx-auto flex h-[260px] w-full max-w-[280px] items-center justify-center rounded-2xl border-2 border-zinc-300 bg-white text-[128px] text-zinc-900 hover:bg-zinc-50 disabled:cursor-not-allowed"
                 aria-label="Clique para responder"
               >
-                {currentShape ? shapeGlyph(currentShape) : <span style={{opacity: 0}}>&nbsp;★&nbsp;</span>}
+                {currentShape ? (
+                  <img
+                    src={`/simbolos/${currentShape}.svg`}
+                    alt={currentShape}
+                    style={{ width: 120, height: 120 }}
+                  />
+                ) : (
+                  <span style={{ opacity: 0 }}>&nbsp;★&nbsp;</span>
+                )}
               </button>
             ) : null}
           </div>
