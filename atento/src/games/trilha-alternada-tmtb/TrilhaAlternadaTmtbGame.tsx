@@ -1,10 +1,3 @@
-  // Inicializa o treino automaticamente ao montar, se necessário
-  useEffect(() => {
-    if (phase === "running" && sequence.length === 0) {
-      startValidPhase(1, true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase]);
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -211,6 +204,13 @@ export function TrilhaAlternadaTmtbGame({ basePoints, reportContext, onComplete 
   const phaseStartedAtRef = useRef<number | null>(null);
   const phaseDurationsRef = useRef<Record<ValidPhaseId, number>>({ 1: 0, 2: 0, 3: 0 });
 
+    // Inicializa o treino automaticamente ao montar, se necessário
+    useEffect(() => {
+      if (phase === "running" && sequence.length === 0) {
+        startValidPhase(1, true);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [phase]);
   const currentExpected = sequence[currentSeqIndex] ?? null;
   const activeValidPhaseConfig = VALID_PHASES.find((item) => item.id === validPhaseId) ?? VALID_PHASES[0]!;
 
