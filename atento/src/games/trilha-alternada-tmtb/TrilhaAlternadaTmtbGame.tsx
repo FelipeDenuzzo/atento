@@ -1,4 +1,6 @@
+
 "use client";
+import { ResultScreen } from "@/components/ResultScreen";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReportContext } from "@/components/AttentionTrainingGame";
@@ -680,76 +682,36 @@ export function TrilhaAlternadaTmtbGame({ basePoints, reportContext, onComplete 
       {phase === "result" && result && isResultPopupOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4">
           <div className="max-h-[92vh] w-full max-w-4xl space-y-4 overflow-y-auto rounded-lg border border-black/10 bg-white p-5 shadow-xl">
-          <h3 className="text-xl font-semibold text-zinc-900">Resultado final</h3>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Tempo total</p>
-              <p className="font-semibold text-zinc-900">{result.totalTimeSeconds.toFixed(2)} s</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Velocidade total da fase</p>
-              <p className="font-semibold text-zinc-900">{result.totalClickRatePerSecond.toFixed(3)} cliques/s</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Maior intervalo entre cliques</p>
-              <p className="font-semibold text-zinc-900">{(result.maxInterClickMs / 1000).toFixed(2)} s</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Erros</p>
-              <p className="font-semibold text-zinc-900">{result.errorsTotal}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Recuos aplicados</p>
-              <p className="font-semibold text-zinc-900">{result.backStepsApplied}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Pontuação final</p>
-              <p className="font-semibold text-zinc-900">{result.finalScore.toFixed(1)}%</p>
-            </div>
-          </div>
-
-          <div className="rounded-lg border border-black/10 bg-zinc-50 p-3 text-sm text-zinc-700">
-            <p>{result.interpretation}</p>
-          </div>
-
-          <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-            <p className="text-sm font-semibold text-zinc-900">Métricas por fase (didático)</p>
-            <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-              {result.phaseMetrics.map((metric) => (
-                <div key={metric.phaseId} className="rounded-md border border-zinc-200 bg-white p-2 text-sm">
-                  <p className="font-medium text-zinc-900">Fase {metric.phaseId}</p>
-                  <p className="text-zinc-700">Velocidade: {metric.clickRatePerSecond.toFixed(3)} cliques/s</p>
-                  <p className="text-zinc-700">Maior intervalo: {(metric.maxInterClickMs / 1000).toFixed(2)} s</p>
-                </div>
-              ))}
-              <div className="rounded-md border border-zinc-200 bg-white p-2 text-sm">
-                <p className="font-medium text-zinc-900">Total geral</p>
-                <p className="text-zinc-700">Velocidade: {result.totalClickRatePerSecond.toFixed(3)} cliques/s</p>
-                <p className="text-zinc-700">Maior intervalo: {(result.maxInterClickMs / 1000).toFixed(2)} s</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={downloadTXT}
-              className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50"
-            >
-              Baixar resultados (.txt)
-            </button>
-            <button
-              type="button"
-              onClick={() => {
+            <ResultScreen
+              title="Resultado final"
+              result={result}
+              onDownloadTxt={downloadTXT}
+              onContinue={() => {
                 setIsResultPopupOpen(false);
                 setPhase("intro");
               }}
-              className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+              continueLabel="Jogar novamente"
             >
-              Jogar novamente
-            </button>
+              {/* Métricas customizadas do treino */}
+              <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
+                <p className="text-sm font-semibold text-zinc-900">Métricas por fase (didático)</p>
+                <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                  {result.phaseMetrics.map((metric: any) => (
+                    <div key={metric.phaseId} className="rounded-md border border-zinc-200 bg-white p-2 text-sm">
+                      <p className="font-medium text-zinc-900">Fase {metric.phaseId}</p>
+                      <p className="text-zinc-700">Velocidade: {metric.clickRatePerSecond.toFixed(3)} cliques/s</p>
+                      <p className="text-zinc-700">Maior intervalo: {(metric.maxInterClickMs / 1000).toFixed(2)} s</p>
+                    </div>
+                  ))}
+                  <div className="rounded-md border border-zinc-200 bg-white p-2 text-sm">
+                    <p className="font-medium text-zinc-900">Total geral</p>
+                    <p className="text-zinc-700">Velocidade: {result.totalClickRatePerSecond.toFixed(3)} cliques/s</p>
+                    <p className="text-zinc-700">Maior intervalo: {(result.maxInterClickMs / 1000).toFixed(2)} s</p>
+                  </div>
+                </div>
+              </div>
+            </ResultScreen>
           </div>
-        </div>
         </div>
       )}
     </div>
