@@ -479,6 +479,8 @@ export function DirijaPalavrasAlvoGame({
           runtimeRef.current.hitsInsideGreen += 1;
         }
         playFeedbackTone("positive");
+      } else if (event.code === "Space") {
+        playFeedbackTone("negative");
       }
     }
 

@@ -335,8 +335,10 @@ export function handleKeyDown(params: {
     return { hit: false, falsePositive: false };
   }
 
+
+  // Ajuste: tolerância cobre toda a faixa verde central (48px de altura)
   const responseLineY = params.responseLineY ?? params.runtime.config.arenaHeightPx / 2;
-  const tolerance = params.runtime.config.responseLineTolerancePx;
+  const tolerance = 24; // metade da altura da faixa verde (48px)
 
   const targetIndex = params.runtime.activeBlocks.findIndex(
     (block) =>

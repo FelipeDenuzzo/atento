@@ -631,8 +631,9 @@ export function AttentionTrainingGame() {
 
                 <button
                   type="button"
-                  onClick={handleSelectGuidedTrail}
-                  className="w-full rounded-xl border border-zinc-200 bg-white p-4 text-left hover:bg-zinc-50"
+                  onClick={undefined}
+                  className="w-full rounded-xl border border-zinc-200 bg-white p-4 text-left opacity-50 cursor-not-allowed"
+                  disabled
                 >
                   <p className="text-base font-semibold text-zinc-900">
                     Trilha guiada
