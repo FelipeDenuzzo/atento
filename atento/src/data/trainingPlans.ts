@@ -447,7 +447,7 @@ export const trainingPlans: TrainingPlan[] = [
               ? [
                   {
                     id: "div-3",
-                    title: "1 tela no training Dirija + Palavras-Alvo",
+                    title: "Dirija + Palavras-Alvo",
                     attentionType: "dividida" as const,
                     kind: "drive-word-target" as const,
                     instructions:
