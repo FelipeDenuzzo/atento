@@ -479,10 +479,9 @@ export const VisualSearchHunt: React.FC<Props> = (props) => {
             </div>
           </div>
 
-        <div className="space-y-2 text-sm text-zinc-700">
-  <p>Uma grade com várias figuras coloridas vai aparecer na tela. No topo, você verá qual é o seu alvo — uma combinação de <strong>forma e cor</strong>, como "triângulo vermelho". Seu objetivo é <strong>tocar em todas as figuras que correspondem ao alvo</strong>, ignorando as outras. Cuidado: tocar em figuras erradas reduz seu tempo. A cada fase, as figuras ficam mais parecidas entre si e o tempo diminui.
-  </p>
-          </div>
+       <div className="space-y-2 text-sm text-zinc-700">
+          <p>A figura mostrada acima é o seu <strong>alvo</strong>. Durante o jogo, uma grade com várias figuras coloridas vai aparecer na tela — seu objetivo é <strong>tocar em todas as figuras iguais ao alvo</strong>, prestando atenção na forma e na cor. Cuidado: tocar em figuras erradas reduz seu tempo. A cada fase, as figuras ficam mais parecidas entre si e o tempo diminui.</p>
+      </div>
 
           <button
             type="button"
