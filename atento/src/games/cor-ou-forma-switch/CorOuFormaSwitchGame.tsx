@@ -407,7 +407,9 @@ export function CorOuFormaSwitchGame({
           </div>
 
           <div className={`rounded-xl border border-zinc-300 p-10 text-center ${cueClass(currentRule)} min-h-[180px] flex flex-col items-center justify-center`}>
-            <p className={`mt-4 text-9xl font-black leading-none ${colorClass(currentColor)}`}>{shapeGlyph(currentShape)}</p>
+            <div className="mt-4 flex items-center justify-center" style={{height: 120, width: 120}}>
+              <span className={`text-9xl font-black leading-none ${colorClass(currentColor)}`}>{shapeGlyph(currentShape)}</span>
+            </div>
             <p className="mt-4 min-h-[22px] text-sm font-semibold text-zinc-700">{feedback}</p>
           </div>
 
