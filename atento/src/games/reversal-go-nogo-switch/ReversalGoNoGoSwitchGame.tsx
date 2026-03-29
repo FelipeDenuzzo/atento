@@ -418,7 +418,7 @@ export function ReversalGoNoGoSwitchGame({
               <div className="flex h-[260px] items-center justify-center text-5xl font-black text-zinc-400">•</div>
             ) : trialStage === "cue" ? (
               <div className="flex h-[260px] items-center justify-center text-lg font-medium text-zinc-600">Prepare-se...</div>
-            ) : (
+            ) : trialStage === "stimulus" ? (
               <button
                 type="button"
                 onClick={answerByClick}
@@ -428,7 +428,7 @@ export function ReversalGoNoGoSwitchGame({
               >
                 {shapeGlyph(currentShape)}
               </button>
-            )}
+            ) : null}
           </div>
 
           {isTrainingRound && (

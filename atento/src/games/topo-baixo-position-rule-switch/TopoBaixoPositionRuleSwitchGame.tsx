@@ -491,12 +491,12 @@ export function TopoBaixoPositionRuleSwitchGame({
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
           {/* Painéis de regras restaurados */}
           <div className="flex flex-col sm:flex-row justify-center gap-4 mb-4">
-            <div className="bg-gray-100 rounded p-2 text-xs min-w-[180px]">
+            <div className="bg-gray-100 rounded p-2 text-xs min-w-[180px] text-zinc-900">
               <div className="font-bold mb-1">{topRule.position}</div>
               <div>{topRule.dimension}</div>
               <div className="mt-1">{topRule.mapping}</div>
             </div>
-            <div className="bg-gray-100 rounded p-2 text-xs min-w-[180px]">
+            <div className="bg-gray-100 rounded p-2 text-xs min-w-[180px] text-zinc-900">
               <div className="font-bold mb-1">{bottomRule.position}</div>
               <div>{bottomRule.dimension}</div>
               <div className="mt-1">{bottomRule.mapping}</div>
