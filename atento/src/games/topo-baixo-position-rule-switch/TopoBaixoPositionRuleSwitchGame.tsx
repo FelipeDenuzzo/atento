@@ -489,34 +489,6 @@ export function TopoBaixoPositionRuleSwitchGame({
     <div className="space-y-5">
       {phase === "running" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Fase</p>
-              <p className="font-semibold text-zinc-900">
-                {roundIndex + 1}/{ROUND_CONFIGS.length}
-              </p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Trial</p>
-              <p className="font-semibold text-zinc-900">
-                {trialCounter}/{currentConfig.totalTrials}
-              </p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Tempo</p>
-              <p className="font-semibold text-zinc-900">{formatClock(remainingMs)}</p>
-            </div>
-          </div>
-
-          <div className="rounded-lg border-2 border-zinc-300 bg-zinc-50 p-4 text-zinc-700">
-            <p className="text-lg font-semibold text-zinc-900">
-              {relevantLabel(currentDimension)}
-            </p>
-            <p className="text-base">
-              Posição atual: {positionLabel(currentPosition)}
-            </p>
-          </div>
-
           <div className="relative h-[360px] overflow-hidden rounded-xl border border-zinc-300 bg-white">
             <div className="absolute inset-x-0 top-0 h-1/2 border-b border-dashed border-zinc-300 bg-zinc-50/60" />
             <div className="absolute inset-x-0 bottom-0 h-1/2 bg-zinc-100/40" />
@@ -545,39 +517,6 @@ export function TopoBaixoPositionRuleSwitchGame({
                 />
               </div>
             )}
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-lg border-2 border-zinc-300 bg-zinc-50 p-4 text-sm text-zinc-800">
-              <p className="text-xs font-semibold uppercase text-zinc-500">
-                {topRule.position}
-              </p>
-              <p
-                className={
-                  topRule.dimension.includes("COR")
-                    ? "text-base font-semibold leading-tight text-blue-800"
-                    : "text-base font-semibold leading-tight text-emerald-800"
-                }
-              >
-                {topRule.dimension}
-              </p>
-              <p className="mt-1 text-sm font-medium">{topRule.mapping}</p>
-            </div>
-            <div className="rounded-lg border-2 border-zinc-300 bg-zinc-50 p-4 text-sm text-zinc-800">
-              <p className="text-xs font-semibold uppercase text-zinc-500">
-                {bottomRule.position}
-              </p>
-              <p
-                className={
-                  bottomRule.dimension.includes("COR")
-                    ? "text-base font-semibold leading-tight text-blue-800"
-                    : "text-base font-semibold leading-tight text-emerald-800"
-                }
-              >
-                {bottomRule.dimension}
-              </p>
-              <p className="mt-1 text-sm font-medium">{bottomRule.mapping}</p>
-            </div>
           </div>
         </div>
       )}

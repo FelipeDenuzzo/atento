@@ -377,23 +377,25 @@ export function ReversalGoNoGoSwitchGame({
       {/* Tela de instrução removida. O jogo inicia automaticamente. */}
       {phase === "running" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Fase</p>
-              <p className="font-semibold text-zinc-900">
-                {isTrainingRound ? "Treino" : `Ação ${roundIndex}`}
-                <span className="ml-2 text-zinc-500">{roundIndex + 1}/{ROUND_CONFIGS.length}</span>
-              </p>
+          {isTrainingRound && (
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
+                <p className="text-xs text-zinc-500">Fase</p>
+                <p className="font-semibold text-zinc-900">
+                  Treino
+                  <span className="ml-2 text-zinc-500">{roundIndex + 1}/{ROUND_CONFIGS.length}</span>
+                </p>
+              </div>
+              <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
+                <p className="text-xs text-zinc-500">Tentativa</p>
+                <p className="font-semibold text-zinc-900">{trialCounter}/{currentConfig.totalTrials}</p>
+              </div>
+              <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
+                <p className="text-xs text-zinc-500">Tempo</p>
+                <p className="font-semibold text-zinc-900">{formatClock(remainingMs)}</p>
+              </div>
             </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Tentativa</p>
-              <p className="font-semibold text-zinc-900">{trialCounter}/{currentConfig.totalTrials}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Tempo</p>
-              <p className="font-semibold text-zinc-900">{formatClock(remainingMs)}</p>
-            </div>
-          </div>
+          )}
 
           <div className="space-y-3 rounded-lg border-2 border-zinc-300 bg-zinc-50 p-4">
             <div className={`rounded-lg border px-4 py-3 text-center text-base font-semibold ${cueClass(currentRule)}`}>

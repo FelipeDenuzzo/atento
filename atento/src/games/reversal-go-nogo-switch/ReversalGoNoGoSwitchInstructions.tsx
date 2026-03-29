@@ -9,10 +9,16 @@ export default function ReversalGoNoGoSwitchInstructions({ onStart }: Props) {
     <InstructionScreen
       title="Inversão Responde/Não Responde"
       instructions={
-        <p>Um estímulo vai aparecer na tela junto com uma regra: 
-          <strong>NORMAL</strong> ou <strong>INVERTIDO</strong>. Na regra NORMAL, clique apenas quando aparecer o alvo. 
-          Na regra INVERTIDO, clique quando <strong>NÃO</strong> aparecer o alvo — a lógica se inverte completamente. 
-          <strong>Fique atento à regra antes de responder</strong>, pois ela pode mudar a qualquer momento.</p>
+        <div>
+          <p>Este exercício treina sua <strong>atenção alternada</strong> — especificamente a capacidade de inverter uma regra que já estava funcionando e adotar o comportamento oposto. Fazemos isso no dia a dia quando uma situação conhecida muda de lógica e precisamos nos adaptar rapidamente, sem agir no piloto automático.</p>
+          <p>Um estímulo vai aparecer na tela junto com uma indicação de regra: <strong>NORMAL</strong> ou <strong>INVERTIDO</strong>.</p>
+          <p>
+            ✅ Regra <strong>NORMAL</strong> → clique quando aparecer o alvo, não clique nos outros
+            <br />
+            EXEMPLO: 🔄 Regra <strong>INVERTIDO</strong> → clique quando <strong>não</strong> aparecer o alvo, não clique quando ele aparecer
+          </p>
+          <p>Leia sempre a regra antes de responder — ela pode mudar a qualquer momento. Responder pela regra errada conta como erro.</p>
+        </div>
       }
       onStart={onStart}
     />

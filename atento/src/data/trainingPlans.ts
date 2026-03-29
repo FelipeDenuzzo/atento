@@ -447,7 +447,7 @@ export const trainingPlans: TrainingPlan[] = [
               ? [
                   {
                     id: "div-3",
-                    title: "Dirija + Palavras-Alvo",
+                    title: "1 tela no training Dirija + Palavras-Alvo",
                     attentionType: "dividida" as const,
                     kind: "drive-word-target" as const,
                     instructions:
@@ -534,7 +534,7 @@ export const trainingPlans: TrainingPlan[] = [
               ? [
                   {
                     id: "alt-2",
-                    title: "Inversão de Posição",
+                    title: "Superior ou Inferior - Cor ou Forma",
                     attentionType: "alternada" as const,
                     kind: "top-bottom-position-rule-switch" as const,
                     instructions:

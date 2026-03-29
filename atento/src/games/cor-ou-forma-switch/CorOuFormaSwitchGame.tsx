@@ -131,7 +131,7 @@ function cueLabel(rule: SwitchRule | null): string {
 function shapeGlyph(shape: StimulusShape | null): string {
   if (shape === "circle") return "●";
   if (shape === "square") return "■";
-  return "•";
+  return "";
 }
 
 function colorClass(color: StimulusColor | null): string {
