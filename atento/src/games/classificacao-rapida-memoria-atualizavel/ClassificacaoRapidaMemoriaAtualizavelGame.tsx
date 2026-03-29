@@ -377,9 +377,27 @@ export function ClassificacaoRapidaMemoriaAtualizavelGame({
   }
 
   return (
+
     <div className="space-y-5">
       {phase === "intro" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
+          <p>O jogo exige <strong>duas tarefas ao mesmo tempo</strong>:</p>
+
+<p>
+⌨️ <strong>Classificação</strong> → um item aparece no centro da tela e você deve classificá-lo rapidamente com as teclas <strong>F</strong> ou <strong>J</strong>, seguindo a regra da fase atual
+
+🧠 <strong>Memória</strong> → ao mesmo tempo, mantenha uma informação na cabeça — ela será cobrada em uma checagem surpresa durante a fase
+</p>
+
+
+
+<p>Quando a checagem surgir, uma pergunta com alternativas vai aparecer no lugar do estímulo, e você responde com as <strong>teclas numéricas</strong>. Depois, o jogo retoma de onde parou.</p>
+
+
+
+<p>A regra de classificação e o tipo de memória exigidos estão sempre visíveis na tela. Sua pontuação combina o desempenho nas <strong>duas tarefas</strong> — é preciso manter as duas para ter um bom resultado.</p>
+
+
           <button
             type="button"
             onClick={startRound}
@@ -392,37 +410,35 @@ export function ClassificacaoRapidaMemoriaAtualizavelGame({
 
       {phase === "running" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <div className="grid gap-3 sm:grid-cols-4">
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Fase</p>
-              <p className="font-semibold text-zinc-900">{roundIndex + 1}/{ROUND_CONFIGS.length}</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {/* CLASSIFICAÇÃO */}
+            <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 flex flex-col items-center">
+              <span className="text-xs font-bold text-zinc-500 tracking-widest mb-2">{currentConfig.classificationMode === "number" ? "NÚMERO" : "LETRA"}</span>
+              <div className="flex flex-col items-center">
+                <span className="text-base font-bold text-zinc-900">F</span>
+                <span className="text-sm text-zinc-700">
+                  {currentConfig.classificationMode === "number" ? "par" : "vogal"}
+                </span>
+                <span className="mt-2 text-base font-bold text-zinc-900">J</span>
+                <span className="text-sm text-zinc-700">
+                  {currentConfig.classificationMode === "number" ? "ímpar" : "consoante"}
+                </span>
+              </div>
             </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Tempo restante</p>
-              <p className="font-semibold text-zinc-900">{formatClock(remainingMs)}</p>
+            {/* MEMÓRIA */}
+            <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 flex flex-col items-center">
+              <span className="text-xs font-bold text-zinc-500 tracking-widest mb-2">MEMÓRIA</span>
+              <span className="text-sm text-zinc-700 text-center">
+                {currentConfig.memoryMode === "last-targets"
+                  ? "Mantenha os 2 últimos alvos."
+                  : "Mantenha contador mental até a checagem."}
+              </span>
             </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Classificação</p>
-              <p className="font-semibold text-zinc-900">
-                ✓ {liveClassification.hits} | ✗ {liveClassification.errors} | ○ {liveClassification.omissions}
-              </p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Checagens de memória</p>
-              <p className="font-semibold text-zinc-900">
-                ✓ {liveMemory.hits} | ✗ {liveMemory.errors} | total {liveMemory.total}
-              </p>
-            </div>
-          </div>
-
-          <div className="grid gap-2 rounded-lg border border-black/10 bg-zinc-50 p-3 text-sm text-zinc-700 sm:grid-cols-2">
-            <p>{classificationRuleLabel(currentConfig)}</p>
-            <p>{memoryRuleLabel(currentConfig)}</p>
           </div>
 
           {!activeMemoryCheck ? (
-            <div className="flex min-h-[220px] items-center justify-center rounded-lg border border-black/10 bg-zinc-50">
-              <p className="text-6xl font-bold text-zinc-900">{visibleStimulus?.value ?? "·"}</p>
+            <div className="flex min-h-[220px] items-center justify-center rounded-lg border border-black/10 bg-zinc-50 transition-none">
+              <p className="text-6xl font-bold text-zinc-900">{visibleStimulus?.value ?? ""}</p>
             </div>
           ) : (
             <div className="space-y-3 rounded-lg border border-black/10 bg-zinc-50 p-4">
@@ -442,14 +458,7 @@ export function ClassificacaoRapidaMemoriaAtualizavelGame({
             </div>
           )}
 
-          <div className="flex flex-wrap gap-2 text-xs">
-            {feedbackClassification && (
-              <span className="rounded-md bg-zinc-100 px-3 py-1 text-zinc-700">{feedbackClassification}</span>
-            )}
-            {feedbackMemory && (
-              <span className="rounded-md bg-zinc-100 px-3 py-1 text-zinc-700">{feedbackMemory}</span>
-            )}
-          </div>
+          {/* Feedbacks removidos para não mostrar acerto/erro durante o treino */}
         </div>
       )}
 

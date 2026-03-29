@@ -343,6 +343,13 @@ export function ChatVigilanciaErrosGame({
     <div className="space-y-5">
       {phase === "intro" && currentConfig && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
+          <p>Você terá <strong>duas tarefas ao mesmo tempo</strong>:</p>
+          <p>
+            💬 <strong>Tarefa de chat</strong> → leia mensagens curtas que aparecem na tela e escolha a resposta mais adequada entre as opções apresentadas
+            <br />
+            👁️ <strong>Tarefa de vigilância</strong> → ao mesmo tempo, fique atento ao fundo da tela e clique imediatamente quando aparecer uma <strong>anomalia visual</strong> — como um ícone proibido, uma cor errada ou um alerta
+          </p>
+          <p>Sua pontuação depende do desempenho nas <strong>duas tarefas juntas</strong>. Focar demais em uma e ignorar a outra reduz sua pontuação. A cada fase, as mensagens ficam mais complexas e as anomalias mais sutis.</p>
           <button
             type="button"
             onClick={startCurrentRound}
@@ -352,6 +359,7 @@ export function ChatVigilanciaErrosGame({
           </button>
         </div>
       )}
+      )
 
       {phase === "running" && currentConfig && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">

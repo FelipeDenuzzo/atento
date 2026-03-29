@@ -343,6 +343,13 @@ export function MapaSimbolosMonitorSomGame({
     <div className="space-y-5">
       {phase === "intro" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
+          <p>Você terá <strong>duas tarefas ao mesmo tempo</strong>:</p>
+          <p>
+            🔷 <strong>Tarefa visual</strong> → encontre e clique nos símbolos que correspondem ao alvo mostrado na grade
+            <br />
+            🔊 <strong>Tarefa auditiva</strong> → ouça o som contínuo e clique em um botão específico sempre que ouvir um <strong>ruído diferente</strong> — um estalo ou interrupção inesperada
+          </p>
+          <p>Sua pontuação combina os <strong>acertos na grade</strong> com as <strong>detecções corretas do som</strong>. Concentrar-se em apenas uma das tarefas reduz sua pontuação. A cada fase, a grade fica maior e os sons mais sutis.</p>
           <button
             type="button"
             onClick={startRound}
@@ -355,42 +362,23 @@ export function MapaSimbolosMonitorSomGame({
 
       {phase === "running" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Fase</p>
-              <p className="font-semibold text-zinc-900">{roundIndex + 1}/{ROUND_CONFIGS.length}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Tempo restante</p>
-              <p className="font-semibold text-zinc-900">{formatClock(remainingMs)}</p>
-            </div>
-            <div className={`rounded-lg border p-3 ${glitchActive ? "border-rose-300 bg-rose-50" : "border-black/10 bg-zinc-50"}`}>
-              <p className="text-xs text-zinc-500">Monitor auditivo</p>
-              <p className={`font-semibold ${glitchActive ? "text-rose-700" : "text-zinc-900"}`}>
-                {glitchActive ? "Glitch ativo" : "Som estável"}
-              </p>
-            </div>
+          <div className={`rounded-lg border p-3 ${glitchActive ? "border-rose-300 bg-rose-50" : "border-black/10 bg-zinc-50"}`}>
+            <p className="text-xs text-zinc-500">Monitor auditivo</p>
+            <p className={`font-semibold ${glitchActive ? "text-rose-700" : "text-zinc-900"}`}>
+              {glitchActive ? "Glitch ativo" : "Som estável"}
+            </p>
           </div>
 
           <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 text-center">
             <p className="text-xs uppercase tracking-wide text-zinc-500">Símbolo-alvo</p>
-            <p className="mt-2 text-4xl font-bold text-zinc-900">{targetGlyph}</p>
-          </div>
-
-          <div
-            className="grid gap-2"
-            style={{ gridTemplateColumns: `repeat(${currentConfig.gridColumns}, minmax(0, 1fr))` }}
-          >
-            {options.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                onClick={() => handleVisualClick(option.id)}
-                className="aspect-square rounded-lg border border-zinc-300 bg-white text-3xl font-bold text-zinc-900 hover:bg-zinc-50"
-              >
-                {option.glyph}
-              </button>
-            ))}
+            <div
+              className="mt-2 mx-auto flex items-center justify-center rounded-lg border border-zinc-200 bg-white"
+              style={{ width: 80, height: 80 }}
+            >
+              <span style={{ fontSize: 44, fontWeight: 700, lineHeight: 1, display: 'block', width: '100%', textAlign: 'center' }}>
+                {targetGlyph}
+              </span>
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-3">
