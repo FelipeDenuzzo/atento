@@ -543,6 +543,24 @@ export function DirijaPalavrasAlvoGame({
     <div className="space-y-5">
       {phase === "intro" && currentConfig && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
+          <div className="space-y-3 text-zinc-700 text-sm">
+            <p>
+              Neste exercício, você precisa fazer duas coisas ao mesmo tempo:
+              <strong>“dirigir” o marcador</strong> dentro de uma faixa móvel
+              e <strong>prestar atenção nas palavras</strong> que caem dos lados da tela.
+            </p>
+            <p>
+              Use o teclado para manter o marcador dentro da <strong>área verde</strong> na parte de baixo,
+              enquanto observa as palavras que descem pelas laterais.
+              Aperte a <strong>barra de espaço</strong> apenas quando a
+              <strong>palavra-alvo</strong> aparecer na <strong>linha horizontal do meio</strong>.
+            </p>
+            <p>
+              À medida que as fases avançam, a faixa se move mais,
+              a área verde fica menor e as palavras aparecem mais rápido,
+              deixando o desafio mais intenso para <strong>dividir o foco sem perder a precisão</strong>.
+            </p>
+          </div>
           <button
             type="button"
             onClick={startCurrentRound}
