@@ -1,7 +1,7 @@
 "use client";
 
 import type { AttentionContainerProps } from "../types";
-import { EscutaSeletivaCocktailPartyMobileGame } from "@/games/escuta-seletiva-cocktail-party/mobile/EscutaSeletivaCocktailPartyMobileGame";
+import { EscutaSeletivaCocktailPartyMobileGame } from "@/games/escutaseletiva/mobile/EscutaSeletivaCocktailPartyMobileGame";
 
 export type SelectiveAttentionMobileContainerProps = AttentionContainerProps & {
   variant?: "simples" | "cocktail-party";
