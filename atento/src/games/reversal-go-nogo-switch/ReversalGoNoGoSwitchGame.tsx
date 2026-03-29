@@ -124,7 +124,7 @@ export function ReversalGoNoGoSwitchGame({
   reportContext,
   onComplete,
 }: Props) {
-  const [phase, setPhase] = useState<Phase>("intro");
+  const [phase, setPhase] = useState<Phase>("running");
   const [roundIndex, setRoundIndex] = useState(0);
   const [trialStage, setTrialStage] = useState<TrialStage>("fixation");
   const [remainingMs, setRemainingMs] = useState(ROUND_CONFIGS[0]?.durationMs ?? 0);
@@ -310,7 +310,12 @@ export function ReversalGoNoGoSwitchGame({
     setPhase("running");
   }
 
-  useEffect(() => () => clearTimer(), []);
+  useEffect(() => {
+    // Inicia o round automaticamente ao montar
+    startRound(roundIndex);
+    return () => clearTimer();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function answerByClick() {
     const runtime = runtimeRef.current;
@@ -369,34 +374,7 @@ export function ReversalGoNoGoSwitchGame({
 
   return (
     <div className="space-y-5">
-      {phase === "intro" && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <h3 className="text-xl font-semibold text-zinc-900">Reversal Go/No-Go Switch</h3>
-          <div className="rounded-lg border-2 border-zinc-300 bg-zinc-50 p-4 text-zinc-700">
-            <p className="text-base font-semibold text-zinc-900">{currentConfig.name}</p>
-            <p className="mt-1 text-sm font-semibold text-zinc-800">
-              {isTrainingRound ? "MODO TREINO (com ajuda visual)" : "MODO AÇÃO (sem ajuda visual)"}
-            </p>
-            {isTrainingRound && (
-              <p className="mt-1 text-sm font-semibold text-amber-700">
-                Aviso: este treino é só prática e não valida seu resultado final.
-              </p>
-            )}
-            <p className="mt-2 text-base font-medium">1) Leia a REGRA antes de responder.</p>
-            <p className="mt-1 text-base font-medium">2) REGRA NORMAL: clique apenas na ESTRELA.</p>
-            <p className="mt-1 text-base font-medium">3) REGRA INVERTIDA: clique apenas quando NÃO for estrela.</p>
-            <p className="mt-1 text-base font-medium">4) Se não for para clicar, não toque na tela e aguarde a próxima tentativa.</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => startRound(roundIndex)}
-            className="w-full rounded-lg bg-zinc-900 px-4 py-3 font-semibold text-white hover:bg-zinc-700"
-          >
-            {isTrainingRound ? "Iniciar treino" : "Iniciar fase"}
-          </button>
-        </div>
-      )}
-
+      {/* Tela de instrução removida. O jogo inicia automaticamente. */}
       {phase === "running" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
           <div className="grid gap-3 sm:grid-cols-3">

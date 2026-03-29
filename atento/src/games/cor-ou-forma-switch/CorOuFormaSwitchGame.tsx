@@ -145,7 +145,7 @@ export function CorOuFormaSwitchGame({
   reportContext,
   onComplete,
 }: Props) {
-  const [phase, setPhase] = useState<Phase>("intro");
+  const [phase, setPhase] = useState<Phase>("running");
   const [roundIndex, setRoundIndex] = useState(0);
   const [trialStage, setTrialStage] = useState<TrialStage>("fixation");
   const [remainingMs, setRemainingMs] = useState(ROUND_CONFIGS[0]?.durationMs ?? 0);
@@ -327,7 +327,10 @@ export function CorOuFormaSwitchGame({
   }
 
   useEffect(() => {
+    // Inicia o round automaticamente ao montar
+    startRound(roundIndex);
     return () => clearTimer();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function answerByClick(option: ChoiceOption) {
@@ -393,24 +396,7 @@ export function CorOuFormaSwitchGame({
 
   return (
     <div className="space-y-5">
-      {phase === "intro" && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <h3 className="text-xl font-semibold text-zinc-900">Cor-ou-Forma (Color/Shape Switch)</h3>
-          <div className="rounded-lg border border-black/10 bg-zinc-50 p-4 text-sm text-zinc-700">
-            <p className="font-semibold text-zinc-900">{currentConfig.name}</p>
-            <p className="mt-1">Responda por clique nas 4 opções: vermelho, círculo, azul e quadrado.</p>
-            <p className="mt-1">A regra alterna em blocos de 1 a 3 trials.</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => startRound(roundIndex)}
-            className="w-full rounded-lg bg-zinc-900 px-4 py-3 font-semibold text-white hover:bg-zinc-700"
-          >
-            Iniciar fase
-          </button>
-        </div>
-      )}
-
+      {/* Tela de instrução removida. O jogo inicia automaticamente. */}
       {phase === "running" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
           <div className="grid gap-3 sm:grid-cols-1">
