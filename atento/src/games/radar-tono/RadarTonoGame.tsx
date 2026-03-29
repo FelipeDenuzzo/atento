@@ -1,3 +1,4 @@
+// (Removido: useEffect duplicado fora do componente)
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
