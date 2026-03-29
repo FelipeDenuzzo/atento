@@ -336,9 +336,13 @@ export function handleKeyDown(params: {
   }
 
 
-  // Ajuste: tolerância cobre toda a faixa verde central (48px de altura)
+  // Tolerância: metade da faixa verde + metade do bloco (abrange toda a faixa e bordas do bloco)
   const responseLineY = params.responseLineY ?? params.runtime.config.arenaHeightPx / 2;
-  const tolerance = 24; // metade da altura da faixa verde (48px)
+  // Altura da faixa verde (ex: 48px)
+  const greenHeight = 48; // ajuste se necessário para o valor real
+  // Altura do bloco (ex: 46px)
+  const blockHeight = 46; // ajuste se necessário para o valor real
+  const tolerance = greenHeight / 2 + blockHeight / 2;
 
   // Busca se existe pelo menos um alvo não respondido na faixa verde
   const hasUnansweredTarget = params.runtime.activeBlocks.some(
