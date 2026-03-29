@@ -9,14 +9,8 @@ export default function MapaDeSimbolosInstructions({ onStart }: Props) {
     <InstructionScreen
       title="Mapa de Símbolos"
       instructions={
-        <p>Neste exercício, você vai ver uma <strong>grade com vários símbolos</strong> e precisará encontrar ou combinar os que correspondem a um modelo mostrado antes.
-
-Antes de começar, você verá quais são os símbolos-alvo — aqueles que deve localizar ou associar corretamente dentro da grade. Os outros símbolos ao redor são <strong>distrações visuais</strong> que tornam a busca mais difícil.
-
-Seu objetivo é <strong>encontrar os símbolos certos com precisão</strong>, sem se perder na quantidade de informação visual na tela.
-
-O exercício fica mais desafiador com o tempo: grades maiores, símbolos mais parecidos entre si ou menos tempo disponível para responder.
-</p>
+       <p>Este exercício treina a sua <strong>atenção seletiva</strong> — especificamente a capacidade de varrer um campo visual cheio de informações e identificar apenas o que importa. Usamos essa habilidade quando procuramos um número numa lista, uma palavra num texto longo ou um item específico numa página cheia de opções.
+       </p>
       }
       onStart={onStart}
     />

@@ -186,7 +186,8 @@ export function MapaDeSimbolosGame({
           <p className="text-sm text-zinc-500">{level.name}</p>
           <h3 className="text-xl font-semibold text-zinc-900">Mapa de Símbolos</h3>
           <p className="text-sm text-zinc-700">
-            Encontre e clique em todas as ocorrências do(s) alvo(s) na grade.
+           <p>O símbolo mostrado aqui é o seu <strong>alvo</strong>. Uma grade com vários símbolos diferentes vai aparecer na tela — sua tarefa é <strong>tocar em todas as ocorrências do símbolo alvo</strong> o mais rápido que conseguir, sem clicar nos outros. A cada fase, a grade fica maior e os símbolos mais parecidos entre si, exigindo uma busca mais cuidadosa.
+           </p>
           </p>
 
           <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">

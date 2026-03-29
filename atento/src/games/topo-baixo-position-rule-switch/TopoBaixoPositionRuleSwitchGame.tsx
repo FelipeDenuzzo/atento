@@ -195,8 +195,8 @@ function relevantLabel(dimension: RelevantDimension | null): string {
 }
 
 function positionLabel(position: VerticalPosition | null): string {
-  if (position === "top") return "Topo";
-  if (position === "bottom") return "Baixo";
+  if (position === "top") return "Parte superior";
+  if (position === "bottom") return "Parte inferior";
   return "-";
 }
 
@@ -462,42 +462,45 @@ export function TopoBaixoPositionRuleSwitchGame({
   const topRule =
     currentConfig.topRule.dimension === "color"
       ? {
-          position: "TOPO",
-          dimension: "COR",
+          position: "PARTE SUPERIOR",
+          dimension: "REGRA DA COR",
           mapping: `${currentConfig.topRule.colorKeyMap.blue.toUpperCase()} - AZUL / ${currentConfig.topRule.colorKeyMap.green.toUpperCase()} - VERDE`,
         }
       : {
-          position: "TOPO",
-          dimension: "FORMA",
+          position: "PARTE SUPERIOR",
+          dimension: "REGRA DA FORMA",
           mapping: `${currentConfig.topRule.shapeKeyMap.square.toUpperCase()} - QUADRADO / ${currentConfig.topRule.shapeKeyMap.rectangle.toUpperCase()} - RETÂNGULO`,
         };
 
   const bottomRule =
     currentConfig.bottomRule.dimension === "shape"
       ? {
-          position: "BAIXO",
-          dimension: "FORMA",
+          position: "PARTE INFERIOR",
+          dimension: "REGRA DA FORMA",
           mapping: `${currentConfig.bottomRule.shapeKeyMap.square.toUpperCase()} - QUADRADO / ${currentConfig.bottomRule.shapeKeyMap.rectangle.toUpperCase()} - RETÂNGULO`,
         }
       : {
-          position: "BAIXO",
-          dimension: "COR",
+          position: "PARTE INFERIOR",
+          dimension: "REGRA DA COR",
           mapping: `${currentConfig.bottomRule.colorKeyMap.blue.toUpperCase()} - AZUL / ${currentConfig.bottomRule.colorKeyMap.green.toUpperCase()} - VERDE`,
         };
 
   return (
     <div className="space-y-5">
-
       {phase === "running" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
               <p className="text-xs text-zinc-500">Fase</p>
-              <p className="font-semibold text-zinc-900">{roundIndex + 1}/{ROUND_CONFIGS.length}</p>
+              <p className="font-semibold text-zinc-900">
+                {roundIndex + 1}/{ROUND_CONFIGS.length}
+              </p>
             </div>
             <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
               <p className="text-xs text-zinc-500">Trial</p>
-              <p className="font-semibold text-zinc-900">{trialCounter}/{currentConfig.totalTrials}</p>
+              <p className="font-semibold text-zinc-900">
+                {trialCounter}/{currentConfig.totalTrials}
+              </p>
             </div>
             <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
               <p className="text-xs text-zinc-500">Tempo</p>
@@ -506,43 +509,76 @@ export function TopoBaixoPositionRuleSwitchGame({
           </div>
 
           <div className="rounded-lg border-2 border-zinc-300 bg-zinc-50 p-4 text-zinc-700">
-            <p className="text-lg font-semibold text-zinc-900">{relevantLabel(currentDimension)}</p>
-            <p className="text-base">Posição atual: {positionLabel(currentPosition)}</p>
+            <p className="text-lg font-semibold text-zinc-900">
+              {relevantLabel(currentDimension)}
+            </p>
+            <p className="text-base">
+              Posição atual: {positionLabel(currentPosition)}
+            </p>
           </div>
 
           <div className="relative h-[360px] overflow-hidden rounded-xl border border-zinc-300 bg-white">
             <div className="absolute inset-x-0 top-0 h-1/2 border-b border-dashed border-zinc-300 bg-zinc-50/60" />
             <div className="absolute inset-x-0 bottom-0 h-1/2 bg-zinc-100/40" />
 
-            <p className="absolute left-3 top-3 text-xs font-semibold uppercase text-zinc-500">Topo</p>
-            <p className="absolute left-3 bottom-3 text-xs font-semibold uppercase text-zinc-500">Baixo</p>
+            <p className="absolute left-3 top-3 text-xs font-semibold uppercase text-zinc-500">
+              Parte superior
+            </p>
+            <p className="absolute left-3 bottom-3 text-xs font-semibold uppercase text-zinc-500">
+              Parte inferior
+            </p>
 
             {trialStage === "fixation" && (
-              <div className="absolute inset-0 flex items-center justify-center text-4xl font-black text-zinc-400">+</div>
+              <div className="absolute inset-0 flex items-center justify-center text-4xl font-black text-zinc-400">
+                +
+              </div>
             )}
 
             {trialStage === "stimulus" && currentPosition && (
               <div
-                className={`absolute left-1/2 -translate-x-1/2 ${currentPosition === "top" ? "top-[18%]" : "top-[66%]"}`}
+                className={`absolute left-1/2 -translate-x-1/2 ${
+                  currentPosition === "top" ? "top-[18%]" : "top-[66%]"
+                }`}
               >
-                <div className={`${shapeClass(currentShape)} ${colorClass(currentColor)} shadow-sm`} />
+                <div
+                  className={`${shapeClass(currentShape)} ${colorClass(currentColor)} shadow-sm`}
+                />
               </div>
             )}
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg border-2 border-zinc-300 bg-zinc-50 p-4 text-sm text-zinc-800">
-              <p className="text-base font-semibold leading-tight">{topRule.position}</p>
-              <p className="text-base font-semibold leading-tight">{topRule.dimension}</p>
+              <p className="text-xs font-semibold uppercase text-zinc-500">
+                {topRule.position}
+              </p>
+              <p
+                className={
+                  topRule.dimension.includes("COR")
+                    ? "text-base font-semibold leading-tight text-blue-800"
+                    : "text-base font-semibold leading-tight text-emerald-800"
+                }
+              >
+                {topRule.dimension}
+              </p>
               <p className="mt-1 text-sm font-medium">{topRule.mapping}</p>
             </div>
             <div className="rounded-lg border-2 border-zinc-300 bg-zinc-50 p-4 text-sm text-zinc-800">
-              <p className="text-base font-semibold leading-tight">{bottomRule.position}</p>
-              <p className="text-base font-semibold leading-tight">{bottomRule.dimension}</p>
+              <p className="text-xs font-semibold uppercase text-zinc-500">
+                {bottomRule.position}
+              </p>
+              <p
+                className={
+                  bottomRule.dimension.includes("COR")
+                    ? "text-base font-semibold leading-tight text-blue-800"
+                    : "text-base font-semibold leading-tight text-emerald-800"
+                }
+              >
+                {bottomRule.dimension}
+              </p>
               <p className="mt-1 text-sm font-medium">{bottomRule.mapping}</p>
             </div>
           </div>
-
         </div>
       )}
 
@@ -566,28 +602,39 @@ export function TopoBaixoPositionRuleSwitchGame({
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
               <p className="text-xs text-zinc-500">Pontuação</p>
-              <p className="font-semibold text-zinc-900">{result.finalScore.toFixed(1)}%</p>
+              <p className="font-semibold text-zinc-900">
+                {result.finalScore.toFixed(1)}%
+              </p>
             </div>
             <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
               <p className="text-xs text-zinc-500">Acurácia</p>
-              <p className="font-semibold text-zinc-900">{result.overallAccuracyPercent.toFixed(1)}%</p>
+              <p className="font-semibold text-zinc-900">
+                {result.overallAccuracyPercent.toFixed(1)}%
+              </p>
             </div>
             <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
               <p className="text-xs text-zinc-500">Switch cost</p>
-              <p className="font-semibold text-zinc-900">{result.overallSwitchCostMs.toFixed(0)} ms</p>
+              <p className="font-semibold text-zinc-900">
+                {result.overallSwitchCostMs.toFixed(0)} ms
+              </p>
             </div>
             <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
               <p className="text-xs text-zinc-500">RT médio geral</p>
-              <p className="font-semibold text-zinc-900">{result.overallMeanReactionMs.toFixed(0)} ms</p>
+              <p className="font-semibold text-zinc-900">
+                {result.overallMeanReactionMs.toFixed(0)} ms
+              </p>
             </div>
             <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
               <p className="text-xs text-zinc-500">RT médio acertos</p>
-              <p className="font-semibold text-zinc-900">{result.overallMeanCorrectReactionMs.toFixed(0)} ms</p>
+              <p className="font-semibold text-zinc-900">
+                {result.overallMeanCorrectReactionMs.toFixed(0)} ms
+              </p>
             </div>
             <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
               <p className="text-xs text-zinc-500">Acurácia A/B</p>
               <p className="font-semibold text-zinc-900">
-                {result.overallRuleAAccuracyPercent.toFixed(1)}% / {result.overallRuleBAccuracyPercent.toFixed(1)}%
+                {result.overallRuleAAccuracyPercent.toFixed(1)}% /{" "}
+                {result.overallRuleBAccuracyPercent.toFixed(1)}%
               </p>
             </div>
           </div>
