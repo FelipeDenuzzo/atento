@@ -272,11 +272,10 @@ export function AttentionTrainingGame() {
     exercise?.kind === "chat-error-vigilance" ||
     exercise?.kind === "symbol-map-sound-monitor" ||
     exercise?.kind === "rapid-classification-updatable-memory" ||
-    exercise?.kind === "color-shape-switch" ||
     exercise?.kind === "top-bottom-position-rule-switch" ||
     exercise?.kind === "reversal-go-nogo-switch"
       ? "exercise"
-      : exercise?.kind === "trilha-alternada-tmtb"
+      : exercise?.kind === "color-shape-switch" || exercise?.kind === "trilha-alternada-tmtb"
       ? "instructions"
       : "instructions";
 
