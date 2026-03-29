@@ -274,9 +274,10 @@ export function AttentionTrainingGame() {
     exercise?.kind === "rapid-classification-updatable-memory" ||
     exercise?.kind === "color-shape-switch" ||
     exercise?.kind === "top-bottom-position-rule-switch" ||
-    exercise?.kind === "reversal-go-nogo-switch" ||
-    exercise?.kind === "trilha-alternada-tmtb"
+    exercise?.kind === "reversal-go-nogo-switch"
       ? "exercise"
+      : exercise?.kind === "trilha-alternada-tmtb"
+      ? "instructions"
       : "instructions";
 
   const startPlan = () => {
