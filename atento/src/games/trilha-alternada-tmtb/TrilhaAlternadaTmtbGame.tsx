@@ -1,3 +1,10 @@
+  // Inicializa o treino automaticamente ao montar, se necessário
+  useEffect(() => {
+    if (phase === "running" && sequence.length === 0) {
+      startValidPhase(1, true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
