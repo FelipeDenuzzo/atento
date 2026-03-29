@@ -517,10 +517,10 @@ export function FiltroCoresComSomGame({
       {phase === "intro" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-6">
           <div>
-            <p className="text-sm text-zinc-500">Nivel atual</p>
+            <p className="text-sm text-zinc-500">Nível atual</p>
             <h3 className="text-xl font-semibold text-zinc-900">{level.name}</h3>
             <p className="mt-2 text-sm text-zinc-700">
-              Clique apenas quando o alvo (cor ou forma anunciada) estiver na faixa destacada.
+              Clique apenas nas formas que correspondem ao <strong>alvo anunciado</strong>, e somente quando estiverem na <strong>faixa indicada abaixo</strong>. Ignore tudo o que estiver fora dela.
             </p>
             <div className="mt-2 flex flex-col gap-1">
               <span className="text-xs text-zinc-500">Faixa ativa deste bloco:</span>
