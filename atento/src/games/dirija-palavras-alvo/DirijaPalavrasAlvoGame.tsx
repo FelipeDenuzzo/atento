@@ -573,19 +573,6 @@ export function DirijaPalavrasAlvoGame({
 
       {phase === "running" && currentConfig && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Fase</p>
-              <p className="font-semibold text-zinc-900">
-                {roundIndex + 1}/{ROUND_CONFIGS.length}
-              </p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Tempo restante</p>
-              <p className="font-semibold text-zinc-900">{formatClock(remainingMs)}</p>
-            </div>
-          </div>
-
           <div className="space-y-3">
             <p className="text-sm font-medium text-zinc-700">
               Palavra-alvo: <span className="font-semibold text-zinc-900">{currentConfig.targetWord}</span>
@@ -598,10 +585,10 @@ export function DirijaPalavrasAlvoGame({
               <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.22)_1px,transparent_1px)] bg-[length:100%_24px]" />
 
               <div
-                className="absolute left-1/2 -translate-x-1/2 rounded-md bg-emerald-500/40 border-2 border-emerald-600"
+                className="absolute left-0 right-0 rounded-md bg-emerald-500/40 border-2 border-emerald-600"
                 style={{
                   top: currentConfig.arenaHeightPx / 2 - 24,
-                  width: 160, // 2x célula da palavra (80px)
+                  width: '100%',
                   height: 48,
                   zIndex: 2,
                   pointerEvents: 'none',
