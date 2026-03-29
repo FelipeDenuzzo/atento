@@ -545,14 +545,14 @@ export function DirijaPalavrasAlvoGame({
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
           <div className="space-y-3 text-zinc-700 text-sm">
             <p>
-              Neste exercício, você precisa fazer duas coisas ao mesmo tempo:
+              Neste treino, você precisa fazer duas coisas ao mesmo tempo:
               <strong>“dirigir” o marcador</strong> dentro de uma faixa móvel
               e <strong>prestar atenção nas palavras</strong> que caem dos lados da tela.
             </p>
             <p>
               Use o teclado para manter o marcador dentro da <strong>área verde</strong> na parte de baixo,
               enquanto observa as palavras que descem pelas laterais.
-              Aperte a <strong>barra de espaço</strong> apenas quando a
+              Aperte a <strong>barra de espaço</strong> apenas quando a 
               <strong>palavra-alvo</strong> aparecer na <strong>linha horizontal do meio</strong>.
             </p>
             <p>
@@ -609,17 +609,24 @@ export function DirijaPalavrasAlvoGame({
                   left: bandCenterX - currentConfig.bandWidthPx / 2,
                 }}
               >
-                <div
-                  className="absolute inset-y-0 rounded-md bg-emerald-500/45"
-                  style={{
-                    width: currentConfig.bandWidthPx * currentConfig.greenZoneRatio,
-                    left:
-                      greenCenterX -
-                      (bandCenterX - currentConfig.bandWidthPx / 2) -
-                      (currentConfig.bandWidthPx * currentConfig.greenZoneRatio) / 2,
-                  }}
-                />
+                {/* Largura da célula da palavra: padding px-3 (24px) + texto (aprox. 40px) = ~64px. Usar 80px para garantir. */}
+                {/** Ajuste: linha verde = 2x célula da palavra **/}
+                {(() => {
+                  const wordCellWidth = 80; // px, pode ser ajustado conforme necessário
+                  const greenWidth = 2 * wordCellWidth;
+                  return (
+                    <div
+                      className="absolute inset-y-0 rounded-md bg-emerald-500/45"
+                      style={{
+                        width: greenWidth,
+                        left:
+                          greenCenterX - (bandCenterX - currentConfig.bandWidthPx / 2) - greenWidth / 2,
+                      }}
+                    />
+                  );
+                })()}
               </div>
+
 
               <div
                 className="absolute bottom-[30px] rounded-md bg-zinc-900"
