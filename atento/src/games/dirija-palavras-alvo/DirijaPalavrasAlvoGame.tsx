@@ -598,8 +598,14 @@ export function DirijaPalavrasAlvoGame({
               <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.22)_1px,transparent_1px)] bg-[length:100%_24px]" />
 
               <div
-                className="absolute left-0 right-0 border-t-2 border-emerald-500/80"
-                style={{ top: currentConfig.arenaHeightPx / 2 }}
+                className="absolute left-1/2 -translate-x-1/2 rounded-md bg-emerald-500/40 border-2 border-emerald-600"
+                style={{
+                  top: currentConfig.arenaHeightPx / 2 - 24,
+                  width: 160, // 2x célula da palavra (80px)
+                  height: 48,
+                  zIndex: 2,
+                  pointerEvents: 'none',
+                }}
               />
 
               <div
@@ -612,17 +618,15 @@ export function DirijaPalavrasAlvoGame({
                 {/* Largura da célula da palavra: padding px-3 (24px) + texto (aprox. 40px) = ~64px. Usar 80px para garantir. */}
                 {/** Ajuste: linha verde = 2x célula da palavra **/}
                 {(() => {
-                  // Ajuste: célula da palavra pode ser maior, então aumentamos para 110px
-                  const wordCellWidth = 110; // px, mais visível
+                  const wordCellWidth = 80; // px, pode ser ajustado conforme necessário
                   const greenWidth = 2 * wordCellWidth;
                   return (
                     <div
-                      className="absolute inset-y-0 rounded-md bg-emerald-500/70 border-2 border-emerald-700"
+                      className="absolute inset-y-0 rounded-md bg-emerald-500/45"
                       style={{
                         width: greenWidth,
                         left:
                           greenCenterX - (bandCenterX - currentConfig.bandWidthPx / 2) - greenWidth / 2,
-                        boxShadow: '0 0 0 2px #059669, 0 0 16px 4px #34d39988',
                       }}
                     />
                   );
