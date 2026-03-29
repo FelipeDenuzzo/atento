@@ -92,7 +92,7 @@ export const trainingPlans: TrainingPlan[] = [
         ? [
             {
               id: "mix-5",
-              title: "Mapa de Símbolos (Symbol Matching)",
+              title: "Mapa de Símbolos",
               attentionType: "seletiva" as const,
               kind: "symbol-map" as const,
               instructions:
@@ -519,7 +519,7 @@ export const trainingPlans: TrainingPlan[] = [
               ? [
                   {
                     id: "alt-1",
-                    title: "Cor-ou-Forma (Color/Shape Switch)",
+                    title: "Cor ou Forma",
                     attentionType: "alternada" as const,
                     kind: "color-shape-switch" as const,
                     instructions:
@@ -534,7 +534,7 @@ export const trainingPlans: TrainingPlan[] = [
               ? [
                   {
                     id: "alt-2",
-                    title: "Topo/Baixo — Position-Rule Switch",
+                    title: "Inversão de Posição",
                     attentionType: "alternada" as const,
                     kind: "top-bottom-position-rule-switch" as const,
                     instructions:
@@ -549,7 +549,7 @@ export const trainingPlans: TrainingPlan[] = [
               ? [
                   {
                     id: "alt-3",
-                    title: "Reversal Go/No-Go Switch",
+                    title: "Inversão Responde/Não Responde",
                     attentionType: "alternada" as const,
                     kind: "reversal-go-nogo-switch" as const,
                     instructions:
@@ -564,7 +564,7 @@ export const trainingPlans: TrainingPlan[] = [
               ? [
                   {
                     id: "alt-4",
-                    title: "Trilha Alternada 1-A-2-B (TMT-B)",
+                    title: "Trilha Alternada 1->A 2->B",
                     attentionType: "alternada" as const,
                     kind: "trilha-alternada-tmtb" as const,
                     instructions:
