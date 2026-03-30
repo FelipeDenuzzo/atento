@@ -427,15 +427,10 @@ export function ReversalGoNoGoSwitchGame({
                       const nonStarPngs = [
                         "18.png", "19.png", "20.png", "22.png", "23.png", "24.png", "25.png", "26.png", "27.png", "28.png", "29.png", "30.png", "31.png", "32.png", "33.png", "34.png", "35.png", "36.png", "37.png", "38.png", "39.png", "40.png", "41.png", "42.png", "43.png", "44.png", "45.png"
                       ];
-                      // Para cada shape diferente de star, sorteia um PNG diferente de 21.png
-                      // Para manter determinístico, pode mapear cada shape para um índice
-                      const shapeMap = {
-                        circle: 0,
-                        square: 1,
-                        triangle: 2
-                      };
-                      const idx = shapeMap[currentShape] ?? 0;
-                      return `/simbolos/${nonStarPngs[idx % nonStarPngs.length]}`;
+                      // Para cada shape diferente de star, pega um PNG diferente de 21.png (pode ser aleatório ou sequencial)
+                      // Aqui, para manter simples, sorteia um PNG aleatório
+                      const idx = Math.floor(Math.random() * nonStarPngs.length);
+                      return `/simbolos/${nonStarPngs[idx]}`;
                     })()}
                     alt={currentShape}
                     style={{ width: 120, height: 120 }}
