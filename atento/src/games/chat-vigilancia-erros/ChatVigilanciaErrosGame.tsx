@@ -1,7 +1,36 @@
+// Barra de progresso simples para tempo de resposta
+import React from "react";
+
+type ProgressBarProps = {
+  duration: number;
+  onTimeout: () => void;
+};
+
+function ProgressBar({ duration, onTimeout }: ProgressBarProps) {
+  const barRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!barRef.current) return;
+    barRef.current.style.transition = "none";
+    barRef.current.style.width = "100%";
+    // Força reflow para garantir animação
+    void barRef.current.offsetWidth;
+    barRef.current.style.transition = `width ${duration}ms linear`;
+    barRef.current.style.width = "0%";
+    const timeout = setTimeout(() => {
+      onTimeout();
+    }, duration);
+    return () => clearTimeout(timeout);
+  }, [duration, onTimeout]);
+  return (
+    <div className="w-full h-2 bg-zinc-200 rounded overflow-hidden mb-2">
+      <div ref={barRef} className="h-full bg-blue-500" style={{ width: "100%" }} />
+    </div>
+  );
+}
 "use client";
 
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import type { ReportContext } from "@/components/AttentionTrainingGame";
 import { buildTxtReportFileName } from "@/utils/reportFileName";
 import {
@@ -138,6 +167,9 @@ function buildResultText(result: ChatErrorSessionResult, reportContext?: ReportC
 }
 
 export function ChatVigilanciaErrosGame({ basePoints, reportContext, onComplete }: Props) {
+    // Registro de tempo de resposta
+    const [startTime, setStartTime] = useState<number | null>(null);
+    const [respostas, setRespostas] = useState<Array<{ pergunta: string; resposta: string | null; correta: boolean; tempoResposta: number; anomalia: boolean; anomaliaDetectada: boolean }>>([]);
   const [phase, setPhase] = useState<Phase>("intro");
   const [roundIndex, setRoundIndex] = useState(0);
   const [remainingMs, setRemainingMs] = useState(ROUND_CONFIGS[0]?.durationMs ?? 0);
@@ -201,6 +233,7 @@ export function ChatVigilanciaErrosGame({ basePoints, reportContext, onComplete 
   async function carregarPerguntaAleatoria() {
     setCarregandoPergunta(true);
     setRespostaSelecionada(null);
+    setStartTime(Date.now());
     try {
       const tema = temas[getRandomInt(temas.length)];
       const url = `/perguntas/${tema.tema}/${tema.arquivo}`;
@@ -238,6 +271,24 @@ export function ChatVigilanciaErrosGame({ basePoints, reportContext, onComplete 
   function handleClickOpcao(opcao: string) {
     if (respostaSelecionada || carregandoPergunta) return;
     setRespostaSelecionada(opcao);
+    // Calcular tempo de resposta
+    const tempoResposta = startTime ? Date.now() - startTime : 0;
+    // Verificar se a resposta está correta
+    const correta = perguntaAtual?.respostas_certas?.includes(opcao) ?? false;
+    // Verificar se havia anomalia e se foi detectada
+    const anomalia = !!erroAtivo;
+    const anomaliaDetectada = anomaliaLogs.length > 0 && anomaliaLogs[anomaliaLogs.length - 1].timestamp >= (startTime ?? 0);
+    setRespostas((prev) => [
+      ...prev,
+      {
+        pergunta: perguntaAtual?.pergunta ?? '',
+        resposta: opcao,
+        correta,
+        tempoResposta,
+        anomalia,
+        anomaliaDetectada,
+      },
+    ]);
     setTimeout(() => {
       carregarPerguntaAleatoria();
     }, 1000);
@@ -293,11 +344,22 @@ export function ChatVigilanciaErrosGame({ basePoints, reportContext, onComplete 
       )}
       {phase === "running" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5 relative">
-          <h2 className="text-lg font-semibold">Pergunta</h2>
+          {/* Barra de progressão de tempo */}
+          {!carregandoPergunta && perguntaAtual && (
+            <div className="w-full mb-2">
+              <ProgressBar key={perguntaAtual.pergunta} duration={20000} onTimeout={carregarPerguntaAleatoria} />
+            </div>
+          )}
+          <h2 className="text-lg font-bold text-black uppercase">PERGUNTA</h2>
+
           {carregandoPergunta && <p>Carregando pergunta...</p>}
           {!carregandoPergunta && perguntaAtual && (
             <>
               <p className="mb-2 text-base font-medium text-black">{perguntaAtual.pergunta}</p>
+              {/* Exibe tempo de resposta se já respondeu */}
+              {respostaSelecionada && startTime && (
+                <div className="text-xs text-zinc-600 mt-1">Tempo de resposta: {((Date.now() - startTime) / 1000).toFixed(2)}s</div>
+              )}
               <div className="grid gap-2">
                 {opcoes.map((opcao) => (
                   <button
