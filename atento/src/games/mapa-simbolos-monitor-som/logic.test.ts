@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   closeRound,
   computeScores,
-  handleGlitchResponse,
-  scheduleGlitches,
+  handleSomEstranhoResponse,
+  scheduleSonsEstranhos,
   spawnVisualRound,
   startSession,
   updateRuntime,
@@ -28,7 +28,7 @@ describe("mapa-simbolos-monitor-som logic", () => {
     const runtime = startSession(config, () => 0.2);
     expect(runtime.currentVisualRound).toBeNull();
     expect(runtime.visualAttempts.length).toBe(0);
-    expect(runtime.glitches.length).toBe(0);
+    expect(runtime.sonsEstranhos.length).toBe(0);
   });
 
   it("registra hit e erro no matching visual", () => {
@@ -69,16 +69,16 @@ describe("mapa-simbolos-monitor-som logic", () => {
     expect(runtime.visualAttempts.some((item) => item.outcome === "omission")).toBe(true);
   });
 
-  it("registra detecção de glitch e falso alarme", () => {
+  it("registra detecção de som estranho e falso alarme", () => {
     const runtime = startSession(config, () => 0.2);
-    const glitch = scheduleGlitches(runtime, runtime.nextGlitchAtMs, () => 0.1);
+    const somEstranho = scheduleSonsEstranhos(runtime, runtime.nextSomEstranhoAtMs, () => 0.1);
 
-    expect(glitch).not.toBeNull();
+    expect(somEstranho).not.toBeNull();
 
-    const detected = handleGlitchResponse({ runtime, atMs: (glitch?.startedAtMs ?? 0) + 200 });
+    const detected = handleSomEstranhoResponse({ runtime, atMs: (somEstranho?.startedAtMs ?? 0) + 200 });
     expect(detected.detected).toBe(true);
 
-    const falseAlarm = handleGlitchResponse({ runtime, atMs: (glitch?.startedAtMs ?? 0) + 250 });
+    const falseAlarm = handleSomEstranhoResponse({ runtime, atMs: (somEstranho?.startedAtMs ?? 0) + 250 });
     expect(falseAlarm.falseAlarm).toBe(true);
     expect(runtime.falseAlarms).toBe(1);
   });
@@ -90,8 +90,8 @@ describe("mapa-simbolos-monitor-som logic", () => {
     const correctOption = visual.options.find((item) => item.isTarget);
     validateSymbolClick({ runtime, optionId: correctOption?.id ?? "", atMs: 400 });
 
-    const glitch = scheduleGlitches(runtime, runtime.nextGlitchAtMs, () => 0.1);
-    handleGlitchResponse({ runtime, atMs: (glitch?.startedAtMs ?? 0) + 180 });
+    const somEstranho = scheduleSonsEstranhos(runtime, runtime.nextSomEstranhoAtMs, () => 0.1);
+    handleSomEstranhoResponse({ runtime, atMs: (somEstranho?.startedAtMs ?? 0) + 180 });
 
     const round = closeRound({
       runtime,
