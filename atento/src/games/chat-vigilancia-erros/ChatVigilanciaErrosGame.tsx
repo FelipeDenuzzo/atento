@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+
+import { useEffect, useState, useCallback } from "react";
 import type { ReportContext } from "@/components/AttentionTrainingGame";
 import { buildTxtReportFileName } from "@/utils/reportFileName";
 import {
@@ -19,10 +20,16 @@ import type {
   ChatErrorSessionResult,
 } from "./types";
 
+// Estrutura para logar detecções de anomalia
+type AnomaliaLog = {
+  timestamp: number;
+  via: "mouse" | "teclado";
+};
+
+// ...existing code...
+
 type Props = {
   basePoints: number;
-  startingLevel: number;
-  maxLevelHint: number;
   reportContext?: ReportContext;
   onComplete: (result: { success: boolean; pointsEarned: number }) => void;
 };
@@ -89,11 +96,9 @@ function formatClock(ms: number): string {
   const min = Math.floor(sec / 60);
   const rest = sec % 60;
   return `${String(min).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;
-}
 
 function formatSeconds(ms: number): string {
   return `${(ms / 1000).toFixed(1)} s`;
-}
 
 function buildResultText(result: ChatErrorSessionResult, reportContext?: ReportContext): string {
   const lines: string[] = [];
@@ -130,30 +135,42 @@ function buildResultText(result: ChatErrorSessionResult, reportContext?: ReportC
   lines.push("");
   lines.push(`Finalizado em: ${new Date(result.endedAtIso).toLocaleString("pt-BR")}`);
   return lines.join("\n");
-}
 
-export function ChatVigilanciaErrosGame({
-  basePoints,
-  reportContext,
-  onComplete,
-}: Props) {
+export function ChatVigilanciaErrosGame({ basePoints, reportContext, onComplete }: Props) {
   const [phase, setPhase] = useState<Phase>("intro");
   const [roundIndex, setRoundIndex] = useState(0);
   const [remainingMs, setRemainingMs] = useState(ROUND_CONFIGS[0]?.durationMs ?? 0);
   const [roundLogs, setRoundLogs] = useState<ChatErrorRoundLog[]>([]);
   const [sessionResult, setSessionResult] = useState<ChatErrorSessionResult | null>(null);
-
-  // Estados para perguntas externas
-  const [perguntaAtual, setPerguntaAtual] = useState<null | {
-    pergunta: string;
-    respostas_certas: string[];
-    respostas_erradas: string[];
-  }>(null);
+  const [perguntaAtual, setPerguntaAtual] = useState<null | { pergunta: string; respostas_certas: string[]; respostas_erradas: string[] }>(null);
   const [opcoes, setOpcoes] = useState<string[]>([]);
   const [respostaSelecionada, setRespostaSelecionada] = useState<string | null>(null);
   const [carregandoPergunta, setCarregandoPergunta] = useState(false);
-
-  // Temas disponíveis
+  const ERROS = ["erro1","erro2","erro3","erro4","erro5","erro6","erro7","erro8","erro9","erro10"];
+  const [erroAtivo, setErroAtivo] = useState<string | null>(null);
+  const [anomaliaLogs, setAnomaliaLogs] = useState<AnomaliaLog[]>([]);
+  const marcarAnomalia = useCallback((via: "mouse" | "teclado") => {
+    setAnomaliaLogs((prev) => [...prev, { timestamp: Date.now(), via }]);
+  }, []);
+  useEffect(() => {
+    if (phase !== "running") return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.code === "Space" && !e.repeat) {
+        e.preventDefault();
+        marcarAnomalia("teclado");
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [phase, marcarAnomalia]);
+  useEffect(() => {
+    if (!erroAtivo) return;
+    const timeout = setTimeout(() => setErroAtivo(null), 3000);
+    return () => clearTimeout(timeout);
+  }, [erroAtivo]);
+  function sortearErro() {
+    return ERROS[Math.floor(Math.random() * ERROS.length)];
+  }
   const temas = [
     { tema: "tema1", arquivo: "pergunta1.json" },
     { tema: "tema2", arquivo: "pergunta2.json" },
@@ -164,19 +181,12 @@ export function ChatVigilanciaErrosGame({
     { tema: "tema7", arquivo: "pergunta7.json" },
     { tema: "tema8", arquivo: "pergunta8.json" },
   ];
-
   function shuffle<T>(arr: T[]): T[] {
-    return arr
-      .map((item) => ({ item, sort: Math.random() }))
-      .sort((a, b) => a.sort - b.sort)
-      .map(({ item }) => item);
+    return arr.map((item) => ({ item, sort: Math.random() })).sort((a, b) => a.sort - b.sort).map(({ item }) => item);
   }
-
   function getRandomInt(max: number) {
     return Math.floor(Math.random() * max);
   }
-
-  // Carrega uma pergunta aleatória de um tema aleatório
   async function carregarPerguntaAleatoria() {
     setCarregandoPergunta(true);
     setRespostaSelecionada(null);
@@ -194,20 +204,19 @@ export function ChatVigilanciaErrosGame({
       const opcoesEmbaralhadas = shuffle([certa, ...erradas]);
       setPerguntaAtual(pergunta);
       setOpcoes(opcoesEmbaralhadas as string[]);
+      setErroAtivo(sortearErro());
     } catch (e) {
       setPerguntaAtual(null);
       setOpcoes([]);
     }
     setCarregandoPergunta(false);
   }
-
   useEffect(() => {
     if (phase === "running") {
       carregarPerguntaAleatoria();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
-
   function handleClickOpcao(opcao: string) {
     if (respostaSelecionada || carregandoPergunta) return;
     setRespostaSelecionada(opcao);
@@ -215,25 +224,19 @@ export function ChatVigilanciaErrosGame({
       carregarPerguntaAleatoria();
     }, 1000);
   }
-
-
-
   function nextRound() {
     setRoundIndex((value) => value + 1);
     setPhase("intro");
   }
-
   function concludeExercise() {
     if (!sessionResult) {
       onComplete({ success: false, pointsEarned: 0 });
       return;
     }
-
     const success = sessionResult.averageDualScore >= 65;
     const pointsEarned = Math.round(basePoints * Math.min(1, sessionResult.averageDualScore / 100));
     onComplete({ success, pointsEarned });
   }
-
   function downloadText() {
     if (!sessionResult) return;
     const content = buildResultText(sessionResult, reportContext);
@@ -249,9 +252,9 @@ export function ChatVigilanciaErrosGame({
     link.click();
     URL.revokeObjectURL(url);
   }
-
   return (
     <div className="space-y-5">
+      {/* ... JSX do componente ... */}
       {phase === "intro" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5 text-left text-black">
           <p>Você terá <strong>duas tarefas ao mesmo tempo</strong>:</p>
@@ -270,10 +273,8 @@ export function ChatVigilanciaErrosGame({
           </button>
         </div>
       )}
-      )
-
       {phase === "running" && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
+        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5 relative">
           <h2 className="text-lg font-semibold">Pergunta</h2>
           {carregandoPergunta && <p>Carregando pergunta...</p>}
           {!carregandoPergunta && perguntaAtual && (
@@ -285,7 +286,7 @@ export function ChatVigilanciaErrosGame({
                     key={opcao}
                     type="button"
                     onClick={() => handleClickOpcao(opcao)}
-                    className={`rounded-lg border border-zinc-200 px-3 py-2 text-left text-sm text-zinc-800 hover:bg-zinc-50 ${
+                    className={`rounded-lg border border-zinc-200 px-3 py-2 text-left text-sm text-black hover:bg-zinc-50 ${
                       respostaSelecionada === opcao ? "bg-blue-100 border-blue-400" : ""
                     }`}
                     disabled={!!respostaSelecionada}
@@ -294,11 +295,43 @@ export function ChatVigilanciaErrosGame({
                   </button>
                 ))}
               </div>
+              {/* ERRO 7: Trovões piscando */}
+              {erroAtivo === "erro7" && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <span className="animate-erro7 text-yellow-400 text-6xl">⚡⚡⚡⚡⚡</span>
+                </div>
+              )}
+              {/* ERRO 8: Piscar error.png */}
+              {erroAtivo === "erro8" && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none animate-erro8">
+                  <img src="/error/error.png" alt="erro8" className="max-w-xs w-full h-auto" />
+                </div>
+              )}
+              {/* ERRO 9: Piscar error1.png */}
+              {erroAtivo === "erro9" && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none animate-erro9">
+                  <img src="/error/error1.png" alt="erro9" className="max-w-xs w-full h-auto" />
+                </div>
+              )}
+              {/* ERRO 10: Piscar listra.png */}
+              {erroAtivo === "erro10" && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none animate-erro10">
+                  <img src="/error/listra.png" alt="erro10" className="max-w-xs w-full h-auto" />
+                </div>
+              )}
+              <div className="mt-6 flex flex-col items-center">
+                <button
+                  type="button"
+                  className="rounded-lg border-2 border-rose-400 bg-rose-100 px-6 py-3 text-lg font-bold text-rose-700 shadow hover:bg-rose-200 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  onClick={() => marcarAnomalia("mouse")}
+                >
+                  Detectar erro/anomalia (Espaço ou clique)
+                </button>
+              </div>
             </>
           )}
         </div>
       )}
-
       {phase === "round-feedback" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
           <h3 className="text-xl font-semibold text-zinc-900">Fase concluída</h3>
@@ -311,7 +344,6 @@ export function ChatVigilanciaErrosGame({
           </button>
         </div>
       )}
-
       {phase === "result" && sessionResult && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
           <h3 className="text-xl font-semibold text-zinc-900">Resultado final</h3>
@@ -320,7 +352,6 @@ export function ChatVigilanciaErrosGame({
               {reportContext.mode === "sequence" ? "Trilha" : "Jogo individual"}: {reportContext.scopeLabel}
             </p>
           )}
-
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
               <p className="text-xs text-zinc-500">Dual score médio</p>
@@ -340,7 +371,6 @@ export function ChatVigilanciaErrosGame({
               <p className="font-semibold text-zinc-900">{sessionResult.trendSummary}</p>
             </div>
           </div>
-
           <div className="flex flex-wrap gap-3">
             <button
               type="button"
@@ -361,4 +391,3 @@ export function ChatVigilanciaErrosGame({
       )}
     </div>
   );
-}
