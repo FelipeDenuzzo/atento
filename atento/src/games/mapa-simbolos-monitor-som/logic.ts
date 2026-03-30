@@ -59,7 +59,7 @@ function pickUniqueGlyphs(count: number, rng: () => number): SymbolGlyph[] {
 function computeRoundMetrics(
   config: SymbolMapSoundRoundConfig,
   attempts: SymbolMapSoundRoundRuntime["visualAttempts"],
-  glitches: SymbolMapSoundRoundRuntime["glitches"],
+  sonsEstranhos: SymbolMapSoundRoundRuntime["sonsEstranhos"],
   falseAlarms: number,
 ): SymbolMapSoundRoundMetrics {
   const hits = attempts.filter((item) => item.outcome === "hit").length;
@@ -88,10 +88,10 @@ function computeRoundMetrics(
     100,
   );
 
-  const glitchesTotal = glitches.length;
-  const detected = glitches.filter((item) => item.detectedAtMs != null).length;
-  const missed = glitches.filter((item) => item.missed).length;
-  const audioRtList = glitches
+  const sonsEstranhosTotal = sonsEstranhos.length;
+  const detected = sonsEstranhos.filter((item) => item.detectedAtMs != null).length;
+  const missed = sonsEstranhos.filter((item) => item.missed).length;
+  const audioRtList = sonsEstranhos
     .filter((item) => item.reactionMs != null)
     .map((item) => item.reactionMs ?? 0);
   const audioMeanRt =
@@ -99,8 +99,8 @@ function computeRoundMetrics(
       ? audioRtList.reduce((sum, value) => sum + value, 0) / audioRtList.length
       : 0;
 
-  const detectionPercent = glitchesTotal > 0 ? (detected / glitchesTotal) * 100 : 0;
-  const falseAlarmPenalty = glitchesTotal > 0 ? (falseAlarms / glitchesTotal) * 25 : falseAlarms * 5;
+  const detectionPercent = sonsEstranhosTotal > 0 ? (detected / sonsEstranhosTotal) * 100 : 0;
+  const falseAlarmPenalty = sonsEstranhosTotal > 0 ? (falseAlarms / sonsEstranhosTotal) * 25 : falseAlarms * 5;
   const audioSpeedFactor =
     audioRtList.length > 0
       ? 1 - clamp((audioMeanRt - 120) / Math.max(1, config.glitchVisibleMs - 120), 0, 1)
@@ -118,7 +118,7 @@ function computeRoundMetrics(
       score: visualScore,
     },
     audio: {
-      glitchesTotal,
+      sonsEstranhosTotal,
       detected,
       missed,
       falseAlarms,
@@ -139,11 +139,11 @@ export function startSession(
     currentVisualRound: null,
     visualRoundsSpawned: 0,
     visualAttempts: [],
-    glitches: [],
+    sonsEstranhos: [],
     falseAlarms: 0,
     nextVisualAtMs: 0,
-    nextGlitchAtMs: randomBetween(config.glitchIntervalMinMs, config.glitchIntervalMaxMs, rng),
-    activeGlitch: null,
+    nextSomEstranhoAtMs: randomBetween(config.glitchIntervalMinMs, config.glitchIntervalMaxMs, rng),
+    activeSomEstranho: null,
   };
 }
 
@@ -360,7 +360,7 @@ export function closeRound(params: {
   const metrics = computeRoundMetrics(
     runtime.config,
     runtime.visualAttempts,
-    runtime.glitches,
+    runtime.sonsEstranhos,
     runtime.falseAlarms,
   );
 
@@ -372,7 +372,7 @@ export function closeRound(params: {
     config: runtime.config,
     metrics,
     visualAttempts: runtime.visualAttempts.map((item) => ({ ...item })),
-    glitches: runtime.glitches.map((item) => ({ ...item })),
+    sonsEstranhos: runtime.sonsEstranhos.map((item) => ({ ...item })),
   };
 }
 
@@ -404,7 +404,7 @@ export function computeScores(params: {
     .map((item) => item.responseMs);
 
   const audioRtList = rounds
-    .flatMap((round) => round.glitches)
+    .flatMap((round) => round.sonsEstranhos)
     .filter((item) => item.reactionMs != null)
     .map((item) => item.reactionMs ?? 0);
 
