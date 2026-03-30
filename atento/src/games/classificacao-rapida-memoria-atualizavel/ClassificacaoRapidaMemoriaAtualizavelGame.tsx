@@ -420,7 +420,7 @@ export function ClassificacaoRapidaMemoriaAtualizavelGame({
         <div className="space-y-6 rounded-lg border border-black/10 bg-white p-5 text-center text-black">
           <div className="text-3xl font-bold text-zinc-900">{countdown}</div>
           <div className="text-base text-zinc-700 mt-2">
-            <strong>Dica</strong> — Localize as teclas <b>J</b> e <b>L</b> no seu teclado e fique preparado para digitar
+            <strong>Dica</strong> — Localize as teclas <b>F</b> e <b>J</b> no seu teclado e fique preparado para digitar
           </div>
         </div>
       )}
