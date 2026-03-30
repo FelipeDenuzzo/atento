@@ -479,7 +479,7 @@ export function ClassificacaoRapidaMemoriaAtualizavelGame({
                     }}
                     disabled={!!activeMemoryCheck.answeredAtMs}
                   >
-                    <span className="font-semibold text-zinc-900">{index + 1}</span> — {option}
+                    {option}
                   </button>
                 ))}
               </div>
