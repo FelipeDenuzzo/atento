@@ -392,3 +392,4 @@ export function ChatVigilanciaErrosGame({ basePoints, reportContext, onComplete 
       )}
     </div>
   );
+}
