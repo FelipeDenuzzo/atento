@@ -7,7 +7,7 @@ import {
   closeRound,
   computeScores,
   exportTXT,
-  handleGlitchResponse,
+  handleSomEstranhoResponse,
   startContinuousAudio,
   startSession,
   updateRuntime,
@@ -115,7 +115,7 @@ export function MapaSimbolosMonitorSomGame({
   const [options, setOptions] = useState<VisualOption[]>([]);
   const [feedbackVisual, setFeedbackVisual] = useState<string>("");
   const [feedbackAudio, setFeedbackAudio] = useState<string>("");
-  const [glitchActive, setGlitchActive] = useState(false);
+  const [somEstranhoAtivo, setSomEstranhoAtivo] = useState(false);
   const [roundLogs, setRoundLogs] = useState<SymbolMapSoundRoundLog[]>([]);
   const [sessionResult, setSessionResult] = useState<SymbolMapSoundSessionResult | null>(null);
 
@@ -125,7 +125,7 @@ export function MapaSimbolosMonitorSomGame({
   const sessionStartedAtRef = useRef<number | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioControllerRef = useRef<AudioEngineController | null>(null);
-  const lastGlitchIdRef = useRef<number | null>(null);
+  const lastSomEstranhoIdRef = useRef<number | null>(null);
 
   const currentConfig = useMemo(
     () => ROUND_CONFIGS[roundIndex] ?? ROUND_CONFIGS[0],
@@ -180,20 +180,20 @@ export function MapaSimbolosMonitorSomGame({
     setTargetGlyph(currentVisual?.targetGlyph ?? "-");
     setOptions(currentVisual?.options ?? []);
 
-    const activeGlitchId = runtime.activeGlitch?.id ?? null;
-    setGlitchActive(activeGlitchId != null);
+    const activeSomEstranhoId = runtime.activeSomEstranho?.id ?? null;
+    setSomEstranhoAtivo(activeSomEstranhoId != null);
 
     if (
-      activeGlitchId != null &&
-      activeGlitchId !== lastGlitchIdRef.current &&
+      activeSomEstranhoId != null &&
+      activeSomEstranhoId !== lastSomEstranhoIdRef.current &&
       audioControllerRef.current
     ) {
-      audioControllerRef.current.triggerGlitch();
-      lastGlitchIdRef.current = activeGlitchId;
+      audioControllerRef.current.triggerSomEstranho();
+      lastSomEstranhoIdRef.current = activeSomEstranhoId;
     }
 
-    if (activeGlitchId == null) {
-      lastGlitchIdRef.current = null;
+    if (activeSomEstranhoId == null) {
+      lastSomEstranhoIdRef.current = null;
     }
   }
 
@@ -230,7 +230,7 @@ export function MapaSimbolosMonitorSomGame({
     setOptions([]);
     setFeedbackVisual("");
     setFeedbackAudio("");
-    setGlitchActive(false);
+    setSomEstranhoAtivo(false);
 
     const startedAt = performance.now();
     roundStartedAtRef.current = startedAt;
@@ -301,9 +301,9 @@ export function MapaSimbolosMonitorSomGame({
     const now = performance.now();
     const elapsedMs = Math.max(0, now - roundStartedAtRef.current);
 
-    const response = handleGlitchResponse({ runtime, atMs: elapsedMs });
+    const response = handleSomEstranhoResponse({ runtime, atMs: elapsedMs });
     if (response.detected) {
-      setFeedbackAudio(`Glitch detectado (${Math.round(response.reactionMs)} ms)`);
+      setFeedbackAudio(`Som estranho detectado (${Math.round(response.reactionMs)} ms)`);
     } else if (response.falseAlarm) {
       setFeedbackAudio("Falso alarme");
     }
@@ -362,10 +362,10 @@ export function MapaSimbolosMonitorSomGame({
 
       {phase === "running" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <div className={`rounded-lg border p-3 ${glitchActive ? "border-rose-300 bg-rose-50" : "border-black/10 bg-zinc-50"}`}>
+          <div className={`rounded-lg border p-3 ${somEstranhoAtivo ? "border-rose-300 bg-rose-50" : "border-black/10 bg-zinc-50"}`}>
             <p className="text-xs text-zinc-500">Monitor auditivo</p>
-            <p className={`font-semibold ${glitchActive ? "text-rose-700" : "text-zinc-900"}`}>
-              {glitchActive ? "Glitch ativo" : "Som estável"}
+            <p className={`font-semibold ${somEstranhoAtivo ? "text-rose-700" : "text-zinc-900"}`}>
+              {somEstranhoAtivo ? "Som estranho ativo" : "Som estável"}
             </p>
           </div>
 
@@ -387,7 +387,7 @@ export function MapaSimbolosMonitorSomGame({
               onClick={triggerAudioResponse}
               className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-zinc-800 hover:bg-zinc-50"
             >
-              Detectei glitch
+              Detectei som estranho
             </button>
             {feedbackVisual && (
               <span className="rounded-md bg-zinc-100 px-3 py-2 text-xs font-semibold text-zinc-700">

@@ -25,7 +25,7 @@ export type VisualAttempt = {
   outcome: AttemptOutcome;
 };
 
-export type GlitchEvent = {
+export type SomEstranhoEvent = {
   id: number;
   startedAtMs: number;
   expiresAtMs: number;
@@ -51,11 +51,11 @@ export type SymbolMapSoundRoundRuntime = {
   currentVisualRound: VisualRound | null;
   visualRoundsSpawned: number;
   visualAttempts: VisualAttempt[];
-  glitches: GlitchEvent[];
+  sonsEstranhos: SomEstranhoEvent[];
   falseAlarms: number;
   nextVisualAtMs: number;
-  nextGlitchAtMs: number;
-  activeGlitch: GlitchEvent | null;
+  nextSomEstranhoAtMs: number;
+  activeSomEstranho: SomEstranhoEvent | null;
 };
 
 export type VisualScoreBreakdown = {
@@ -69,7 +69,7 @@ export type VisualScoreBreakdown = {
 };
 
 export type AudioScoreBreakdown = {
-  glitchesTotal: number;
+  sonsEstranhosTotal: number;
   detected: number;
   missed: number;
   falseAlarms: number;
@@ -92,7 +92,7 @@ export type SymbolMapSoundRoundLog = {
   config: SymbolMapSoundRoundConfig;
   metrics: SymbolMapSoundRoundMetrics;
   visualAttempts: VisualAttempt[];
-  glitches: GlitchEvent[];
+  sonsEstranhos: SomEstranhoEvent[];
 };
 
 export type SymbolMapSoundSessionResult = {
@@ -114,6 +114,6 @@ export type SymbolMapSoundSessionResult = {
 };
 
 export type AudioEngineController = {
-  triggerGlitch: () => void;
+  triggerSomEstranho: () => void;
   stop: () => void;
 };

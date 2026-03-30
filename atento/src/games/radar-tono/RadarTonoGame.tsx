@@ -531,45 +531,70 @@ export function RadarTonoGame({ basePoints, reportContext, onComplete }: Props) 
   // O componente agora só renderiza o exercício, sem instruções/tela inicial/resultados popup
   return (
     <div className="space-y-5">
-      {/* Renderize apenas a interface do exercício, sem lógica de instrução/tela inicial */}
-      <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-        <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-            <p className="text-xs text-zinc-500">Tempo restante</p>
-            <p className="font-semibold text-zinc-900">{formatClock(remainingMs)}</p>
-        </div>
-        <div className="space-y-3">
-          <div
-            onMouseMove={updateMousePosition}
-            onMouseLeave={clearMousePosition}
-            className="relative mx-auto rounded-lg border border-zinc-300 bg-zinc-50"
-            style={{ width: currentConfig.arenaSizePx, height: currentConfig.arenaSizePx }}
+      {phase === "round-feedback" ? (
+        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
+          <h3 className="text-xl font-semibold text-zinc-900">Fase concluída</h3>
+          <button
+            type="button"
+            onClick={nextRound}
+            className="rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-50"
           >
+            Próxima fase
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
+          <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
+              <p className="text-xs text-zinc-500">Tempo restante</p>
+              <p className="font-semibold text-zinc-900">{formatClock(remainingMs)}</p>
+          </div>
+          <div className="space-y-3">
             <div
-              className="absolute rounded-full bg-zinc-900"
-              style={{
-                width: currentConfig.dotRadiusPx * 2,
-                height: currentConfig.dotRadiusPx * 2,
-                left: dotPosition.x - currentConfig.dotRadiusPx,
-                top: dotPosition.y - currentConfig.dotRadiusPx,
-              }}
-            />
-            {redDotPosition && (
+              onMouseMove={updateMousePosition}
+              onMouseLeave={clearMousePosition}
+              className="relative mx-auto rounded-lg border border-zinc-300 bg-zinc-50"
+              style={{ width: currentConfig.arenaSizePx, height: currentConfig.arenaSizePx }}
+            >
+              {/* Área sensível: dobro do tamanho da esfera */}
               <div
-                className="absolute rounded-full bg-red-600"
+                className="absolute rounded-full border-2 border-blue-300 opacity-30 pointer-events-none"
+                style={{
+                  width: currentConfig.dotRadiusPx * 4,
+                  height: currentConfig.dotRadiusPx * 4,
+                  left: dotPosition.x - currentConfig.dotRadiusPx * 2,
+                  top: dotPosition.y - currentConfig.dotRadiusPx * 2,
+                  zIndex: 1,
+                }}
+              />
+              {/* Esfera central */}
+              <div
+                className="absolute rounded-full bg-zinc-900"
                 style={{
                   width: currentConfig.dotRadiusPx * 2,
                   height: currentConfig.dotRadiusPx * 2,
-                  left: redDotPosition.x - currentConfig.dotRadiusPx,
-                  top: redDotPosition.y - currentConfig.dotRadiusPx,
+                  left: dotPosition.x - currentConfig.dotRadiusPx,
+                  top: dotPosition.y - currentConfig.dotRadiusPx,
+                  zIndex: 2,
                 }}
               />
-            )}
+              {redDotPosition && (
+                <div
+                  className="absolute rounded-full bg-red-600"
+                  style={{
+                    width: currentConfig.dotRadiusPx * 2,
+                    height: currentConfig.dotRadiusPx * 2,
+                    left: redDotPosition.x - currentConfig.dotRadiusPx,
+                    top: redDotPosition.y - currentConfig.dotRadiusPx,
+                  }}
+                />
+              )}
+            </div>
+            <p className="text-xs text-zinc-600">
+              Grave = J | Agudo = K
+            </p>
           </div>
-          <p className="text-xs text-zinc-600">
-            Grave = J | Agudo = K
-          </p>
         </div>
-      </div>
+      )}
     </div>
   );
 }

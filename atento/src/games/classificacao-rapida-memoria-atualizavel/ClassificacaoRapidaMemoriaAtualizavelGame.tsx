@@ -31,7 +31,7 @@ type Props = {
   onComplete: (result: { success: boolean; pointsEarned: number }) => void;
 };
 
-type Phase = "intro" | "running" | "round-feedback" | "result";
+type Phase = "intro" | "countdown" | "running" | "round-feedback" | "result";
 
 const ROUND_CONFIGS: RapidMemoryRoundConfig[] = [
   {
@@ -180,6 +180,7 @@ export function ClassificacaoRapidaMemoriaAtualizavelGame({
   onComplete,
 }: Props) {
   const [phase, setPhase] = useState<Phase>("intro");
+  const [countdown, setCountdown] = useState(5);
   const [roundIndex, setRoundIndex] = useState(0);
   const [remainingMs, setRemainingMs] = useState(ROUND_CONFIGS[0]?.durationMs ?? 0);
   const [visibleStimulus, setVisibleStimulus] = useState<Stimulus | null>(null);
@@ -249,6 +250,22 @@ export function ClassificacaoRapidaMemoriaAtualizavelGame({
 
     frameRef.current = requestAnimationFrame(runFrame);
   }
+
+
+  function startCountdown() {
+    setCountdown(5);
+    setPhase("countdown");
+  }
+
+  useEffect(() => {
+    if (phase !== "countdown") return;
+    if (countdown === 0) {
+      startRound();
+      return;
+    }
+    const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [phase, countdown]);
 
   function startRound() {
     if (sessionStartedAtRef.current == null) {
@@ -400,11 +417,20 @@ export function ClassificacaoRapidaMemoriaAtualizavelGame({
 
           <button
             type="button"
-            onClick={startRound}
+            onClick={startCountdown}
             className="w-full rounded-lg bg-zinc-900 px-4 py-3 font-semibold text-white hover:bg-zinc-700"
           >
             Iniciar fase
           </button>
+
+              {phase === "countdown" && (
+                <div className="space-y-6 rounded-lg border border-black/10 bg-white p-5 text-center text-black">
+                  <div className="text-3xl font-bold text-zinc-900">{countdown}</div>
+                  <div className="text-base text-zinc-700 mt-2">
+                    <strong>Dica</strong> — Localize as teclas <b>J</b> e <b>L</b> no seu teclado e fique preparado para digitar
+                  </div>
+                </div>
+              )}
         </div>
       )}
 

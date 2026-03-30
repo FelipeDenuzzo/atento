@@ -1,3 +1,25 @@
+
+export function scheduleSonsEstranhos(
+  runtime: SymbolMapSoundRoundRuntime,
+  atMs: number,
+  rng: () => number = Math.random,
+): SomEstranhoEvent | null {
+  if (runtime.activeSomEstranho || atMs < runtime.nextSomEstranhoAtMs) {
+    return null;
+  }
+  const somEstranho: SomEstranhoEvent = {
+    id: runtime.sonsEstranhos.length + 1,
+    startedAtMs: atMs,
+    expiresAtMs: atMs + runtime.config.glitchVisibleMs,
+  };
+
+  runtime.sonsEstranhos.push(somEstranho);
+  runtime.activeSomEstranho = somEstranho;
+  runtime.nextSomEstranhoAtMs =
+    atMs + randomBetween(runtime.config.glitchIntervalMinMs, runtime.config.glitchIntervalMaxMs, rng);
+
+  return somEstranho;
+}
 import type {
   AudioEngineController,
   GlitchEvent,
@@ -211,31 +233,32 @@ export function startContinuousAudio(audioContext: AudioContext): AudioEngineCon
   baseGain.connect(audioContext.destination);
   baseOscillator.start();
 
-  const triggerGlitch = () => {
+  // Som estranho (antes: glitch)
+  const triggerSomEstranho = () => {
     const now = audioContext.currentTime;
 
-    const glitchOsc = audioContext.createOscillator();
-    const glitchGain = audioContext.createGain();
+    const somEstranhoOsc = audioContext.createOscillator();
+    const somEstranhoGain = audioContext.createGain();
 
-    glitchOsc.type = "square";
-    glitchOsc.frequency.setValueAtTime(840, now);
-    glitchOsc.frequency.exponentialRampToValueAtTime(380, now + 0.08);
+    somEstranhoOsc.type = "square";
+    somEstranhoOsc.frequency.setValueAtTime(840, now);
+    somEstranhoOsc.frequency.exponentialRampToValueAtTime(380, now + 0.18); // duração aumentada
 
-    glitchGain.gain.setValueAtTime(0.0001, now);
-    glitchGain.gain.exponentialRampToValueAtTime(0.12, now + 0.015);
-    glitchGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.11);
+    somEstranhoGain.gain.setValueAtTime(0.0001, now);
+    somEstranhoGain.gain.exponentialRampToValueAtTime(0.12, now + 0.03); // ataque mais suave
+    somEstranhoGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22); // duração aumentada
 
-    glitchOsc.connect(glitchGain);
-    glitchGain.connect(audioContext.destination);
+    somEstranhoOsc.connect(somEstranhoGain);
+    somEstranhoGain.connect(audioContext.destination);
 
     const ducked = clamp(baseGain.gain.value * 0.35, 0.0001, 1);
     baseGain.gain.cancelScheduledValues(now);
     baseGain.gain.setValueAtTime(baseGain.gain.value, now);
     baseGain.gain.linearRampToValueAtTime(ducked, now + 0.01);
-    baseGain.gain.linearRampToValueAtTime(0.025, now + 0.14);
+    baseGain.gain.linearRampToValueAtTime(0.025, now + 0.24); // acompanha duração
 
-    glitchOsc.start(now);
-    glitchOsc.stop(now + 0.12);
+    somEstranhoOsc.start(now);
+    somEstranhoOsc.stop(now + 0.22); // duração aumentada
   };
 
   const stop = () => {
@@ -246,7 +269,7 @@ export function startContinuousAudio(audioContext: AudioContext): AudioEngineCon
     baseOscillator.stop(now + 0.1);
   };
 
-  return { triggerGlitch, stop };
+  return { triggerSomEstranho, stop };
 }
 
 export function scheduleGlitches(
@@ -272,26 +295,27 @@ export function scheduleGlitches(
   return glitch;
 }
 
-export function handleGlitchResponse(params: {
+
+export function handleSomEstranhoResponse(params: {
   runtime: SymbolMapSoundRoundRuntime;
   atMs: number;
 }): { detected: boolean; falseAlarm: boolean; reactionMs: number } {
   const { runtime, atMs } = params;
 
-  if (!runtime.activeGlitch) {
+  if (!runtime.activeSomEstranho) {
     runtime.falseAlarms += 1;
     return { detected: false, falseAlarm: true, reactionMs: 0 };
   }
 
-  if (runtime.activeGlitch.detectedAtMs != null) {
+  if (runtime.activeSomEstranho.detectedAtMs != null) {
     runtime.falseAlarms += 1;
     return { detected: false, falseAlarm: true, reactionMs: 0 };
   }
 
-  const reactionMs = Math.max(0, atMs - runtime.activeGlitch.startedAtMs);
-  runtime.activeGlitch.detectedAtMs = atMs;
-  runtime.activeGlitch.reactionMs = reactionMs;
-  runtime.activeGlitch = null;
+  const reactionMs = Math.max(0, atMs - runtime.activeSomEstranho.startedAtMs);
+  runtime.activeSomEstranho.detectedAtMs = atMs;
+  runtime.activeSomEstranho.reactionMs = reactionMs;
+  runtime.activeSomEstranho = null;
 
   return { detected: true, falseAlarm: false, reactionMs };
 }
@@ -317,6 +341,8 @@ export function updateRuntime(
     runtime.currentVisualRound = null;
     runtime.nextVisualAtMs = atMs;
   }
+  // Agendamento do som estranho
+  scheduleSonsEstranhos(runtime, atMs, rng);
 
   scheduleGlitches(runtime, atMs, rng);
 
