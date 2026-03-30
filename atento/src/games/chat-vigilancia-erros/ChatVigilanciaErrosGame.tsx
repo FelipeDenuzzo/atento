@@ -1,3 +1,5 @@
+
+"use client";
 // Barra de progresso simples para tempo de resposta
 import React from "react";
 
@@ -27,7 +29,6 @@ function ProgressBar({ duration, onTimeout }: ProgressBarProps) {
     </div>
   );
 }
-"use client";
 
 
 import { useEffect, useState, useCallback, useRef } from "react";
