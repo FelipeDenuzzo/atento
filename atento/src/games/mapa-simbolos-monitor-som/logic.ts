@@ -452,7 +452,7 @@ export function exportTXT(result: SymbolMapSoundSessionResult): string {
   result.rounds.forEach((round) => {
     lines.push(`${round.roundName}`);
     lines.push(`- Visual: hits ${round.metrics.visual.hits}, erros ${round.metrics.visual.errors}, omissões ${round.metrics.visual.omissions}, score ${round.metrics.visual.score.toFixed(1)}%`);
-    lines.push(`- Auditivo: detectadas ${round.metrics.audio.detected}/${round.metrics.audio.glitchesTotal}, falsos alarmes ${round.metrics.audio.falseAlarms}, score ${round.metrics.audio.score.toFixed(1)}%`);
+    lines.push(`- Auditivo: detectadas ${round.metrics.audio.detected}/${round.metrics.audio.sonsEstranhosTotal}, falsos alarmes ${round.metrics.audio.falseAlarms}, score ${round.metrics.audio.score.toFixed(1)}%`);
     lines.push(`- Dual score: ${round.metrics.dualScore.toFixed(1)}%`);
   });
 
