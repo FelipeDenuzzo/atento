@@ -96,10 +96,10 @@ function formatClock(ms: number): string {
   const min = Math.floor(sec / 60);
   const rest = sec % 60;
   return `${String(min).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;
-
+}
 function formatSeconds(ms: number): string {
   return `${(ms / 1000).toFixed(1)} s`;
-
+}
 function buildResultText(result: ChatErrorSessionResult, reportContext?: ReportContext): string {
   const lines: string[] = [];
   const totalAnswered = result.rounds.reduce((sum, round) => sum + round.metrics.chatAnswered, 0);
