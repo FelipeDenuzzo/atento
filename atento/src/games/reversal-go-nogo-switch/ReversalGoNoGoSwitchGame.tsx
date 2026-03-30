@@ -123,6 +123,8 @@ export function ReversalGoNoGoSwitchGame({
   const [remainingMs, setRemainingMs] = useState(ROUND_CONFIGS[0]?.durationMs ?? 0);
   const [currentRule, setCurrentRule] = useState<RuleMode | null>(null);
   const [currentShape, setCurrentShape] = useState<StimulusShape | null>(null);
+  // Novo estado para PNG sorteado do símbolo não-estrela
+  const [currentNonStarPng, setCurrentNonStarPng] = useState<string | null>(null);
   const [currentExpectedClick, setCurrentExpectedClick] = useState<boolean | null>(null);
   const [trialCounter, setTrialCounter] = useState(0);
   const [feedback, setFeedback] = useState("\u00A0");
@@ -157,6 +159,16 @@ export function ReversalGoNoGoSwitchGame({
     setCurrentShape(trial?.stimulusShape ?? null);
     setCurrentExpectedClick(trial?.expectedClick ?? null);
     setTrialCounter(runtime.logs.length + (trial ? 1 : 0));
+    // Sorteia PNG não-estrela se não for estrela
+    if (trial?.stimulusShape && trial.stimulusShape !== "star") {
+      const nonStarPngs = [
+        "18.png", "19.png", "20.png", "22.png", "23.png", "24.png", "25.png", "26.png", "27.png", "28.png", "29.png", "30.png", "31.png", "32.png", "33.png", "34.png", "35.png", "36.png", "37.png", "38.png", "39.png", "40.png", "41.png", "42.png", "43.png", "44.png", "45.png"
+      ];
+      const idx = Math.floor(Math.random() * nonStarPngs.length);
+      setCurrentNonStarPng(nonStarPngs[idx]);
+    } else {
+      setCurrentNonStarPng(null);
+    }
   }
 
   function startNextTrial(runtime: ReversalRuntime, elapsedMs: number) {
@@ -171,6 +183,7 @@ export function ReversalGoNoGoSwitchGame({
     setCurrentRule(null);
     setCurrentShape(null);
     setCurrentExpectedClick(null);
+    setCurrentNonStarPng(null);
     setFeedback("\u00A0");
   }
 
@@ -421,17 +434,13 @@ export function ReversalGoNoGoSwitchGame({
               >
                 {currentShape ? (
                   <img
-                    src={(() => {
-                      if (currentShape === "star") return "/simbolos/21.png";
-                      // Lista de PNGs não-estrela (excluindo 21.png)
-                      const nonStarPngs = [
-                        "18.png", "19.png", "20.png", "22.png", "23.png", "24.png", "25.png", "26.png", "27.png", "28.png", "29.png", "30.png", "31.png", "32.png", "33.png", "34.png", "35.png", "36.png", "37.png", "38.png", "39.png", "40.png", "41.png", "42.png", "43.png", "44.png", "45.png"
-                      ];
-                      // Para cada shape diferente de star, pega um PNG diferente de 21.png (pode ser aleatório ou sequencial)
-                      // Aqui, para manter simples, sorteia um PNG aleatório
-                      const idx = Math.floor(Math.random() * nonStarPngs.length);
-                      return `/simbolos/${nonStarPngs[idx]}`;
-                    })()}
+                    src={
+                      currentShape === "star"
+                        ? "/simbolos/21.png"
+                        : currentNonStarPng
+                        ? `/simbolos/${currentNonStarPng}`
+                        : ""
+                    }
                     alt={currentShape}
                     style={{ width: 120, height: 120 }}
                   />
