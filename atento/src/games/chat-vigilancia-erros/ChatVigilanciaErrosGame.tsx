@@ -353,64 +353,77 @@ export function ChatVigilanciaErrosGame({ basePoints, reportContext, onComplete 
           )}
           <h2 className="text-lg font-bold text-black uppercase">PERGUNTA</h2>
 
-          {carregandoPergunta && <p>Carregando pergunta...</p>}
-          {!carregandoPergunta && perguntaAtual && (
-            <>
-              <p className="mb-2 text-base font-medium text-black">{perguntaAtual.pergunta}</p>
-              {/* Exibe tempo de resposta se já respondeu */}
-              {respostaSelecionada && startTime && (
-                <div className="text-xs text-zinc-600 mt-1">Tempo de resposta: {((Date.now() - startTime) / 1000).toFixed(2)}s</div>
-              )}
-              <div className="grid gap-2">
-                {opcoes.map((opcao) => (
+          <div style={{ minHeight: 220 }}>
+            {carregandoPergunta ? (
+              <>
+                <p className="mb-2 text-base font-medium text-black animate-pulse bg-zinc-100 rounded h-6 w-3/4" />
+                <div className="grid gap-2 mt-2">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="rounded-lg border border-zinc-200 px-3 py-2 text-left text-sm bg-zinc-100 text-zinc-300 animate-pulse h-8" />
+                  ))}
+                </div>
+                <div className="mt-6 flex flex-col items-center">
+                  <div className="rounded-lg border-2 border-rose-200 bg-rose-50 px-6 py-3 text-lg font-bold text-rose-200 shadow h-12 w-64 animate-pulse" />
+                </div>
+              </>
+            ) : perguntaAtual && (
+              <>
+                <p className="mb-2 text-base font-medium text-black">{perguntaAtual.pergunta}</p>
+                {/* Exibe tempo de resposta se já respondeu */}
+                {respostaSelecionada && startTime && (
+                  <div className="text-xs text-zinc-600 mt-1">Tempo de resposta: {((Date.now() - startTime) / 1000).toFixed(2)}s</div>
+                )}
+                <div className="grid gap-2">
+                  {opcoes.map((opcao) => (
+                    <button
+                      key={opcao}
+                      type="button"
+                      onClick={() => handleClickOpcao(opcao)}
+                      className={`rounded-lg border border-zinc-200 px-3 py-2 text-left text-sm text-black hover:bg-zinc-50 ${
+                        respostaSelecionada === opcao ? "bg-blue-100 border-blue-400" : ""
+                      }`}
+                      disabled={!!respostaSelecionada}
+                    >
+                      {opcao}
+                    </button>
+                  ))}
+                </div>
+                {/* ERRO 7: Trovões piscando */}
+                {erroAtivo === "erro7" && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <span className="animate-erro7 text-yellow-400 text-6xl">⚡⚡⚡⚡⚡</span>
+                  </div>
+                )}
+                {/* ERRO 8: Piscar error.png */}
+                {erroAtivo === "erro8" && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none animate-erro8">
+                    <img src="/error/error.png" alt="erro8" className="max-w-xs w-full h-auto" />
+                  </div>
+                )}
+                {/* ERRO 9: Piscar error1.png */}
+                {erroAtivo === "erro9" && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none animate-erro9">
+                    <img src="/error/error1.png" alt="erro9" className="max-w-xs w-full h-auto" />
+                  </div>
+                )}
+                {/* ERRO 10: Piscar listra.png */}
+                {erroAtivo === "erro10" && (
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none animate-erro10">
+                    <img src="/error/listra.png" alt="erro10" className="max-w-xs w-full h-auto" />
+                  </div>
+                )}
+                <div className="mt-6 flex flex-col items-center">
                   <button
-                    key={opcao}
                     type="button"
-                    onClick={() => handleClickOpcao(opcao)}
-                    className={`rounded-lg border border-zinc-200 px-3 py-2 text-left text-sm text-black hover:bg-zinc-50 ${
-                      respostaSelecionada === opcao ? "bg-blue-100 border-blue-400" : ""
-                    }`}
-                    disabled={!!respostaSelecionada}
+                    className="rounded-lg border-2 border-rose-400 bg-rose-100 px-6 py-3 text-lg font-bold text-rose-700 shadow hover:bg-rose-200 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                    onClick={() => marcarAnomalia("mouse")}
                   >
-                    {opcao}
+                    Detectar erro/anomalia (Espaço ou clique)
                   </button>
-                ))}
-              </div>
-              {/* ERRO 7: Trovões piscando */}
-              {erroAtivo === "erro7" && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <span className="animate-erro7 text-yellow-400 text-6xl">⚡⚡⚡⚡⚡</span>
                 </div>
-              )}
-              {/* ERRO 8: Piscar error.png */}
-              {erroAtivo === "erro8" && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none animate-erro8">
-                  <img src="/error/error.png" alt="erro8" className="max-w-xs w-full h-auto" />
-                </div>
-              )}
-              {/* ERRO 9: Piscar error1.png */}
-              {erroAtivo === "erro9" && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none animate-erro9">
-                  <img src="/error/error1.png" alt="erro9" className="max-w-xs w-full h-auto" />
-                </div>
-              )}
-              {/* ERRO 10: Piscar listra.png */}
-              {erroAtivo === "erro10" && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none animate-erro10">
-                  <img src="/error/listra.png" alt="erro10" className="max-w-xs w-full h-auto" />
-                </div>
-              )}
-              <div className="mt-6 flex flex-col items-center">
-                <button
-                  type="button"
-                  className="rounded-lg border-2 border-rose-400 bg-rose-100 px-6 py-3 text-lg font-bold text-rose-700 shadow hover:bg-rose-200 focus:outline-none focus:ring-2 focus:ring-rose-500"
-                  onClick={() => marcarAnomalia("mouse")}
-                >
-                  Detectar erro/anomalia (Espaço ou clique)
-                </button>
-              </div>
-            </>
-          )}
+              </>
+            )}
+          </div>
         </div>
       )}
       {phase === "round-feedback" && (
