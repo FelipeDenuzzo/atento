@@ -489,7 +489,7 @@ export function exportCSV(result: SymbolMapSoundSessionResult): string {
     round.metrics.visual.omissions,
     round.metrics.visual.meanResponseMs.toFixed(2),
     round.metrics.visual.score.toFixed(2),
-    round.metrics.audio.glitchesTotal,
+    round.metrics.audio.sonsEstranhosTotal,
     round.metrics.audio.detected,
     round.metrics.audio.missed,
     round.metrics.audio.falseAlarms,
