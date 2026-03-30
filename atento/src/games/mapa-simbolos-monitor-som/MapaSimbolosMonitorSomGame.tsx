@@ -111,7 +111,8 @@ export function MapaSimbolosMonitorSomGame({
   const [phase, setPhase] = useState<Phase>("intro");
   const [roundIndex, setRoundIndex] = useState(0);
   const [remainingMs, setRemainingMs] = useState(ROUND_CONFIGS[0]?.durationMs ?? 0);
-  const [targetSymbol, setTargetSymbol] = useState<string>("");
+  // Armazena o índice do símbolo alvo para evitar piscar
+  const [targetSymbolIdx, setTargetSymbolIdx] = useState<number | null>(null);
   const [options, setOptions] = useState<VisualOption[]>([]);
   const [feedbackVisual, setFeedbackVisual] = useState<string>("");
   const [feedbackAudio, setFeedbackAudio] = useState<string>("");
@@ -179,9 +180,10 @@ export function MapaSimbolosMonitorSomGame({
     const currentVisual = runtime.currentVisualRound;
     // O targetGlyph agora é um índice para o símbolo
     if (currentVisual) {
-      setTargetSymbol(`/simbolos/${18 + currentVisual.options.findIndex(opt => opt.isTarget)}.png`);
+      const idx = currentVisual.options.findIndex(opt => opt.isTarget);
+      setTargetSymbolIdx(idx >= 0 ? idx : null);
     } else {
-      setTargetSymbol("");
+      setTargetSymbolIdx(null);
     }
     setOptions(currentVisual?.options ?? []);
 
@@ -231,7 +233,7 @@ export function MapaSimbolosMonitorSomGame({
     runtimeRef.current = runtime;
 
     setRemainingMs(currentConfig.durationMs);
-    setTargetSymbol("");
+    setTargetSymbolIdx(null);
     setOptions([]);
     setFeedbackVisual("");
     setFeedbackAudio("");
@@ -380,8 +382,8 @@ export function MapaSimbolosMonitorSomGame({
               className="mt-2 mx-auto flex items-center justify-center rounded-lg border border-zinc-200 bg-white"
               style={{ width: 80, height: 80 }}
             >
-              {targetSymbol && (
-                <img src={targetSymbol} alt="Símbolo alvo" style={{ width: 60, height: 60 }} />
+              {targetSymbolIdx !== null && (
+                <img src={`/simbolos/${18 + targetSymbolIdx}.png`} alt="Símbolo alvo" style={{ width: 60, height: 60 }} />
               )}
             </div>
           </div>
