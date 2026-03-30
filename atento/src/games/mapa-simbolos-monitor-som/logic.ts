@@ -345,10 +345,7 @@ export function closeRound(params: {
     runtime.currentVisualRound = null;
   }
 
-  if (runtime.activeGlitch && runtime.activeGlitch.detectedAtMs == null) {
-    runtime.activeGlitch.missed = true;
-    runtime.activeGlitch = null;
-  }
+  // Removido: bloco de activeGlitch (não existe mais, agora é sonsEstranhos)
 
   const metrics = computeRoundMetrics(
     runtime.config,
