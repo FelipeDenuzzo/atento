@@ -1,0 +1,17 @@
+[
+  {
+    "pergunta": "Em que ano o Brasil foi oficialmente descoberto pelos portugueses?",
+    "respostas_certas": [
+      "1500",
+      "No ano 1500, com a chegada de Cabral"
+    ],
+    "respostas_erradas": [
+      "1492",
+      "1488",
+      "1521",
+      "1498",
+      "1505",
+      "1510"
+    ]
+  }
+]

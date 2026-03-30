@@ -1,0 +1,17 @@
+[
+  {
+    "pergunta": "Romeu e Julieta é uma história sobre o quê?",
+    "respostas_certas": [
+      "Dois jovens de famílias rivais que se apaixonam",
+      "Um amor impossível entre inimigos"
+    ],
+    "respostas_erradas": [
+      "Um cavaleiro que busca vingança pela morte do pai",
+      "Dois amigos que viajam juntos pela Itália",
+      "Uma jovem que foge de um casamento arranjado com um rei",
+      "Um rei que perde o trono por traição",
+      "Dois irmãos separados que se reencontram em Verona",
+      "Uma mulher que se disfarça de homem para lutar numa batalha"
+    ]
+  }
+]

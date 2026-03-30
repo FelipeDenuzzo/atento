@@ -1,0 +1,17 @@
+[
+  {
+    "pergunta": "Qual é o primeiro passo para preparar um arroz soltinho?",
+    "respostas_certas": [
+      "Refogar o arroz no alho e óleo antes de adicionar água",
+      "Fritar levemente o arroz seco no azeite com alho"
+    ],
+    "respostas_erradas": [
+      "Deixar o arroz de molho por duas horas antes de cozinhar",
+      "Adicionar o arroz direto na água fervendo sem refogar",
+      "Misturar o arroz com farinha antes de levar ao fogo",
+      "Cozinhar o arroz no leite para ficar mais macio",
+      "Temperar o arroz somente depois que a água secar",
+      "Lavar o arroz com água quente para remover o amido"
+    ]
+  }
+]

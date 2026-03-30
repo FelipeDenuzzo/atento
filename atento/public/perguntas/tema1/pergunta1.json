@@ -1,0 +1,17 @@
+[
+  {
+    "pergunta": "William Shakespeare é conhecido principalmente por qual tipo de obra?",
+    "respostas_certas": [
+      "Peças teatrais",
+      "Dramas e comédias encenados"
+    ],
+    "respostas_erradas": [
+      "Romances policiais",
+      "Poemas épicos sobre guerras",
+      "Contos infantis ilustrados",
+      "Crônicas de viagem",
+      "Tratados filosóficos",
+      "Diários pessoais publicados"
+    ]
+  }
+]

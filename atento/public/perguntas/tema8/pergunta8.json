@@ -1,0 +1,17 @@
+[
+  {
+    "pergunta": "Qual é a ordem mais eficiente para limpar um cômodo?",
+    "respostas_certas": [
+      "Começar pelo pó nas superfícies altas e terminar varrendo o chão",
+      "Limpar de cima para baixo para o pó não sujar o que já foi limpo"
+    ],
+    "respostas_erradas": [
+      "Passar o pano no chão primeiro para não sujar depois de varrer",
+      "Começar pelas janelas para aproveitar a luz natural durante a limpeza",
+      "Lavar as paredes antes de limpar os móveis para economizar água",
+      "Aspirar o sofá por último para não espalhar poeira nos objetos limpos",
+      "Limpar o banheiro antes da sala para usar os mesmos produtos",
+      "Começar pelos cantos do teto somente quando a sujeira for visível"
+    ]
+  }
+]

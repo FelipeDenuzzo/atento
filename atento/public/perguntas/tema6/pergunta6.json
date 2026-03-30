@@ -1,0 +1,17 @@
+[
+  {
+    "pergunta": "O que é fundamental para andar de bicicleta com segurança?",
+    "respostas_certas": [
+      "Usar capacete e respeitar as regras de trânsito",
+      "Manter o guidão firme e sinalizar as mudanças de direção"
+    ],
+    "respostas_erradas": [
+      "Pedalar sempre no centro da pista para ser mais visto",
+      "Segurar o guidão com uma mão para sinalizar com mais frequência",
+      "Andar próximo aos carros para aproveitar o vento a favor",
+      "Frear com força em curvas para reduzir a velocidade rapidamente",
+      "Deixar os pneus um pouco murchos para mais aderência no asfalto",
+      "Usar fones de ouvido nos dois ouvidos para manter o foco"
+    ]
+  }
+]

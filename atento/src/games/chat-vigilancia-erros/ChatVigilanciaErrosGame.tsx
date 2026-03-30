@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReportContext } from "@/components/AttentionTrainingGame";
 import { buildTxtReportFileName } from "@/utils/reportFileName";
 import {
@@ -143,169 +143,80 @@ export function ChatVigilanciaErrosGame({
   const [roundLogs, setRoundLogs] = useState<ChatErrorRoundLog[]>([]);
   const [sessionResult, setSessionResult] = useState<ChatErrorSessionResult | null>(null);
 
-  const [chatPrompt, setChatPrompt] = useState<string>("Aguardando próxima mensagem...");
-  const [chatOptions, setChatOptions] = useState<Array<{ id: string; text: string }>>([]);
-  const [activeAnomalyType, setActiveAnomalyType] = useState<AnomalyType | null>(null);
-  const [topBarAlert, setTopBarAlert] = useState(false);
+  // Estados para perguntas externas
+  const [perguntaAtual, setPerguntaAtual] = useState<null | {
+    pergunta: string;
+    respostas_certas: string[];
+    respostas_erradas: string[];
+  }>(null);
+  const [opcoes, setOpcoes] = useState<string[]>([]);
+  const [respostaSelecionada, setRespostaSelecionada] = useState<string | null>(null);
+  const [carregandoPergunta, setCarregandoPergunta] = useState(false);
 
-  const totals = useMemo(() => {
-    if (!sessionResult) {
-      return {
-        chatAnswered: 0,
-        chatCorrect: 0,
-      };
-    }
+  // Temas disponíveis
+  const temas = [
+    { tema: "tema1", arquivo: "pergunta1.json" },
+    { tema: "tema2", arquivo: "pergunta2.json" },
+    { tema: "tema3", arquivo: "pergunta3.json" },
+    { tema: "tema4", arquivo: "pergunta4.json" },
+    { tema: "tema5", arquivo: "pergunta5.json" },
+    { tema: "tema6", arquivo: "pergunta6.json" },
+    { tema: "tema7", arquivo: "pergunta7.json" },
+    { tema: "tema8", arquivo: "pergunta8.json" },
+  ];
 
-    return sessionResult.rounds.reduce(
-      (acc, round) => {
-        acc.chatAnswered += round.metrics.chatAnswered;
-        acc.chatCorrect += round.metrics.chatCorrect;
-        return acc;
-      },
-      { chatAnswered: 0, chatCorrect: 0 },
-    );
-  }, [sessionResult]);
-
-  const frameRef = useRef<number | null>(null);
-  const roundStartRef = useRef<number>(0);
-  const runtimeRef = useRef<ChatErrorRoundRuntime | null>(null);
-  const sessionStartedAtRef = useRef<number | null>(null);
-
-  const currentConfig = useMemo(() => ROUND_CONFIGS[roundIndex] ?? ROUND_CONFIGS[0], [roundIndex]);
-
-  useEffect(() => {
-    return () => {
-      if (frameRef.current) cancelAnimationFrame(frameRef.current);
-      frameRef.current = null;
-    };
-  }, []);
-
-  function stopLoop() {
-    if (frameRef.current) {
-      cancelAnimationFrame(frameRef.current);
-      frameRef.current = null;
-    }
+  function shuffle<T>(arr: T[]): T[] {
+    return arr
+      .map((item) => ({ item, sort: Math.random() }))
+      .sort((a, b) => a.sort - b.sort)
+      .map(({ item }) => item);
   }
 
-  function syncUiFromRuntime(runtime: ChatErrorRoundRuntime) {
-    setChatPrompt(runtime.currentMessage?.prompt ?? "Aguardando próxima mensagem...");
-    setChatOptions(
-      runtime.currentMessage?.options.map((item) => ({ id: item.id, text: item.text })) ?? [],
-    );
-
-    const anomalyType = runtime.activeAnomaly?.type ?? null;
-    setActiveAnomalyType(anomalyType);
-    setTopBarAlert(anomalyType === "bar-color");
+  function getRandomInt(max: number) {
+    return Math.floor(Math.random() * max);
   }
 
-  function runFrame(now: number) {
-    const runtime = runtimeRef.current;
-    if (!runtime) return;
-
-    const elapsedMs = Math.max(0, now - roundStartRef.current);
-    updateRuntime(runtime, elapsedMs);
-    syncUiFromRuntime(runtime);
-
-    setRemainingMs(Math.max(0, runtime.config.durationMs - elapsedMs));
-
-    if (elapsedMs >= runtime.config.durationMs) {
-      finalizeRound();
-      return;
+  // Carrega uma pergunta aleatória de um tema aleatório
+  async function carregarPerguntaAleatoria() {
+    setCarregandoPergunta(true);
+    setRespostaSelecionada(null);
+    try {
+      const tema = temas[getRandomInt(temas.length)];
+      const url = `/perguntas/${tema.tema}/${tema.arquivo}`;
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error("Erro ao buscar pergunta");
+      const data = await resp.json();
+      if (!Array.isArray(data) || !data[0]) throw new Error("Pergunta inválida");
+      const pergunta = data[0];
+      if (!pergunta.respostas_certas?.length || !pergunta.respostas_erradas?.length) throw new Error("Pergunta sem respostas válidas");
+      const certa = shuffle(pergunta.respostas_certas)[0];
+      const erradas = shuffle(pergunta.respostas_erradas).slice(0, 2);
+      const opcoesEmbaralhadas = shuffle([certa, ...erradas]);
+      setPerguntaAtual(pergunta);
+      setOpcoes(opcoesEmbaralhadas as string[]);
+    } catch (e) {
+      setPerguntaAtual(null);
+      setOpcoes([]);
     }
-
-    frameRef.current = requestAnimationFrame(runFrame);
-  }
-
-  function startCurrentRound() {
-    if (!currentConfig) return;
-
-    if (!sessionStartedAtRef.current) {
-      sessionStartedAtRef.current = Date.now();
-      setRoundLogs([]);
-      setSessionResult(null);
-    }
-
-    const runtime = startRound(currentConfig);
-    runtimeRef.current = runtime;
-
-    setRemainingMs(currentConfig.durationMs);
-    syncUiFromRuntime(runtime);
-
-    roundStartRef.current = performance.now();
-    setPhase("running");
-    stopLoop();
-    frameRef.current = requestAnimationFrame(runFrame);
-  }
-
-  function finalizeRound() {
-    stopLoop();
-
-    const runtime = runtimeRef.current;
-    if (!runtime) return;
-
-    const endedAtMs = Date.now();
-
-    const roundLog = buildRoundLog({
-      runtime,
-      roundNumber: roundIndex + 1,
-      startedAtIso: new Date(endedAtMs - runtime.config.durationMs).toISOString(),
-      endedAtIso: new Date(endedAtMs).toISOString(),
-    });
-
-    setRoundLogs((previous) => [...previous, roundLog]);
-
-    if (roundIndex + 1 < ROUND_CONFIGS.length) {
-      setPhase("round-feedback");
-      return;
-    }
-
-    if (!sessionStartedAtRef.current) return;
-
-    const finalRounds = [...roundLogs, roundLog];
-    const result = computeMetrics({
-      startedAtMs: sessionStartedAtRef.current,
-      endedAtMs,
-      rounds: finalRounds,
-    });
-
-    setSessionResult(result);
-    setPhase("result");
-  }
-
-  function chooseOption(optionId: string) {
-    const runtime = runtimeRef.current;
-    if (!runtime || phase !== "running") return;
-
-    const elapsedMs = Math.max(0, performance.now() - roundStartRef.current);
-    const response = handleChatResponse({
-      runtime,
-      optionId,
-      atMs: elapsedMs,
-    });
-
-    if (!response.accepted) return;
-    syncUiFromRuntime(runtime);
+    setCarregandoPergunta(false);
   }
 
   useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
-      if (phase !== "running") return;
-      if (event.code !== "Space") return;
-      if (event.repeat) return;
-
-      event.preventDefault();
-
-      const runtime = runtimeRef.current;
-      if (!runtime) return;
-
-      const elapsedMs = Math.max(0, performance.now() - roundStartRef.current);
-      handleAnomalyKeyPress({ runtime, atMs: elapsedMs });
-      syncUiFromRuntime(runtime);
+    if (phase === "running") {
+      carregarPerguntaAleatoria();
     }
-
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
+
+  function handleClickOpcao(opcao: string) {
+    if (respostaSelecionada || carregandoPergunta) return;
+    setRespostaSelecionada(opcao);
+    setTimeout(() => {
+      carregarPerguntaAleatoria();
+    }, 1000);
+  }
+
+
 
   function nextRound() {
     setRoundIndex((value) => value + 1);
@@ -341,7 +252,7 @@ export function ChatVigilanciaErrosGame({
 
   return (
     <div className="space-y-5">
-      {phase === "intro" && currentConfig && (
+      {phase === "intro" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5 text-left text-black">
           <p>Você terá <strong>duas tarefas ao mesmo tempo</strong>:</p>
           <p>
@@ -352,7 +263,7 @@ export function ChatVigilanciaErrosGame({
           <p>Sua pontuação depende do desempenho nas <strong>duas tarefas juntas</strong>. Focar demais em uma e ignorar a outra reduz sua pontuação. A cada fase, as mensagens ficam mais complexas e as anomalias mais sutis.</p>
           <button
             type="button"
-            onClick={startCurrentRound}
+            onClick={() => setPhase("running")}
             className="w-full rounded-lg bg-zinc-900 px-4 py-3 font-semibold text-white hover:bg-zinc-700"
           >
             Iniciar fase
@@ -361,75 +272,30 @@ export function ChatVigilanciaErrosGame({
       )}
       )
 
-      {phase === "running" && currentConfig && (
+      {phase === "running" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Fase</p>
-              <p className="font-semibold text-zinc-900">{roundIndex + 1}/{ROUND_CONFIGS.length}</p>
-            </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3">
-              <p className="text-xs text-zinc-500">Tempo restante</p>
-              <p className="font-semibold text-zinc-900">{formatClock(remainingMs)}</p>
-            </div>
-          </div>
-
-          <div
-            className={`relative overflow-hidden rounded-lg border border-black/10 p-4 ${
-              activeAnomalyType ? "bg-rose-50" : "bg-zinc-100"
-            }`}
-          >
-            <div className={`mb-3 h-2 rounded-full ${topBarAlert ? "bg-rose-500" : "bg-zinc-300"}`} />
-
-            <div className="mb-3 rounded-lg border border-black/10 bg-white/80 px-3 py-2 text-xs font-semibold text-zinc-700">
-              {activeAnomalyType
-                ? `ANOMALIA ATIVA: ${
-                    activeAnomalyType === "prohibited-icon"
-                      ? "Ícone proibido"
-                      : activeAnomalyType === "bar-color"
-                        ? "Mudança de cor da barra"
-                        : "Símbolo de alerta"
-                  } — pressione ESPAÇO`
-                : "Sem anomalia ativa"}
-            </div>
-
-            <div className="relative mx-auto max-w-xl rounded-lg border border-zinc-200 bg-white p-4 shadow-sm">
-              <p className="text-xs font-medium uppercase tracking-wide text-zinc-500">Mensagem ativa</p>
-              <p className="mt-2 text-sm font-medium text-zinc-900">{chatPrompt}</p>
-
-              <div className="mt-4 grid gap-2">
-                {chatOptions.map((option) => (
+          <h2 className="text-lg font-semibold">Pergunta</h2>
+          {carregandoPergunta && <p>Carregando pergunta...</p>}
+          {!carregandoPergunta && perguntaAtual && (
+            <>
+              <p className="mb-2 text-base font-medium">{perguntaAtual.pergunta}</p>
+              <div className="grid gap-2">
+                {opcoes.map((opcao) => (
                   <button
-                    key={option.id}
+                    key={opcao}
                     type="button"
-                    onClick={() => chooseOption(option.id)}
-                    className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-left text-sm text-zinc-800 hover:bg-zinc-50"
+                    onClick={() => handleClickOpcao(opcao)}
+                    className={`rounded-lg border border-zinc-200 px-3 py-2 text-left text-sm text-zinc-800 hover:bg-zinc-50 ${
+                      respostaSelecionada === opcao ? "bg-blue-100 border-blue-400" : ""
+                    }`}
+                    disabled={!!respostaSelecionada}
                   >
-                    {option.text}
+                    {opcao}
                   </button>
                 ))}
-                {chatOptions.length === 0 && (
-                  <p className="rounded-lg border border-dashed border-zinc-200 px-3 py-3 text-sm text-zinc-500">
-                    Aguardando próxima mensagem...
-                  </p>
-                )}
               </div>
-            </div>
-
-            {activeAnomalyType === "prohibited-icon" && (
-              <div className="absolute right-4 top-16 rounded-md border-2 border-rose-500 bg-rose-100 px-3 py-2 text-base font-bold text-rose-700 shadow-sm">
-                ⛔ PROIBIDO
-              </div>
-            )}
-
-            {activeAnomalyType === "alert-flash" && (
-              <div className="absolute bottom-4 left-4 animate-pulse rounded-md border-2 border-amber-400 bg-amber-100 px-3 py-2 text-sm font-bold text-amber-700 shadow-sm">
-                ⚠ ALERTA VISUAL
-              </div>
-            )}
-
-            <p className="mt-4 text-xs text-zinc-600">Pressione ESPAÇO quando detectar anomalia visual no fundo.</p>
-          </div>
+            </>
+          )}
         </div>
       )}
 
@@ -468,12 +334,7 @@ export function ChatVigilanciaErrosGame({
               <p className="text-xs text-zinc-500">Vigilância (detecção)</p>
               <p className="font-semibold text-zinc-900">{sessionResult.averageAnomalyDetectionPercent.toFixed(1)}%</p>
             </div>
-            <div className="rounded-lg border border-black/10 bg-zinc-50 p-3 sm:col-span-3">
-              <p className="text-xs text-zinc-500">Chat (quantidade)</p>
-              <p className="font-semibold text-zinc-900">
-                Respondidas: {totals.chatAnswered} | respondidas certas: {totals.chatCorrect}
-              </p>
-            </div>
+            {/* Chat (quantidade) removido pois não há mais tracking de respostas */}
             <div className="rounded-lg border border-black/10 bg-zinc-50 p-3 sm:col-span-3">
               <p className="text-xs text-zinc-500">Tendência</p>
               <p className="font-semibold text-zinc-900">{sessionResult.trendSummary}</p>

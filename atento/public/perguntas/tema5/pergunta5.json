@@ -1,0 +1,17 @@
+[
+  {
+    "pergunta": "Qual é a forma correta de escovar os dentes?",
+    "respostas_certas": [
+      "Fazer movimentos circulares suaves na gengiva e nos dentes",
+      "Escovar em movimentos de cima para baixo, incluindo a gengiva"
+    ],
+    "respostas_erradas": [
+      "Escovar com força para remover melhor a sujeira",
+      "Usar a escova seca para não diluir o flúor da pasta",
+      "Escovar apenas as superfícies visíveis ao sorrir",
+      "Molhar bem a escova antes de aplicar a pasta dental",
+      "Fazer movimentos horizontais rápidos para mais eficiência",
+      "Enxaguar a boca com água antes de aplicar a pasta"
+    ]
+  }
+]
