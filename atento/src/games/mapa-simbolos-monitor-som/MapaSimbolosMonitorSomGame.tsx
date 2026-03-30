@@ -119,6 +119,7 @@ export function MapaSimbolosMonitorSomGame({
   const [somEstranhoAtivo, setSomEstranhoAtivo] = useState(false);
   const [roundLogs, setRoundLogs] = useState<SymbolMapSoundRoundLog[]>([]);
   const [sessionResult, setSessionResult] = useState<SymbolMapSoundSessionResult | null>(null);
+  const [memoryAnswer, setMemoryAnswer] = useState<string>("");
 
   const frameRef = useRef<number | null>(null);
   const runtimeRef = useRef<SymbolMapSoundRoundRuntime | null>(null);
@@ -424,6 +425,31 @@ export function MapaSimbolosMonitorSomGame({
 
       {phase === "result" && sessionResult && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
+                    {/* Pergunta de memória ao final */}
+                    <div className="my-4">
+                      <label htmlFor="memory-answer" className="block text-sm font-medium text-zinc-700 mb-2">
+                        Pergunta de memória: Qual símbolo você lembra?
+                      </label>
+                      <input
+                        id="memory-answer"
+                        type="text"
+                        value={memoryAnswer}
+                        onChange={e => setMemoryAnswer(e.target.value)}
+                        placeholder="Digite aqui..."
+                        className="rounded-lg border border-zinc-300 px-3 py-2 text-sm w-48"
+                      />
+                      {memoryAnswer && memoryAnswer !== "-" ? (
+                        <button
+                          type="button"
+                          className="ml-3 rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700"
+                          onClick={() => navigator.clipboard.writeText(memoryAnswer)}
+                        >
+                          Copiar resposta
+                        </button>
+                      ) : (
+                        <span className="ml-3 text-zinc-500 text-sm">Nenhuma resposta</span>
+                      )}
+                    </div>
           <h3 className="text-xl font-semibold text-zinc-900">Resultado final</h3>
 
           <div className="grid gap-3 sm:grid-cols-3">
