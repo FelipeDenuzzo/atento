@@ -421,7 +421,7 @@ export function ReversalGoNoGoSwitchGame({
               >
                 {currentShape ? (
                   <img
-                    src={`/simbolos/${currentShape}.svg`}
+                    src={`/simbolos/${currentShape}.png`}
                     alt={currentShape}
                     style={{ width: 120, height: 120 }}
                   />
