@@ -37,14 +37,14 @@ const ROUND_CONFIGS: RapidMemoryRoundConfig[] = [
   {
     id: 1,
     name: "Fase 1",
-    durationMs: 60000,
-    stimulusVisibleMs: 1800,
-    interStimulusMs: 320,
-    memoryCheckMinIntervalMs: 13000,
-    memoryCheckMaxIntervalMs: 17000,
-    classificationMode: "number",
-    memoryMode: "last-targets",
-    alternativesCount: 3,
+    durationMs: 90000,
+    stimulusVisibleMs: 1500,
+    interStimulusMs: 260,
+    memoryCheckMinIntervalMs: 11000,
+    memoryCheckMaxIntervalMs: 15000,
+    classificationMode: "number" as const,
+    memoryMode: "last-targets" as const,
+    alternativesCount: 4 as const,
     keyMap: { left: "f", right: "j" },
   },
   {
@@ -53,37 +53,37 @@ const ROUND_CONFIGS: RapidMemoryRoundConfig[] = [
     durationMs: 90000,
     stimulusVisibleMs: 1500,
     interStimulusMs: 260,
-    memoryCheckMinIntervalMs: 10500,
-    memoryCheckMaxIntervalMs: 14500,
-    classificationMode: "letter",
-    memoryMode: "last-targets",
-    alternativesCount: 4,
+    memoryCheckMinIntervalMs: 11000,
+    memoryCheckMaxIntervalMs: 15000,
+    classificationMode: "number" as const,
+    memoryMode: "last-targets" as const,
+    alternativesCount: 4 as const,
     keyMap: { left: "f", right: "j" },
   },
   {
     id: 3,
     name: "Fase 3",
-    durationMs: 120000,
-    stimulusVisibleMs: 1250,
-    interStimulusMs: 220,
-    memoryCheckMinIntervalMs: 8500,
-    memoryCheckMaxIntervalMs: 12000,
-    classificationMode: "number",
-    memoryMode: "mental-counter",
-    alternativesCount: 4,
+    durationMs: 90000,
+    stimulusVisibleMs: 1500,
+    interStimulusMs: 260,
+    memoryCheckMinIntervalMs: 11000,
+    memoryCheckMaxIntervalMs: 15000,
+    classificationMode: "number" as const,
+    memoryMode: "last-targets" as const,
+    alternativesCount: 4 as const,
     keyMap: { left: "f", right: "j" },
   },
   {
     id: 4,
     name: "Fase 4",
-    durationMs: 120000,
-    stimulusVisibleMs: 1050,
-    interStimulusMs: 180,
-    memoryCheckMinIntervalMs: 7000,
-    memoryCheckMaxIntervalMs: 10000,
-    classificationMode: "letter",
-    memoryMode: "mental-counter",
-    alternativesCount: 4,
+    durationMs: 90000,
+    stimulusVisibleMs: 1500,
+    interStimulusMs: 260,
+    memoryCheckMinIntervalMs: 11000,
+    memoryCheckMaxIntervalMs: 15000,
+    classificationMode: "number" as const,
+    memoryMode: "last-targets" as const,
+    alternativesCount: 4 as const,
     keyMap: { left: "f", right: "j" },
   },
 ];
@@ -463,15 +463,27 @@ export function ClassificacaoRapidaMemoriaAtualizavelGame({
               <p className="text-sm text-zinc-700">{activeMemoryCheck.prompt}</p>
               <div className="grid gap-2 sm:grid-cols-2">
                 {activeMemoryCheck.options.map((option, index) => (
-                  <div
+                  <button
                     key={`${activeMemoryCheck.id}-${option}-${index}`}
-                    className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800"
+                    className="rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 hover:bg-blue-50 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                    onClick={() => {
+                      if (phase !== "running") return;
+                      const runtime = runtimeRef.current;
+                      if (!runtime) return;
+                      const elapsedMs = Math.max(0, performance.now() - roundStartedAtRef.current);
+                      const answered = validateMemoryCheckAnswer({ runtime, optionIndex: index, atMs: elapsedMs });
+                      if (!answered.accepted) return;
+                      setFeedbackMemory(answered.correct ? "Checagem correta" : "Checagem incorreta");
+                      window.setTimeout(() => setFeedbackMemory(""), 480);
+                      syncUi();
+                    }}
+                    disabled={!!activeMemoryCheck.answeredAtMs}
                   >
                     <span className="font-semibold text-zinc-900">{index + 1}</span> — {option}
-                  </div>
+                  </button>
                 ))}
               </div>
-              <p className="text-xs text-zinc-600">Responda com as teclas numéricas de 1 a {activeMemoryCheck.options.length}.</p>
+              <p className="text-xs text-zinc-600">Clique em uma das opções para responder.</p>
             </div>
           )}
 

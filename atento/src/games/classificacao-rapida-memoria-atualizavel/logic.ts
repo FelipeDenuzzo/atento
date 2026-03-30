@@ -401,25 +401,49 @@ export function triggerMemoryCheck(
     return null;
   }
 
+  // Sorteio do tipo de checagem: 0 = último, 1 = penúltimo, 2 = contagem
+  const checkType = Math.floor(rng() * 3);
+  let prompt = "";
+  let options: string[] = [];
   let correctValue = "";
 
-  if (runtime.memoryState.mode === "last-targets") {
-    const history = runtime.memoryState.recentTargets;
-    correctValue = history.length >= 2 ? history[history.length - 2] ?? "-" : "-";
-  } else {
-    correctValue = String(runtime.memoryState.counterSinceLastCheck);
-  }
+  // Coletar todos os alvos apresentados desde a última checagem
+  const presentedTargets = runtime.memoryState.mode === "last-targets"
+    ? [...runtime.memoryState.recentTargets]
+    : [];
+  // Para contagem, coletar todos os estímulos apresentados desde a última checagem
+  const allStimuli = runtime.classificationEvents
+    .filter(e => e.outcome === "hit" || e.outcome === "error")
+    .map(e => e.value);
 
-  const options = runtime.memoryState.mode === "last-targets"
-    ? buildLastTargetsOptions(runtime, correctValue, rng)
-    : buildCounterOptions(runtime, Number(correctValue), rng);
+  if (checkType === 0) {
+    // Último alvo apresentado
+    const last = presentedTargets[presentedTargets.length - 1] ?? "-";
+    correctValue = last;
+    prompt = "Qual foi o último alvo apresentado?";
+    options = buildLastTargetsOptions(runtime, correctValue, rng);
+  } else if (checkType === 1) {
+    // Penúltimo alvo apresentado
+    const penultimo = presentedTargets[presentedTargets.length - 2] ?? "-";
+    correctValue = penultimo;
+    prompt = "Qual foi o penúltimo alvo apresentado?";
+    options = buildLastTargetsOptions(runtime, correctValue, rng);
+  } else {
+    // Contagem de um item específico apresentado
+    // Escolher um dos itens apresentados aleatoriamente
+    const unique = Array.from(new Set(allStimuli));
+    const item = unique.length > 0 ? unique[Math.floor(rng() * unique.length)] : "-";
+    correctValue = String(allStimuli.filter(v => v === item).length);
+    prompt = `Quantas vezes o item '${item}' apareceu desde a última checagem?`;
+    options = buildCounterOptions(runtime, Number(correctValue), rng);
+  }
 
   const correctOptionIndex = options.findIndex((item) => item === correctValue);
   const check: MemoryCheck = {
     id: runtime.memoryCheckSeq,
     mode: runtime.config.memoryMode,
     askedAtMs: atMs,
-    prompt: buildPromptForCheck(runtime, correctValue),
+    prompt,
     options,
     correctOptionIndex: correctOptionIndex >= 0 ? correctOptionIndex : 0,
   };

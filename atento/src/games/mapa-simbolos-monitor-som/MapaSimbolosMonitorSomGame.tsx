@@ -30,7 +30,7 @@ type Props = {
   onComplete: (result: { success: boolean; pointsEarned: number }) => void;
 };
 
-type Phase = "intro" | "running" | "result";
+type Phase = "intro" | "countdown" | "running" | "result";
 
 const ROUND_CONFIGS: SymbolMapSoundRoundConfig[] = [
   {
@@ -109,6 +109,7 @@ export function MapaSimbolosMonitorSomGame({
   onComplete,
 }: Props) {
   const [phase, setPhase] = useState<Phase>("intro");
+  const [countdown, setCountdown] = useState<number | null>(null);
   const [roundIndex, setRoundIndex] = useState(0);
   const [remainingMs, setRemainingMs] = useState(ROUND_CONFIGS[0]?.durationMs ?? 0);
   // Armazena o índice do símbolo alvo para evitar piscar
@@ -224,26 +225,35 @@ export function MapaSimbolosMonitorSomGame({
   }
 
   function startRound() {
-    ensureAudio();
-
-    if (sessionStartedAtRef.current == null) {
-      sessionStartedAtRef.current = performance.now();
-    }
-
-    const runtime = startSession(currentConfig);
-    runtimeRef.current = runtime;
-
-    setRemainingMs(currentConfig.durationMs);
-    setTargetSymbolIdx(null);
-    setOptions([]);
-    setFeedbackVisual("");
-    setFeedbackAudio("");
-    setSomEstranhoAtivo(false);
-
-    const startedAt = performance.now();
-    roundStartedAtRef.current = startedAt;
-    setPhase("running");
-    frameRef.current = requestAnimationFrame(runFrame);
+    setCountdown(3);
+    setPhase("countdown");
+    let current = 3;
+    const interval = setInterval(() => {
+      current -= 1;
+      if (current > 0) {
+        setCountdown(current);
+      } else {
+        clearInterval(interval);
+        setCountdown(null);
+        // Iniciar normalmente
+        ensureAudio();
+        if (sessionStartedAtRef.current == null) {
+          sessionStartedAtRef.current = performance.now();
+        }
+        const runtime = startSession(currentConfig);
+        runtimeRef.current = runtime;
+        setRemainingMs(currentConfig.durationMs);
+        setTargetSymbolIdx(null);
+        setOptions([]);
+        setFeedbackVisual("");
+        setFeedbackAudio("");
+        setSomEstranhoAtivo(false);
+        const startedAt = performance.now();
+        roundStartedAtRef.current = startedAt;
+        setPhase("running");
+        frameRef.current = requestAnimationFrame(runFrame);
+      }
+    }, 1000);
   }
 
   function finalizeRound(now: number) {
@@ -349,6 +359,13 @@ export function MapaSimbolosMonitorSomGame({
 
   return (
     <div className="space-y-5">
+
+      {phase === "countdown" && countdown !== null && (
+        <div className="flex flex-col items-center justify-center py-16">
+          <span className="text-6xl font-bold text-zinc-800 mb-2">{countdown}</span>
+          <span className="text-lg text-zinc-600">Prepare-se! A fase vai começar</span>
+        </div>
+      )}
       {phase === "intro" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5 text-left text-black">
           <p>Você terá <strong>duas tarefas ao mesmo tempo</strong>:</p>
@@ -358,6 +375,7 @@ export function MapaSimbolosMonitorSomGame({
             🔊 <strong>Tarefa auditiva</strong> → ouça o som contínuo e clique em um botão específico sempre que ouvir um <strong>ruído diferente</strong> — um estalo ou interrupção inesperada
           </p>
           <p>Sua pontuação combina os <strong>acertos na grade</strong> com as <strong>detecções corretas do som</strong>. Concentrar-se em apenas uma das tarefas reduz sua pontuação. A cada fase, a grade fica maior e os sons mais sutis.</p>
+          {/* Texto removido: instrução sobre teclas */}
           <button
             type="button"
             onClick={startRound}
@@ -426,30 +444,34 @@ export function MapaSimbolosMonitorSomGame({
       {phase === "result" && sessionResult && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
                     {/* Pergunta de memória ao final */}
-                    <div className="my-4">
-                      <label htmlFor="memory-answer" className="block text-sm font-medium text-zinc-700 mb-2">
-                        Pergunta de memória: Qual símbolo você lembra?
-                      </label>
-                      <input
-                        id="memory-answer"
-                        type="text"
-                        value={memoryAnswer}
-                        onChange={e => setMemoryAnswer(e.target.value)}
-                        placeholder="Digite aqui..."
-                        className="rounded-lg border border-zinc-300 px-3 py-2 text-sm w-48"
-                      />
-                      {memoryAnswer && memoryAnswer !== "-" ? (
-                        <button
-                          type="button"
-                          className="ml-3 rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700"
-                          onClick={() => navigator.clipboard.writeText(memoryAnswer)}
-                        >
-                          Copiar resposta
-                        </button>
-                      ) : (
-                        <span className="ml-3 text-zinc-500 text-sm">Nenhuma resposta</span>
-                      )}
-                    </div>
+          <div className="my-4">
+            <label htmlFor="memory-answer" className="block text-sm font-medium text-zinc-700 mb-2">
+              Pergunta de memória: Qual símbolo você lembra?
+            </label>
+            <div className="flex items-center">
+              <input
+                id="memory-answer"
+                type="text"
+                value={memoryAnswer}
+                onChange={e => setMemoryAnswer(e.target.value)}
+                placeholder="Digite aqui..."
+                className="rounded-lg border border-zinc-300 px-3 py-2 text-sm w-48"
+              />
+              {memoryAnswer && memoryAnswer !== "-" ? (
+                <button
+                  type="button"
+                  className="ml-3 rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700 underline"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => navigator.clipboard.writeText(memoryAnswer)}
+                  title="Clique para copiar a resposta"
+                >
+                  Copiar resposta
+                </button>
+              ) : (
+                <span className="ml-3 text-zinc-500 text-sm">Nenhuma resposta</span>
+              )}
+            </div>
+          </div>
           <h3 className="text-xl font-semibold text-zinc-900">Resultado final</h3>
 
           <div className="grid gap-3 sm:grid-cols-3">
