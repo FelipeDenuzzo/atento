@@ -323,14 +323,7 @@ export function updateRuntime(
   // Agendamento do som estranho
   scheduleSonsEstranhos(runtime, atMs, rng);
 
-  scheduleGlitches(runtime, atMs, rng);
-
-  if (runtime.activeGlitch && atMs >= runtime.activeGlitch.expiresAtMs) {
-    if (runtime.activeGlitch.detectedAtMs == null) {
-      runtime.activeGlitch.missed = true;
-    }
-    runtime.activeGlitch = null;
-  }
+  // Removido: scheduleGlitches e lógica de activeGlitch (tudo agora é sonsEstranhos)
 }
 
 export function closeRound(params: {
