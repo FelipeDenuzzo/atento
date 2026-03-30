@@ -111,7 +111,7 @@ export function MapaSimbolosMonitorSomGame({
   const [phase, setPhase] = useState<Phase>("intro");
   const [roundIndex, setRoundIndex] = useState(0);
   const [remainingMs, setRemainingMs] = useState(ROUND_CONFIGS[0]?.durationMs ?? 0);
-  const [targetGlyph, setTargetGlyph] = useState<string>("-");
+  const [targetSymbol, setTargetSymbol] = useState<string>("");
   const [options, setOptions] = useState<VisualOption[]>([]);
   const [feedbackVisual, setFeedbackVisual] = useState<string>("");
   const [feedbackAudio, setFeedbackAudio] = useState<string>("");
@@ -177,7 +177,12 @@ export function MapaSimbolosMonitorSomGame({
 
   function syncUi(runtime: SymbolMapSoundRoundRuntime) {
     const currentVisual = runtime.currentVisualRound;
-    setTargetGlyph(currentVisual?.targetGlyph ?? "-");
+    // O targetGlyph agora é um índice para o símbolo
+    if (currentVisual) {
+      setTargetSymbol(`/simbolos/${18 + currentVisual.options.findIndex(opt => opt.isTarget)}.png`);
+    } else {
+      setTargetSymbol("");
+    }
     setOptions(currentVisual?.options ?? []);
 
     const activeSomEstranhoId = runtime.activeSomEstranho?.id ?? null;
@@ -226,7 +231,7 @@ export function MapaSimbolosMonitorSomGame({
     runtimeRef.current = runtime;
 
     setRemainingMs(currentConfig.durationMs);
-    setTargetGlyph("-");
+    setTargetSymbol("");
     setOptions([]);
     setFeedbackVisual("");
     setFeedbackAudio("");
@@ -375,13 +380,13 @@ export function MapaSimbolosMonitorSomGame({
               className="mt-2 mx-auto flex items-center justify-center rounded-lg border border-zinc-200 bg-white"
               style={{ width: 80, height: 80 }}
             >
-              <span style={{ fontSize: 44, fontWeight: 700, lineHeight: 1, display: 'block', width: '100%', textAlign: 'center' }}>
-                {targetGlyph}
-              </span>
+              {targetSymbol && (
+                <img src={targetSymbol} alt="Símbolo alvo" style={{ width: 60, height: 60 }} />
+              )}
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 items-center">
             <button
               type="button"
               onClick={triggerAudioResponse}
@@ -389,6 +394,18 @@ export function MapaSimbolosMonitorSomGame({
             >
               Detectei som estranho
             </button>
+            {/* Renderizar opções como imagens */}
+            {options.map((option, idx) => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => handleVisualClick(option.id)}
+                className="rounded-lg border border-zinc-300 bg-white p-2 flex items-center justify-center"
+                style={{ width: 60, height: 60 }}
+              >
+                <img src={`/simbolos/${18 + idx}.png`} alt={`Opção ${idx + 1}`} style={{ width: 40, height: 40 }} />
+              </button>
+            ))}
             {feedbackVisual && (
               <span className="rounded-md bg-zinc-100 px-3 py-2 text-xs font-semibold text-zinc-700">
                 {feedbackVisual}
