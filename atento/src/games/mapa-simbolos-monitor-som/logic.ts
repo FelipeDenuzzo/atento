@@ -281,19 +281,27 @@ export function handleSomEstranhoResponse(params: {
 }): { detected: boolean; falseAlarm: boolean; reactionMs: number } {
   const { runtime, atMs } = params;
 
-  if (!runtime.activeSomEstranho) {
+  const som = runtime.activeSomEstranho;
+  if (!som) {
     runtime.falseAlarms += 1;
     return { detected: false, falseAlarm: true, reactionMs: 0 };
   }
 
-  if (runtime.activeSomEstranho.detectedAtMs != null) {
+  // Só aceita validação dentro da janela de 2 segundos após o início
+  const janelaMs = 2000;
+  const reactionMs = Math.max(0, atMs - som.startedAtMs);
+  if (reactionMs > janelaMs) {
+    // Fora da janela, não aceita validação
+    return { detected: false, falseAlarm: false, reactionMs };
+  }
+
+  if (som.detectedAtMs != null) {
     runtime.falseAlarms += 1;
     return { detected: false, falseAlarm: true, reactionMs: 0 };
   }
 
-  const reactionMs = Math.max(0, atMs - runtime.activeSomEstranho.startedAtMs);
-  runtime.activeSomEstranho.detectedAtMs = atMs;
-  runtime.activeSomEstranho.reactionMs = reactionMs;
+  som.detectedAtMs = atMs;
+  som.reactionMs = reactionMs;
   runtime.activeSomEstranho = null;
 
   return { detected: true, falseAlarm: false, reactionMs };
