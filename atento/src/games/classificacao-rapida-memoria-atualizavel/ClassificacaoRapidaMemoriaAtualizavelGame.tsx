@@ -179,7 +179,7 @@ export function ClassificacaoRapidaMemoriaAtualizavelGame({
   reportContext,
   onComplete,
 }: Props) {
-  const [phase, setPhase] = useState<Phase>("intro");
+  const [phase, setPhase] = useState<Phase>("intro" as Phase);
   const [countdown, setCountdown] = useState(5);
   const [roundIndex, setRoundIndex] = useState(0);
   const [remainingMs, setRemainingMs] = useState(ROUND_CONFIGS[0]?.durationMs ?? 0);
@@ -399,22 +399,13 @@ export function ClassificacaoRapidaMemoriaAtualizavelGame({
       {phase === "intro" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5 text-left text-black">
           <p>O jogo exige <strong>duas tarefas ao mesmo tempo</strong>:</p>
-
-<p>
-⌨️ <strong>Classificação</strong> → um item aparece no centro da tela e você deve classificá-lo rapidamente com as teclas <strong>F</strong> ou <strong>J</strong>, seguindo a regra da fase atual
-
-🧠 <strong>Memória</strong> → ao mesmo tempo, mantenha uma informação na cabeça — ela será cobrada em uma checagem surpresa durante a fase
-</p>
-
-
-
-<p>Quando a checagem surgir, uma pergunta com alternativas vai aparecer no lugar do estímulo, e você responde com as <strong>teclas numéricas</strong>. Depois, o jogo retoma de onde parou.</p>
-
-
-
-<p>A regra de classificação e o tipo de memória exigidos estão sempre visíveis na tela. Sua pontuação combina o desempenho nas <strong>duas tarefas</strong> — é preciso manter as duas para ter um bom resultado.</p>
-
-
+          <p>
+            ⌨️ <strong>Classificação</strong> → um item aparece no centro da tela e você deve classificá-lo rapidamente com as teclas <strong>F</strong> ou <strong>J</strong>, seguindo a regra da fase atual
+            <br />
+            🧠 <strong>Memória</strong> → ao mesmo tempo, mantenha uma informação na cabeça — ela será cobrada em uma checagem surpresa durante a fase
+          </p>
+          <p>Quando a checagem surgir, uma pergunta com alternativas vai aparecer no lugar do estímulo, e você responde com as <strong>teclas numéricas</strong>. Depois, o jogo retoma de onde parou.</p>
+          <p>A regra de classificação e o tipo de memória exigidos estão sempre visíveis na tela. Sua pontuação combina o desempenho nas <strong>duas tarefas</strong> — é preciso manter as duas para ter um bom resultado.</p>
           <button
             type="button"
             onClick={startCountdown}
@@ -422,15 +413,15 @@ export function ClassificacaoRapidaMemoriaAtualizavelGame({
           >
             Iniciar fase
           </button>
+        </div>
+      )}
 
-              {phase === "countdown" && (
-                <div className="space-y-6 rounded-lg border border-black/10 bg-white p-5 text-center text-black">
-                  <div className="text-3xl font-bold text-zinc-900">{countdown}</div>
-                  <div className="text-base text-zinc-700 mt-2">
-                    <strong>Dica</strong> — Localize as teclas <b>J</b> e <b>L</b> no seu teclado e fique preparado para digitar
-                  </div>
-                </div>
-              )}
+      {phase === "countdown" && (
+        <div className="space-y-6 rounded-lg border border-black/10 bg-white p-5 text-center text-black">
+          <div className="text-3xl font-bold text-zinc-900">{countdown}</div>
+          <div className="text-base text-zinc-700 mt-2">
+            <strong>Dica</strong> — Localize as teclas <b>J</b> e <b>L</b> no seu teclado e fique preparado para digitar
+          </div>
         </div>
       )}
 
