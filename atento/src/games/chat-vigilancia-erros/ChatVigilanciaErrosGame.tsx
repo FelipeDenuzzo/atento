@@ -150,9 +150,17 @@ export function ChatVigilanciaErrosGame({ basePoints, reportContext, onComplete 
   const ERROS = ["erro1","erro2","erro3","erro4","erro5","erro6","erro7","erro8","erro9","erro10"];
   const [erroAtivo, setErroAtivo] = useState<string | null>(null);
   const [anomaliaLogs, setAnomaliaLogs] = useState<AnomaliaLog[]>([]);
+  // Estatísticas de anomalia
+  const [anomaliaStats, setAnomaliaStats] = useState<{ total: number; detectadas: number }>({ total: 0, detectadas: 0 });
+  // Tempos possíveis para a anomalia (em ms)
+  const temposAnomalia = [3000, 1500, 1000];
   const marcarAnomalia = useCallback((via: "mouse" | "teclado") => {
     setAnomaliaLogs((prev) => [...prev, { timestamp: Date.now(), via }]);
-  }, []);
+    // Só conta detecção se anomalia está ativa
+    if (erroAtivo) {
+      setAnomaliaStats((prev) => ({ ...prev, detectadas: prev.detectadas + 1 }));
+    }
+  }, [erroAtivo]);
   useEffect(() => {
     if (phase !== "running") return;
     function onKeyDown(e: KeyboardEvent) {
@@ -166,7 +174,9 @@ export function ChatVigilanciaErrosGame({ basePoints, reportContext, onComplete 
   }, [phase, marcarAnomalia]);
   useEffect(() => {
     if (!erroAtivo) return;
-    const timeout = setTimeout(() => setErroAtivo(null), 3000);
+    // Sorteia tempo de presença da anomalia
+    const tempo = temposAnomalia[Math.floor(Math.random() * temposAnomalia.length)];
+    const timeout = setTimeout(() => setErroAtivo(null), tempo);
     return () => clearTimeout(timeout);
   }, [erroAtivo]);
   function sortearErro() {
@@ -205,7 +215,14 @@ export function ChatVigilanciaErrosGame({ basePoints, reportContext, onComplete 
       const opcoesEmbaralhadas = shuffle([certa, ...erradas]);
       setPerguntaAtual(pergunta);
       setOpcoes(opcoesEmbaralhadas as string[]);
-      setErroAtivo(sortearErro());
+      // Decide randomicamente se haverá anomalia nesta pergunta (50% de chance)
+      const vaiTerAnomalia = Math.random() < 0.5;
+      if (vaiTerAnomalia) {
+        setErroAtivo(sortearErro());
+        setAnomaliaStats((prev) => ({ ...prev, total: prev.total + 1 }));
+      } else {
+        setErroAtivo(null);
+      }
     } catch (e) {
       setPerguntaAtual(null);
       setOpcoes([]);
@@ -280,7 +297,7 @@ export function ChatVigilanciaErrosGame({ basePoints, reportContext, onComplete 
           {carregandoPergunta && <p>Carregando pergunta...</p>}
           {!carregandoPergunta && perguntaAtual && (
             <>
-              <p className="mb-2 text-base font-medium">{perguntaAtual.pergunta}</p>
+              <p className="mb-2 text-base font-medium text-black">{perguntaAtual.pergunta}</p>
               <div className="grid gap-2">
                 {opcoes.map((opcao) => (
                   <button
