@@ -23,7 +23,6 @@ export function scheduleSonsEstranhos(
 import type {
   SomEstranhoEvent,
   AudioEngineController,
-  GlitchEvent,
   SymbolGlyph,
   SymbolMapSoundRoundConfig,
   SymbolMapSoundRoundLog,
@@ -273,28 +272,7 @@ export function startContinuousAudio(audioContext: AudioContext): AudioEngineCon
   return { triggerSomEstranho, stop };
 }
 
-export function scheduleGlitches(
-  runtime: SymbolMapSoundRoundRuntime,
-  atMs: number,
-  rng: () => number = Math.random,
-): GlitchEvent | null {
-  if (runtime.activeGlitch || atMs < runtime.nextGlitchAtMs) {
-    return null;
-  }
-
-  const glitch: GlitchEvent = {
-    id: runtime.glitches.length + 1,
-    startedAtMs: atMs,
-    expiresAtMs: atMs + runtime.config.glitchVisibleMs,
-  };
-
-  runtime.glitches.push(glitch);
-  runtime.activeGlitch = glitch;
-  runtime.nextGlitchAtMs =
-    atMs + randomBetween(runtime.config.glitchIntervalMinMs, runtime.config.glitchIntervalMaxMs, rng);
-
-  return glitch;
-}
+// Função deprecada: scheduleGlitches não é mais utilizada pois GlitchEvent foi removido.
 
 
 export function handleSomEstranhoResponse(params: {
