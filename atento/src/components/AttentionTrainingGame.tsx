@@ -1448,16 +1448,6 @@ export function AttentionTrainingGame() {
             ) : currentExercise.kind === "chat-error-vigilance" ? (
               <ChatVigilanciaErrosGame
                 basePoints={currentExercise.points}
-                startingLevel={
-                  "startingLevel" in currentExercise
-                    ? currentExercise.startingLevel
-                    : 1
-                }
-                maxLevelHint={
-                  "maxLevelHint" in currentExercise
-                    ? currentExercise.maxLevelHint
-                    : 0
-                }
                 reportContext={reportContext}
                 onComplete={({ success, pointsEarned }) => {
                   setScore((value) => value + pointsEarned);
