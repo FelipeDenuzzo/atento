@@ -21,6 +21,7 @@ export function scheduleSonsEstranhos(
   return somEstranho;
 }
 import type {
+  SomEstranhoEvent,
   AudioEngineController,
   GlitchEvent,
   SymbolGlyph,
