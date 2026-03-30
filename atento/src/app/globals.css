@@ -1,3 +1,91 @@
+/* === Animações para ChatVigilanciaErrosGame === */
+@keyframes erro1-bg {
+  0%, 100% { background: #fff; }
+  10%, 30%, 50%, 70%, 90% { background: #2e6cff; }
+  20%, 40%, 60%, 80% { background: #ff4fa3; }
+}
+.animate-erro1 {
+  animation: erro1-bg 0.3s steps(1, end) infinite;
+}
+
+@keyframes erro2-font {
+  0%, 100% { font-family: inherit; }
+  50% { font-family: 'monospace', 'Arial Unicode MS', 'Segoe UI Symbol', sans-serif; }
+}
+.animate-erro2 {
+  animation: erro2-font 0.5s steps(1, end) infinite;
+}
+
+@keyframes erro3-reverse {
+  0%, 100% { filter: none; }
+  50% { filter: hue-rotate(180deg) grayscale(0.5); }
+}
+.animate-erro3 {
+  animation: erro3-reverse 0.5s steps(1, end) infinite;
+}
+
+@keyframes erro4-border {
+  0%, 100% { border-color: #000; border-width: 1px; }
+  20%, 60% { border-color: #ffe600; border-width: 6px; }
+  40%, 80% { border-color: #000; border-width: 6px; }
+}
+.animate-erro4 {
+  animation: erro4-border 0.25s steps(1, end) infinite;
+}
+
+@keyframes erro5-blink {
+  0%, 100% { opacity: 0; }
+  10%, 30%, 60% { opacity: 1; }
+  20%, 40%, 50%, 70%, 90% { opacity: 0.2; }
+  80% { opacity: 1; }
+}
+.animate-erro5 {
+  animation: erro5-blink 0.22s steps(1, end) infinite;
+}
+
+@keyframes erro6-contorno {
+  0%, 100% { border-color: #ffe600; }
+  50% { border-color: #000; }
+}
+.animate-erro6 {
+  animation: erro6-contorno 0.4s steps(1, end) infinite;
+}
+
+@keyframes erro7-trovao {
+  0%, 100% { opacity: 0; }
+  20%, 60%, 80% { opacity: 1; }
+  40%, 70% { opacity: 0.5; }
+}
+.animate-erro7 {
+  animation: erro7-trovao 0.18s steps(1, end) infinite;
+}
+
+@keyframes erro8-img {
+  0%, 100% { opacity: 0; }
+  10%, 30%, 60%, 90% { opacity: 1; }
+  20%, 40%, 50%, 70%, 80% { opacity: 0.2; }
+}
+.animate-erro8 {
+  animation: erro8-img 0.22s steps(1, end) infinite;
+}
+
+@keyframes erro9-img {
+  0%, 100% { opacity: 0; }
+  15%, 35%, 65%, 85% { opacity: 1; }
+  25%, 45%, 55%, 75% { opacity: 0.2; }
+}
+.animate-erro9 {
+  animation: erro9-img 0.19s steps(1, end) infinite;
+}
+
+@keyframes erro10-img {
+  0%, 100% { opacity: 0; }
+  20%, 50%, 80% { opacity: 1; }
+  30%, 60%, 90% { opacity: 0.2; }
+}
+.animate-erro10 {
+  animation: erro10-img 0.21s steps(1, end) infinite;
+}
 @import "tailwindcss";
 
 :root {
