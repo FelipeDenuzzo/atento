@@ -432,21 +432,23 @@ export function ReversalGoNoGoSwitchGame({
                 className="mx-auto flex h-[260px] w-full max-w-[280px] items-center justify-center rounded-2xl border-2 border-zinc-300 bg-white text-[128px] text-zinc-900 hover:bg-zinc-50 disabled:cursor-not-allowed"
                 aria-label="Clique para responder"
               >
-                {currentShape ? (
-                  <img
-                    src={
-                      currentShape === "star"
-                        ? "/simbolos/21.png"
-                        : currentNonStarPng
-                        ? `/simbolos/${currentNonStarPng}`
-                        : ""
-                    }
-                    alt={currentShape}
-                    style={{ width: 120, height: 120 }}
-                  />
-                ) : (
-                  <span style={{ opacity: 0 }}>&nbsp;★&nbsp;</span>
-                )}
+                <div style={{ width: 140, height: 140, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {currentShape ? (
+                    <img
+                      src={
+                        currentShape === "star"
+                          ? "/simbolos/21.png"
+                          : currentNonStarPng
+                          ? `/simbolos/${currentNonStarPng}`
+                          : ""
+                      }
+                      alt={currentShape}
+                      style={{ width: 120, height: 120, objectFit: 'contain', display: 'block' }}
+                    />
+                  ) : (
+                    <span style={{ width: 120, height: 120, display: 'inline-block', opacity: 0 }}>&nbsp;★&nbsp;</span>
+                  )}
+                </div>
               </button>
             ) : null}
           </div>

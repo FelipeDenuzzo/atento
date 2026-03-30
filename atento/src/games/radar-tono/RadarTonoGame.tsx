@@ -244,6 +244,7 @@ function buildResultText(result: RadarToneSessionResult, reportContext?: ReportC
 }
 
 export function RadarTonoGame({ basePoints, reportContext, onComplete }: Props) {
+
   // O controle de fase (intro, instrução, etc) será feito externamente
   const [phase, setPhase] = useState<Phase>("running");
   const [roundIndex, setRoundIndex] = useState(0);
@@ -252,6 +253,12 @@ export function RadarTonoGame({ basePoints, reportContext, onComplete }: Props) 
   const [redDotPosition, setRedDotPosition] = useState<{ x: number; y: number } | null>(null);
   const [roundLogs, setRoundLogs] = useState<RadarToneRoundLog[]>([]);
   const [sessionResult, setSessionResult] = useState<RadarToneSessionResult | null>(null);
+
+  // Inicia o round automaticamente ao montar ou mudar de round
+  useEffect(() => {
+    startCurrentRound();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roundIndex]);
 
   const currentConfig = useMemo(() => ROUND_CONFIGS[roundIndex] ?? ROUND_CONFIGS[0], [roundIndex]);
 
@@ -491,7 +498,7 @@ export function RadarTonoGame({ basePoints, reportContext, onComplete }: Props) 
 
   function nextRound() {
     setRoundIndex((prev) => prev + 1);
-    setPhase("intro");
+    setPhase("running");
   }
 
   function concludeExercise() {
