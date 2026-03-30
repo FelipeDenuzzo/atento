@@ -135,6 +135,7 @@ function buildResultText(result: ChatErrorSessionResult, reportContext?: ReportC
   lines.push("");
   lines.push(`Finalizado em: ${new Date(result.endedAtIso).toLocaleString("pt-BR")}`);
   return lines.join("\n");
+}
 
 export function ChatVigilanciaErrosGame({ basePoints, reportContext, onComplete }: Props) {
   const [phase, setPhase] = useState<Phase>("intro");
