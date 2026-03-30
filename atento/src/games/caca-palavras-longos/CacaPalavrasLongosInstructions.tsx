@@ -9,10 +9,9 @@ export default function CacaPalavrasLongosInstructions({ onStart }: Props) {
     <InstructionScreen
       title=""
       instructions={
-        <>
-          <p>Encontre todas as palavras na grade mantendo foco contínuo até o fim.</p>
-          <p className="mt-2">Selecione a palavra clicando no início e arrastando pela direção correta.</p>
-        </>
+        <p>
+          Este exercício treina sua <strong>atenção sustentada</strong> — a capacidade de manter o foco ativo ao longo de uma tarefa extensa, sem deixar a vigilância cair no meio do caminho. Usamos essa habilidade sempre que precisamos revisar um texto longo, conferir uma lista completa ou realizar qualquer tarefa que exija presença constante do início ao fim, sem atalhos.
+        </p>
       }
       onStart={onStart}
     />

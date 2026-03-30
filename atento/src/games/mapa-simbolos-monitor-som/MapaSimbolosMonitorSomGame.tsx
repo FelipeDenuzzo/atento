@@ -36,7 +36,7 @@ const ROUND_CONFIGS: SymbolMapSoundRoundConfig[] = [
   {
     id: 1,
     name: "Fase 1",
-    durationMs: 60000,
+    durationMs: 20000,
     optionCount: 6,
     gridColumns: 3,
     visualTimeLimitMs: 2300,
@@ -47,7 +47,7 @@ const ROUND_CONFIGS: SymbolMapSoundRoundConfig[] = [
   {
     id: 2,
     name: "Fase 2",
-    durationMs: 75000,
+    durationMs: 30000,
     optionCount: 8,
     gridColumns: 4,
     visualTimeLimitMs: 2000,
@@ -58,7 +58,7 @@ const ROUND_CONFIGS: SymbolMapSoundRoundConfig[] = [
   {
     id: 3,
     name: "Fase 3",
-    durationMs: 90000,
+    durationMs: 40000,
     optionCount: 10,
     gridColumns: 5,
     visualTimeLimitMs: 1700,
@@ -69,7 +69,7 @@ const ROUND_CONFIGS: SymbolMapSoundRoundConfig[] = [
   {
     id: 4,
     name: "Fase 4",
-    durationMs: 90000,
+    durationMs: 60000,
     optionCount: 12,
     gridColumns: 6,
     visualTimeLimitMs: 1500,
@@ -120,7 +120,7 @@ export function MapaSimbolosMonitorSomGame({
   const [somEstranhoAtivo, setSomEstranhoAtivo] = useState(false);
   const [roundLogs, setRoundLogs] = useState<SymbolMapSoundRoundLog[]>([]);
   const [sessionResult, setSessionResult] = useState<SymbolMapSoundSessionResult | null>(null);
-  const [memoryAnswer, setMemoryAnswer] = useState<string>("");
+  // Removido: memoryAnswer e setMemoryAnswer, não há pergunta de memória
 
   const frameRef = useRef<number | null>(null);
   const runtimeRef = useRef<SymbolMapSoundRoundRuntime | null>(null);
@@ -178,15 +178,14 @@ export function MapaSimbolosMonitorSomGame({
     }
   }
 
+  // Mantém a célula alvo fixa: só define targetSymbolIdx uma vez por rodada, não zera ao trocar
   function syncUi(runtime: SymbolMapSoundRoundRuntime) {
     const currentVisual = runtime.currentVisualRound;
-    // O targetGlyph agora é um índice para o símbolo
-    if (currentVisual) {
+    if (currentVisual && targetSymbolIdx === null) {
       const idx = currentVisual.options.findIndex(opt => opt.isTarget);
       setTargetSymbolIdx(idx >= 0 ? idx : null);
-    } else {
-      setTargetSymbolIdx(null);
     }
+    // Não zera targetSymbolIdx quando currentVisual some
     setOptions(currentVisual?.options ?? []);
 
     const activeSomEstranhoId = runtime.activeSomEstranho?.id ?? null;
@@ -443,35 +442,6 @@ export function MapaSimbolosMonitorSomGame({
 
       {phase === "result" && sessionResult && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
-                    {/* Pergunta de memória ao final */}
-          <div className="my-4">
-            <label htmlFor="memory-answer" className="block text-sm font-medium text-zinc-700 mb-2">
-              Pergunta de memória: Qual símbolo você lembra?
-            </label>
-            <div className="flex items-center">
-              <input
-                id="memory-answer"
-                type="text"
-                value={memoryAnswer}
-                onChange={e => setMemoryAnswer(e.target.value)}
-                placeholder="Digite aqui..."
-                className="rounded-lg border border-zinc-300 px-3 py-2 text-sm w-48"
-              />
-              {memoryAnswer && memoryAnswer !== "-" ? (
-                <button
-                  type="button"
-                  className="ml-3 rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700 underline"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => navigator.clipboard.writeText(memoryAnswer)}
-                  title="Clique para copiar a resposta"
-                >
-                  Copiar resposta
-                </button>
-              ) : (
-                <span className="ml-3 text-zinc-500 text-sm">Nenhuma resposta</span>
-              )}
-            </div>
-          </div>
           <h3 className="text-xl font-semibold text-zinc-900">Resultado final</h3>
 
           <div className="grid gap-3 sm:grid-cols-3">

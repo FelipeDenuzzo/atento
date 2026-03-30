@@ -337,6 +337,12 @@ export function CacaPalavrasLongosGame({ basePoints, reportContext, onComplete }
     <div className="space-y-5">
       {phase === "intro" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
+          <p>
+            Uma grade grande com letras aparece na tela, junto com uma lista de palavras escondidas nela. Sua tarefa é <strong>encontrar todas as palavras da lista</strong>, buscando em todas as direções — horizontal, vertical e diagonal.
+          </p>
+          <p>
+            A cada fase, a grade fica maior e as palavras mais longas e parecidas entre si, exigindo uma varredura cada vez mais cuidadosa e contínua até a última palavra encontrada.
+          </p>
           <button
             type="button"
             onClick={startSession}

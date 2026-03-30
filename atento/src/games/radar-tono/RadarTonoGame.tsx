@@ -250,6 +250,7 @@ export function RadarTonoGame({ basePoints, reportContext, onComplete }: Props) 
   const [roundIndex, setRoundIndex] = useState(0);
   const [remainingMs, setRemainingMs] = useState(ROUND_CONFIGS[0]?.durationMs ?? 0);
   const [dotPosition, setDotPosition] = useState<{ x: number; y: number }>({ x: 180, y: 180 });
+  const [isHoveringDot, setIsHoveringDot] = useState(false);
   const [redDotPosition, setRedDotPosition] = useState<{ x: number; y: number } | null>(null);
   const [roundLogs, setRoundLogs] = useState<RadarToneRoundLog[]>([]);
   const [sessionResult, setSessionResult] = useState<RadarToneSessionResult | null>(null);
@@ -296,10 +297,18 @@ export function RadarTonoGame({ basePoints, reportContext, onComplete }: Props) 
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
     mouseRef.current = { x, y, valid: true };
+    // Verifica se o mouse está sobre a esfera preta
+    const distance = Math.hypot(x - dotPosition.x, y - dotPosition.y);
+    if (distance <= currentConfig.dotRadiusPx + currentConfig.hitTolerancePx) {
+      setIsHoveringDot(true);
+    } else {
+      setIsHoveringDot(false);
+    }
   }
 
   function clearMousePosition() {
     mouseRef.current = { x: 0, y: 0, valid: false };
+    setIsHoveringDot(false);
   }
 
   function processRoundFrame(now: number) {
@@ -566,6 +575,20 @@ export function RadarTonoGame({ basePoints, reportContext, onComplete }: Props) 
                   zIndex: 1,
                 }}
               />
+              {/* Feedback verde ao passar o mouse */}
+              {isHoveringDot && (
+                <div
+                  className="absolute rounded-full border-4 border-green-500 pointer-events-none animate-pulse"
+                  style={{
+                    width: currentConfig.dotRadiusPx * 2.6,
+                    height: currentConfig.dotRadiusPx * 2.6,
+                    left: dotPosition.x - currentConfig.dotRadiusPx * 1.3,
+                    top: dotPosition.y - currentConfig.dotRadiusPx * 1.3,
+                    zIndex: 3,
+                    boxShadow: '0 0 12px 4px #22c55e55',
+                  }}
+                />
+              )}
               {/* Esfera central */}
               <div
                 className="absolute rounded-full bg-zinc-900"
