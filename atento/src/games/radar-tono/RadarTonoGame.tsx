@@ -591,18 +591,20 @@ if (activeTone && activeTone.responseWindowStartedAt !== undefined) {
               <p className="text-xs text-zinc-500">Tempo restante</p>
               <p className="font-semibold text-zinc-900">{formatClock(remainingMs)}</p>
           </div>
-          {/* Régua visual da janela de resposta */}
-          {responseWindow.open && (
-            <div className="w-full h-3 bg-zinc-200 rounded-lg overflow-hidden mb-2">
+          {/* Régua visual da janela de resposta - espaço sempre reservado */}
+          <div className="w-full h-6 mb-2 relative flex items-center">
+            <div className="w-full h-3 bg-zinc-200 rounded-lg overflow-hidden">
               <div
                 className="h-full bg-blue-500 transition-all duration-100"
-                style={{ width: `${(responseWindow.remaining / 2000) * 100}%` }}
+                style={{ width: responseWindow.open ? `${(responseWindow.remaining / 2000) * 100}%` : '0%' }}
               />
-              <span className="absolute left-1/2 -translate-x-1/2 text-xs text-blue-900 font-semibold" style={{top: '-1.5rem'}}>
-                Janela de resposta aberta ({(responseWindow.remaining / 1000).toFixed(2)}s)
-              </span>
             </div>
-          )}
+            <span className="absolute left-1/2 -translate-x-1/2 text-xs text-blue-900 font-semibold select-none" style={{top: '-1.5rem'}}>
+              {responseWindow.open
+                ? `Janela de resposta aberta (${(responseWindow.remaining / 1000).toFixed(2)}s)`
+                : ''}
+            </span>
+          </div>
           <div className="space-y-3">
             <div
               onMouseMove={updateMousePosition}
