@@ -471,7 +471,7 @@ export function AcharOFaltandoGame({
   return (
       <div className="space-y-5">
       {phase === "intro" && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
+        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5 text-black">
           <p>Compare as duas grades (ou listas) que aparecem na tela.</p>
           <p>
             Elas são quase iguais, mas existe uma diferença: em uma delas <strong>falta</strong> um item ou existe um item <strong>a mais</strong>.
