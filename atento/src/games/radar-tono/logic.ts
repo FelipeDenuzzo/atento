@@ -64,7 +64,6 @@ export function scheduleTones(
       type: toneType,
       startAtMs: cursorMs,
       played: false,
-      responded: false,
     });
     id += 1;
   }
