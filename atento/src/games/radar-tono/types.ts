@@ -25,6 +25,7 @@ export type ToneEvent = {
     reactionMs: number;
     outcome: "correct" | "wrong";
   };
+  responseWindowStartedAt?: number;
 };
 
 export type RadarToneRoundConfig = {

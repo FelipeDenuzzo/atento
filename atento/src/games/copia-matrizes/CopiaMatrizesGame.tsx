@@ -573,7 +573,7 @@ export function CopiaMatrizesGame({ basePoints, reportContext, onComplete }: Pro
   return (
     <div className="space-y-5">
       {phase === "intro" && (
-        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
+        <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5 text-black">
           <p>
             Uma matriz modelo com letras ou símbolos vai aparecer na tela. Sua tarefa é <strong>reproduzi-la fielmente</strong>, posição por posição, na grade em branco ao lado. Cada célula precisa ser preenchida exatamente como no modelo — sem pular, sem adivinhar.
           </p>

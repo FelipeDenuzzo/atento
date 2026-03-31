@@ -41,11 +41,11 @@ const ROUND_CONFIGS: RadarToneRoundConfig[] = [
     dotRadiusPx: 12,
     hitTolerancePx: 14,
     radarSpeedPxPerSec: 55,
-    toneIntervalMinMs: 2000,
-    toneIntervalMaxMs: 3000,
+    toneIntervalMinMs: 2500,
+    toneIntervalMaxMs: 3500,
     toneProbabilityAgudo: 0.5,
-    responseWindowMinMs: 150,
-    responseWindowMaxMs: 1500,
+    responseWindowMinMs: 0,
+    responseWindowMaxMs: 2000,
     keyMap: { grave: "j", agudo: "k" },
   },
   {
@@ -56,11 +56,11 @@ const ROUND_CONFIGS: RadarToneRoundConfig[] = [
     dotRadiusPx: 12,
     hitTolerancePx: 14,
     radarSpeedPxPerSec: 72,
-    toneIntervalMinMs: 1500,
-    toneIntervalMaxMs: 2400,
+    toneIntervalMinMs: 2500,
+    toneIntervalMaxMs: 3500,
     toneProbabilityAgudo: 0.5,
-    responseWindowMinMs: 150,
-    responseWindowMaxMs: 1500,
+    responseWindowMinMs: 0,
+    responseWindowMaxMs: 2000,
     keyMap: { grave: "j", agudo: "k" },
   },
   {
@@ -71,11 +71,11 @@ const ROUND_CONFIGS: RadarToneRoundConfig[] = [
     dotRadiusPx: 12,
     hitTolerancePx: 14,
     radarSpeedPxPerSec: 90,
-    toneIntervalMinMs: 1100,
-    toneIntervalMaxMs: 1800,
+    toneIntervalMinMs: 2500,
+    toneIntervalMaxMs: 3500,
     toneProbabilityAgudo: 0.5,
-    responseWindowMinMs: 150,
-    responseWindowMaxMs: 1500,
+    responseWindowMinMs: 0,
+    responseWindowMaxMs: 2000,
     keyMap: { grave: "j", agudo: "k" },
     speedModulationMode: "alternating-up-only",
     abruptBoostMultiplier: 1.5,
@@ -90,11 +90,11 @@ const ROUND_CONFIGS: RadarToneRoundConfig[] = [
     dotRadiusPx: 12,
     hitTolerancePx: 14,
     radarSpeedPxPerSec: 105,
-    toneIntervalMinMs: 850,
-    toneIntervalMaxMs: 1700,
+    toneIntervalMinMs: 2500,
+    toneIntervalMaxMs: 3500,
     toneProbabilityAgudo: 0.5,
-    responseWindowMinMs: 150,
-    responseWindowMaxMs: 1500,
+    responseWindowMinMs: 0,
+    responseWindowMaxMs: 2000,
     keyMap: { grave: "j", agudo: "k" },
     speedModulationMode: "alternating-up-only",
     abruptBoostMultiplier: 1.65,
@@ -243,8 +243,8 @@ function buildResultText(result: RadarToneSessionResult, reportContext?: ReportC
   return lines.join("\n");
 }
 
-export function RadarTonoGame({ basePoints, reportContext, onComplete }: Props) {
 
+export function RadarTonoGame({ basePoints, reportContext, onComplete }: Props) {
   // O controle de fase (intro, instrução, etc) será feito externamente
   const [phase, setPhase] = useState<Phase>("running");
   const [roundIndex, setRoundIndex] = useState(0);
@@ -254,6 +254,8 @@ export function RadarTonoGame({ basePoints, reportContext, onComplete }: Props) 
   const [redDotPosition, setRedDotPosition] = useState<{ x: number; y: number } | null>(null);
   const [roundLogs, setRoundLogs] = useState<RadarToneRoundLog[]>([]);
   const [sessionResult, setSessionResult] = useState<RadarToneSessionResult | null>(null);
+  // Estado para régua visual da janela de resposta
+  const [responseWindow, setResponseWindow] = useState<{ open: boolean; startedAt: number; remaining: number }>({ open: false, startedAt: 0, remaining: 0 });
 
   // Inicia o round automaticamente ao montar ou mudar de round
   useEffect(() => {
@@ -374,11 +376,13 @@ export function RadarTonoGame({ basePoints, reportContext, onComplete }: Props) 
     }
 
     let changed = false;
+    let responseWindowOpened = false;
     const updatedTones = tonesRef.current.map((tone) => {
       if (!tone.played && elapsedMs >= tone.startAtMs) {
         playTone(audioContextRef.current, tone.type);
         changed = true;
-        return { ...tone, played: true };
+        responseWindowOpened = true;
+        return { ...tone, played: true, responseWindowStartedAt: now };
       }
       return tone;
     });
@@ -386,6 +390,36 @@ export function RadarTonoGame({ basePoints, reportContext, onComplete }: Props) 
     if (changed) {
       tonesRef.current = updatedTones;
     }
+
+    // Controle da régua visual da janela de resposta
+   // Controle da régua visual da janela de resposta
+const activeTone = tonesRef.current.find((tone) => {
+  const startedAt = tone.responseWindowStartedAt;
+
+  return (
+    tone.played &&
+    tone.response === undefined &&
+    startedAt !== undefined &&
+    now - startedAt < config.responseWindowMaxMs
+  );
+});
+
+if (activeTone && activeTone.responseWindowStartedAt !== undefined) {
+  const startedAt = activeTone.responseWindowStartedAt;
+
+  setResponseWindow({
+    open: true,
+    startedAt,
+    remaining: Math.max(
+      0,
+      config.responseWindowMaxMs - (now - startedAt)
+    ),
+  });
+} else {
+  setResponseWindow((prev) =>
+    prev.open ? { open: false, startedAt: 0, remaining: 0 } : prev
+  );
+}
 
     const remaining = Math.max(0, config.durationMs - elapsedMs);
     setRemainingMs(remaining);
@@ -557,6 +591,18 @@ export function RadarTonoGame({ basePoints, reportContext, onComplete }: Props) 
               <p className="text-xs text-zinc-500">Tempo restante</p>
               <p className="font-semibold text-zinc-900">{formatClock(remainingMs)}</p>
           </div>
+          {/* Régua visual da janela de resposta */}
+          {responseWindow.open && (
+            <div className="w-full h-3 bg-zinc-200 rounded-lg overflow-hidden mb-2">
+              <div
+                className="h-full bg-blue-500 transition-all duration-100"
+                style={{ width: `${(responseWindow.remaining / 2000) * 100}%` }}
+              />
+              <span className="absolute left-1/2 -translate-x-1/2 text-xs text-blue-900 font-semibold" style={{top: '-1.5rem'}}>
+                Janela de resposta aberta ({(responseWindow.remaining / 1000).toFixed(2)}s)
+              </span>
+            </div>
+          )}
           <div className="space-y-3">
             <div
               onMouseMove={updateMousePosition}
