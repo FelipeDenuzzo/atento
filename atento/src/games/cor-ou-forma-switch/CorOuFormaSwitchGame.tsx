@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import type { ReportContext } from "@/components/AttentionTrainingGame";
 import { buildTxtReportFileName } from "@/utils/reportFileName";
 import {
@@ -32,6 +33,11 @@ type Props = {
 type Phase = "intro" | "running" | "round-feedback" | "result";
 type TrialStage = "fixation" | "stimulus" | "feedback" | "iti";
 type ChoiceOption = "red" | "circle" | "blue" | "square";
+
+const DIAMOND_IMAGES: Record<StimulusColor, string> = {
+  red: "/material/losango-vermelho.png",
+  blue: "/material/losango-azul.png",
+};
 
 const ROUND_CONFIGS: ColorShapeSwitchRoundConfig[] = [
   {
@@ -128,16 +134,41 @@ function cueLabel(rule: SwitchRule | null): string {
   return "Fixação";
 }
 
-function shapeGlyph(shape: StimulusShape | null): string {
-  if (shape === "circle") return "●";
-  if (shape === "square") return "■";
-  return "";
-}
-
 function colorClass(color: StimulusColor | null): string {
   if (color === "red") return "text-red-600";
   if (color === "blue") return "text-blue-600";
   return "text-zinc-700";
+}
+
+function StimulusDisplay({
+  shape,
+  color,
+}: {
+  shape: StimulusShape | null;
+  color: StimulusColor | null;
+}) {
+  if (!shape || !color) return <span style={{ display: "block", width: 120, height: 120 }} />;
+
+  if (shape === "square") {
+    const src = DIAMOND_IMAGES[color];
+    return (
+      <Image
+        src={src}
+        alt={`losango ${color}`}
+        width={120}
+        height={120}
+        style={{ objectFit: "contain" }}
+        priority
+      />
+    );
+  }
+
+  // circle
+  return (
+    <span className={`text-9xl font-black leading-none ${colorClass(color)}`}>
+      &#9679;
+    </span>
+  );
 }
 
 export function CorOuFormaSwitchGame({
@@ -327,7 +358,6 @@ export function CorOuFormaSwitchGame({
   }
 
   useEffect(() => {
-    // Inicia o round automaticamente ao montar
     startRound(roundIndex);
     return () => clearTimer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -396,7 +426,6 @@ export function CorOuFormaSwitchGame({
 
   return (
     <div className="space-y-5">
-      {/* Tela de instrução removida. O jogo inicia automaticamente. */}
       {phase === "running" && (
         <div className="space-y-4 rounded-lg border border-black/10 bg-white p-5">
           <div className="grid gap-3 sm:grid-cols-1">
@@ -407,8 +436,8 @@ export function CorOuFormaSwitchGame({
           </div>
 
           <div className={`rounded-xl border border-zinc-300 p-10 text-center ${cueClass(currentRule)} min-h-[180px] flex flex-col items-center justify-center`}>
-            <div className="mt-4 flex items-center justify-center" style={{height: 120, width: 120}}>
-              <span className={`text-9xl font-black leading-none ${colorClass(currentColor)}`}>{shapeGlyph(currentShape)}</span>
+            <div className="mt-4 flex items-center justify-center" style={{ height: 120, width: 120 }}>
+              <StimulusDisplay shape={currentShape} color={currentColor} />
             </div>
             <p className="mt-4 min-h-[22px] text-sm font-semibold text-zinc-700">{feedback}</p>
           </div>
@@ -427,7 +456,7 @@ export function CorOuFormaSwitchGame({
                     ? "Círculo"
                     : choice === "blue"
                       ? "Azul"
-                      : "Quadrado"}
+                      : "Losango"}
               </button>
             ))}
           </div>
